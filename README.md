@@ -1,10 +1,12 @@
-# Build with XAgent × OKX
+# Build with X-Agent (xagent) × OKX
 
 > ## Hackathon — join us at [xagt.ai/hackathon](https://xagt.ai/hackathon)
 >
 > ![X-Agent Hackathon](docs/images/hackathon-banner.png)
 >
 > Build the next X-Agent plugin and ship it to the marketplace. Past submissions live in [`submissions/`](./submissions/). 6,000 USDT prize pool.
+
+**X-Agent** (also searched as **xagent** or **XAgent**) is the AI agent builder, runtime, and marketplace at [xagt.ai](https://xagt.ai). This repository is the X-Agent plugin marketplace and OKX Agentic Wallet hackathon submission hub. It is not the OpenBMB/XAgent autonomous LLM research framework, the xorbitsai/xagent enterprise agent workforce repository, or the xagents.store tender procurement product.
 
 One command. Browser opens, you log in (= registered), OKX skill suite installs into your agent (Cursor / Claude Code / OpenClaw). Go build.
 
@@ -58,7 +60,7 @@ Prints session status, expiry, backend, and runtime versions.
                  (TG bot / web / CLI / extension)
    ┌──────────────┼──────────────┐
    │              │              │
- XAgent         OKX            Agent runtime
+ X-Agent       OKX            Agent runtime
  identity       agentic        (Claude Code /
  (us)           wallet         Cursor / any)
                 (OKX)          + OKX skills
@@ -69,7 +71,7 @@ Prints session status, expiry, backend, and runtime versions.
 
 | Layer            | Owned by                | What it does                                                  | What you do                                  |
 |------------------|-------------------------|---------------------------------------------------------------|----------------------------------------------|
-| Identity         | XAgent (us)             | Knows who the hacker is. Registers entries.                   | `xagt-plugin login` — once.                |
+| Identity         | X-Agent (us)            | Knows who the hacker is. Registers entries.                   | `xagt-plugin login` — once.                |
 | Wallet / writes  | OKX agentic wallet      | User signs, swaps, transfers, pays gas.                       | Have your end-users connect their OKX wallet.|
 | Intelligence     | Agent runtime + OKX skills | LLM matches "find me trending memes" → `okx-dex-trenches` etc. | Just chat; the runtime routes.               |
 | Product          | **You**                 | UX, niche, business logic.                                    | Code it.                                     |
@@ -78,9 +80,9 @@ A finished hackathon project uses **all four layers**. The first three are alrea
 
 ## Product shapes that fit
 
-- **AI Trading Telegram Bot** — user types "buy 100u BONK" in TG; XAgent identity tags the user; OKX agentic wallet signs the swap; OKX skill executes the route.
-- **Smart Money Copy Trading dashboard** — web UI, user connects OKX wallet, backend agent runs `okx-dex-signal` to watch KOL buys, auto-mirrors positions; XAgent identity isolates per-user config.
-- **DeFi Onboarding Agent** — user asks "where can I earn 8% on USDC?"; `okx-defi-invest` finds the protocol; OKX wallet does the deposit; XAgent records strategy preference.
+- **AI Trading Telegram Bot** — user types "buy 100u BONK" in TG; X-Agent identity tags the user; OKX agentic wallet signs the swap; OKX skill executes the route.
+- **Smart Money Copy Trading dashboard** — web UI, user connects OKX wallet, backend agent runs `okx-dex-signal` to watch KOL buys, auto-mirrors positions; X-Agent identity isolates per-user config.
+- **DeFi Onboarding Agent** — user asks "where can I earn 8% on USDC?"; `okx-defi-invest` finds the protocol; OKX wallet does the deposit; X-Agent records strategy preference.
 - **Rug-proof Swap Frontend** — every swap quote runs `okx-security` first; honeypots blocked; one-click execution via OKX wallet.
 - **Onchain News Desk** — agent summarizes overnight smart-money signals into a 6 a.m. digest, posts to a hacker-defined channel.
 
@@ -108,7 +110,7 @@ The agent does the on-chain work. You design the experience.
 
 ## Eligibility
 
-To qualify for judging, you **must** complete `xagt-plugin setup --target all` (or `xagt-plugin login`) so you have an XAgent participant ID. Your submission file is named after that ID — judges only count submissions whose participant ID corresponds to a real XAgent account.
+To qualify for judging, you **must** complete `xagt-plugin setup --target all` (or `xagt-plugin login`) so you have an X-Agent participant ID. Your submission file is named after that ID — judges only count submissions whose participant ID corresponds to a real X-Agent account.
 
 Each participant ID owns one folder under `projects/`. Re-submitting overwrites the existing one (open a fresh PR to update before the deadline).
 
@@ -155,7 +157,7 @@ xagt-plugin submit \
   --deploy "https://t.me/my_trading_bot"
 ```
 
-Lost your local credentials? Run `xagt-plugin login` again with the same XAgent account — your participant ID stays stable, so your existing submission folder stays yours.
+Lost your local credentials? Run `xagt-plugin login` again with the same X-Agent account — your participant ID stays stable, so your existing submission folder stays yours.
 
 ## Get help
 
