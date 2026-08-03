@@ -1,17 +1,10 @@
-# X-Agent Hackathons & Agent Plugin
+# X-Agent MCP Hackathon & Agent Plugin
+
+English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
 > **Current program: submit a real, callable capability. X-Agent verifies the API and source, standardizes selected projects as MCP tools, and supports their submission to the OKX Agent ecosystem.**
 
-![X-Agent Hackathon](docs/images/hackathon-banner.png)
-
-This repository is the official code-submission and preservation hub for X-Agent hackathons. It also contains the `@xagt/agent-plugin` installer.
-
-| Program | Status | Records |
-| --- | --- | --- |
-| **X-Agent MCP Hackathon** | Current program | [Rules and submission guide](./docs/mcp-hackathon.md) |
-| **X-Agent × OKX Agentic Wallet Hackathon** | Archived; May 2026 | [Original program archive](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md) · [19 preserved submissions](./submissions/INDEX.md) |
-
-The two programs use separate submission contracts. Historical entries remain available at their original `submissions/<participant-id>-<project>/` paths. New MCP Hackathon entries must use `submissions/mcp-hackathon/<team>-<project>/`.
+This repository is the official code-submission hub for the current X-Agent MCP Hackathon. It also contains the `@xagt/agent-plugin` installer.
 
 ## Current program: X-Agent MCP Hackathon
 
@@ -147,7 +140,7 @@ Passing automation proves reachability and version binding. It does not prove qu
 Builders may keep pushing fixes to an open PR. There is no need to rush a merge:
 
 1. Every new PR head reruns verification; every successfully validated head receives its own official archive reference.
-2. A new push invalidates stale approval; reviewers approve only the exact version they evaluated.
+2. A new push invalidates earlier verification and review context; X-Agent evaluates only the exact latest version.
 3. The final accepted version is merged with its complete source.
 4. X-Agent reruns online verification, creates an integrity receipt and source archive, and publishes an immutable acceptance release.
 5. Reward approval happens only after the accepted artifact is sealed and independently backed up.
@@ -168,17 +161,6 @@ The submitter can delete their fork or external repository without deleting the 
 Outcomes are **pass**, **conditional pass**, or **not accepted**. Scoring begins only after every hard gate passes. Reviewers then use the evidence-based [`review scorecard`](./docs/review-scorecard.md).
 
 Selected teams proceed to MCP productization. X-Agent works with them on tool boundaries, schemas, authorization, errors, limits, observability, and an OKX-facing submission package.
-
-## Previous program archive
-
-The May 2026 **X-Agent × OKX Agentic Wallet Hackathon** is closed and preserved separately:
-
-- [`Archived activity description and rules`](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md)
-- [`Submission index and archival status`](./submissions/INDEX.md)
-- `19` participant submission records, including original PR metadata and source snapshots where available
-- Three external source repositories were already unavailable when the archive was created; that limitation is recorded rather than hidden
-
-Historical files are evidence of the previous program and must not be edited as a way to enter the current MCP Hackathon.
 
 ## Agent plugin setup
 
@@ -203,3 +185,5 @@ npm run validate:submission -- --dir submissions/mcp-hackathon/<team>-<project> 
 ```
 
 License: UNLICENSED — program use only unless a separate written license applies.
+
+Historical records: [May 2026 program archive](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md) · [submission index](./submissions/INDEX.md)
