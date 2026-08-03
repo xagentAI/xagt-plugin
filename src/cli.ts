@@ -10,7 +10,7 @@ import { loadCredentials, clearCredentials } from "./auth/credentials.js";
 import { runLogin, type AuthMode } from "./auth/login.js";
 import { saveCredentials } from "./auth/credentials.js";
 import { runSetup } from "./setup.js";
-import { runSubmit, NotRegisteredError } from "./submit.js";
+import { runSubmit } from "./submit.js";
 import { submitInstallReport } from "./report.js";
 import { collectFingerprint } from "./fingerprint.js";
 import { isTargetSelector, type TargetSelector } from "./targets.js";
@@ -33,9 +33,12 @@ export type CliCommand =
   | {
       command: "submit";
       name?: string;
+      slug?: string;
       intro?: string;
       repo?: string;
-      deploy?: string;
+      api?: string;
+      health?: string;
+      commit?: string;
     }
   | { command: "doctor" }
   | { command: "print-skill" }
@@ -61,14 +64,25 @@ export function parseArgs(args: string[]): CliCommand {
   }
 
   if (command === "submit") {
-    const flags: { name?: string; intro?: string; repo?: string; deploy?: string } = {};
+    const flags: {
+      name?: string;
+      slug?: string;
+      intro?: string;
+      repo?: string;
+      api?: string;
+      health?: string;
+      commit?: string;
+    } = {};
     for (let index = 0; index < rest.length; index += 1) {
       const arg = rest[index];
       const next = rest[index + 1];
       if (arg === "--name") { flags.name = next; index += 1; continue; }
+      if (arg === "--slug") { flags.slug = next; index += 1; continue; }
       if (arg === "--intro") { flags.intro = next; index += 1; continue; }
       if (arg === "--repo") { flags.repo = next; index += 1; continue; }
-      if (arg === "--deploy") { flags.deploy = next; index += 1; continue; }
+      if (arg === "--api") { flags.api = next; index += 1; continue; }
+      if (arg === "--health") { flags.health = next; index += 1; continue; }
+      if (arg === "--commit") { flags.commit = next; index += 1; continue; }
       throw new Error(`Unsupported option: ${arg}`);
     }
     return { command: "submit", ...flags };
@@ -173,16 +187,16 @@ export async function runCli(args: string[]): Promise<number> {
       process.stdout.write(`\n  Currently logged in as ${existing.userId} (${remainingDays}d remaining).\n`);
       process.stdout.write("  Re-running OAuth to refresh / switch account...\n");
     } else {
-      process.stdout.write("\n  Registering you for the XAgent × OKX hackathon\n");
+      process.stdout.write("\n  Signing in to X-Agent\n");
     }
     process.stdout.write(`  Backend: ${baseUrl}\n`);
     const credentials = await runLogin({ authMode: command.authMode, baseUrl, frontendBase, version });
     await saveCredentials(credentials);
     process.stdout.write(`\n  ✓ Logged in as ${credentials.userId}\n`);
-    process.stdout.write("  ✓ Registered for the hackathon\n\n");
-    process.stdout.write("  Now go build your hackathon project.\n\n");
+    process.stdout.write("\n");
+    process.stdout.write("  Now go build your callable capability.\n\n");
     process.stdout.write("  Helpful next commands:\n");
-    process.stdout.write("    xagt-plugin install --target all   # add OKX skills to your agents\n");
+    process.stdout.write("    xagt-plugin install --target all   # optional: add skills to your agents\n");
     process.stdout.write("    xagt-plugin doctor                 # check session status\n");
     process.stdout.write("    xagt-plugin submit                 # submit your project (when ready)\n\n");
     return 0;
@@ -221,10 +235,10 @@ export async function runCli(args: string[]): Promise<number> {
       process.stdout.write(`  ${icon} ${step.name}: ${label}\n`);
     }
     process.stdout.write("\n");
-    process.stdout.write(`  ✓ Registered as ${result.credentials!.userId}\n`);
+    process.stdout.write(`  ✓ Signed in as ${result.credentials!.userId}\n`);
     const failed = result.substeps.filter((step) => step.status === "failed");
     if (failed.length === 0) {
-      process.stdout.write("  ✓ OKX skills installed in your agents\n\n");
+      process.stdout.write("  ✓ Skills installed in your agents\n\n");
     } else {
       process.stdout.write(`  ⚠ ${failed.length} OKX skill install step(s) failed — registration is complete; retry with:\n`);
       for (const step of failed) {
@@ -232,47 +246,46 @@ export async function runCli(args: string[]): Promise<number> {
       }
       process.stdout.write("\n");
     }
-    process.stdout.write("  Now go build your hackathon project.\n\n");
+    process.stdout.write("  Now go build your callable capability.\n\n");
     process.stdout.write("  When you're ready to submit:\n");
     process.stdout.write("    xagt-plugin submit\n\n");
     return failed.length === 0 ? 0 : 2;
   }
 
   if (command.command === "submit") {
-    try {
-      process.stdout.write("\n  Submit your hackathon project\n\n");
-      const result = await runSubmit({
-        cliVersion: version,
-        input: {
-          name: command.name,
-          intro: command.intro,
-          repo: command.repo,
-          deploy: command.deploy
-        }
-      });
-      process.stdout.write(`\n  ✓ Participant: ${result.participantId}\n`);
-      process.stdout.write(`  ✓ Generated:   ${result.localPath}\n\n`);
-      process.stdout.write("  Submit as a PR to xerpa-ai/xagt-plugin:\n\n");
-      process.stdout.write(`    1. Fork in browser: ${result.forkUrl}\n\n`);
-      process.stdout.write("    2. Clone your fork and add the submission:\n\n");
-      process.stdout.write(`       git clone https://github.com/<your-gh-username>/xagt-plugin\n`);
-      process.stdout.write(`       cd xagt-plugin\n`);
-      process.stdout.write(`       git checkout -b submit-${result.participantId}\n`);
-      process.stdout.write(`       mkdir -p projects/${result.participantId}\n`);
-      process.stdout.write(`       cp "${result.localPath}" projects/${result.participantId}/README.md\n`);
-      process.stdout.write(`       git add projects/${result.participantId}/README.md\n`);
-      process.stdout.write(`       git commit -m "submit: ${result.participantId}"\n`);
-      process.stdout.write(`       git push -u origin submit-${result.participantId}\n\n`);
-      process.stdout.write(`    3. Open a PR against ${result.repoUrl}/compare\n\n`);
-      return 0;
-    } catch (error) {
-      if (error instanceof NotRegisteredError) {
-        process.stdout.write("\n  ✗ You are not registered.\n");
-        process.stdout.write("  Run `xagt-plugin login` first to register, then submit.\n\n");
-        return 1;
+    process.stdout.write("\n  Prepare your MCP Hackathon submission\n\n");
+    const result = await runSubmit({
+      cliVersion: version,
+      input: {
+        name: command.name,
+        slug: command.slug,
+        intro: command.intro,
+        repo: command.repo,
+        api: command.api,
+        health: command.health,
+        commit: command.commit
       }
-      throw error;
-    }
+    });
+    process.stdout.write(`\n  ✓ Generated: ${result.localPath}\n`);
+    process.stdout.write(`  ✓ Generated: ${result.localManifestPath}\n\n`);
+    process.stdout.write(`  ✓ Generated: ${result.localRightsPath}\n\n`);
+    process.stdout.write(`  Submit as a PR to ${result.repoUrl}:\n\n`);
+    process.stdout.write(`    1. Fork in browser: ${result.forkUrl}\n\n`);
+    process.stdout.write("    2. Clone your fork and create the submission directory:\n\n");
+    process.stdout.write("       git clone https://github.com/<your-gh-username>/xagt-plugin\n");
+    process.stdout.write("       cd xagt-plugin\n");
+    process.stdout.write(`       git checkout -b submit-${result.slug}\n`);
+    process.stdout.write(`       mkdir -p submissions/mcp-hackathon/${result.slug}/source submissions/mcp-hackathon/${result.slug}/verification\n`);
+    process.stdout.write(`       cp "${result.localPath}" ${result.filename}\n`);
+    process.stdout.write(`       cp "${result.localManifestPath}" ${result.manifestFilename}\n`);
+    process.stdout.write(`       cp "${result.localRightsPath}" ${result.rightsFilename}\n`);
+    process.stdout.write("       # copy your complete, reviewable source into source/\n");
+    process.stdout.write("       # add reproducible API evidence to verification/README.md\n");
+    process.stdout.write(`       git add submissions/mcp-hackathon/${result.slug}\n`);
+    process.stdout.write(`       git commit -m "submit: ${result.slug}"\n`);
+    process.stdout.write(`       git push -u origin submit-${result.slug}\n\n`);
+    process.stdout.write(`    3. Open a PR against ${result.repoUrl}/compare\n\n`);
+    return 0;
   }
 
   if (command.command === "report") {
@@ -314,8 +327,8 @@ function writeHelp(): void {
   process.stdout.write(`Usage:
   xagt-plugin setup [--target cursor|claude-code|codex|opencode|generic|all] [--force] [--dry-run] [--no-browser] [--loopback] [--skip-substep]
                               # one-shot: registers you + installs OKX skills
-  xagt-plugin submit [--name <s>] [--intro <s>] [--repo <url>] [--deploy <url>]
-                              # generates README; you fork + PR to xerpa-ai/xagt-plugin
+  xagt-plugin submit [--name <s>] [--slug <team-project>] [--intro <s>] [--repo <url>] [--api <url>] [--health <url>] [--commit <sha>]
+                              # generates a manifest; add it, complete source, and verification evidence in a PR
   xagt-plugin login [--no-browser] [--loopback]   # re-login or switch accounts
   xagt-plugin logout                  # clear local credentials
   xagt-plugin install [--target ...]  # install skills only (no login)
@@ -329,9 +342,9 @@ Auth modes:
   --no-browser  device-code flow (for SSH / headless environments)
 
 Hackathon flow:
-  1. xagt-plugin setup --target all    # register + install
-  2. build your project
-  3. xagt-plugin submit                # submit via GitHub PR
+  1. build and deploy a callable capability
+  2. xagt-plugin submit                # generate a manifest
+  3. submit source + evidence via GitHub PR
 `);
 }
 

@@ -1,208 +1,205 @@
-# Build with X-Agent (xagent) × OKX
+# X-Agent Hackathons & Agent Plugin
 
-> ## Hackathon — join us at [xagt.ai/hackathon](https://xagt.ai/hackathon)
->
-> ![X-Agent Hackathon](docs/images/hackathon-banner.png)
->
-> Build the next X-Agent plugin and ship it to the marketplace. Past submissions live in [`submissions/`](./submissions/). 6,000 USDT prize pool.
+> **Current program: submit a real, callable capability. X-Agent verifies the API and source, standardizes selected projects as MCP tools, and supports their submission to the OKX Agent ecosystem.**
 
-**X-Agent** (also searched as **xagent** or **XAgent**) is the AI agent builder, runtime, and marketplace at [xagt.ai](https://xagt.ai). This repository is the X-Agent plugin marketplace and OKX Agentic Wallet hackathon submission hub. It is not the OpenBMB/XAgent autonomous LLM research framework, the xorbitsai/xagent enterprise agent workforce repository, or the xagents.store tender procurement product.
+![X-Agent Hackathon](docs/images/hackathon-banner.png)
 
-One command. Browser opens, you log in (= registered), OKX skill suite installs into your agent (Cursor / Claude Code / OpenClaw). Go build.
+This repository is the official code-submission and preservation hub for X-Agent hackathons. It also contains the `@xagt/agent-plugin` installer.
+
+| Program | Status | Records |
+| --- | --- | --- |
+| **X-Agent MCP Hackathon** | Current program | [Rules and submission guide](./docs/mcp-hackathon.md) |
+| **X-Agent × OKX Agentic Wallet Hackathon** | Archived; May 2026 | [Original program archive](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md) · [19 preserved submissions](./submissions/INDEX.md) |
+
+The two programs use separate submission contracts. Historical entries remain available at their original `submissions/<participant-id>-<project>/` paths. New MCP Hackathon entries must use `submissions/mcp-hackathon/<team>-<project>/`.
+
+## Current program: X-Agent MCP Hackathon
+
+The MCP Hackathon is not limited to predefined tracks, languages, frameworks, or project types. Builders may submit any useful capability that an AI agent can call to complete a real task.
+
+You do **not** need to implement MCP before applying. You provide a working capability, a live API, and the complete source. X-Agent handles MCP standardization with selected teams after verification.
+
+### The program in one flow
+
+```text
+Callable capability
+        ↓
+Deployed API + complete source submitted by PR
+        ↓
+API, commit, source, and safety verification
+        ↓
+X-Agent MCP standardization
+        ↓
+OKX Agent ecosystem submission support
+```
+
+An entry is evaluated as a working capability, not as an idea deck. X-Agent support does not guarantee acceptance, listing, traffic, revenue, or endorsement from OKX.
+
+### Minimum submission requirements
+
+Every entry must include:
+
+1. **A deployed API** that reviewers can call during the review window.
+2. **A public health endpoint** that reports the exact reviewed Git commit.
+3. **Complete source code** submitted in this repository through a pull request.
+4. **A pinned public GitHub commit** corresponding to the deployed service.
+5. **Reproducible instructions** for setup, testing, deployment, and one real API call.
+6. **A deployment proof endpoint** binding the public service to the project slug and commit.
+7. **Security, data, dependency, and rights declarations** sufficient for safe review and long-term archival.
+
+MCP, Streamable HTTP, x402, EIP-3009, A2MCP, and payment SDKs are not required at submission time.
+
+### Where to submit code
+
+Open one pull request that adds exactly one project directory:
+
+```text
+submissions/mcp-hackathon/<team-or-builder>-<project-slug>/
+├── SUBMISSION.md          # capability, API, commit, and operating instructions
+├── submission.json        # machine-readable source and deployment binding
+├── RIGHTS.md              # ownership and archive authorization
+├── source/                # complete source used for review
+└── verification/
+    └── README.md          # repeatable API evidence and expected results
+```
+
+An external repository link alone is not enough. The complete reviewed source must be present under `source/` so the official record remains available if a fork or external repository is later deleted.
+
+Start with:
+
+- [`Full submission contract`](./submissions/README.md)
+- [`submissions/TEMPLATE.md`](./submissions/TEMPLATE.md)
+- [`submissions/submission.example.json`](./submissions/submission.example.json)
+- [`submissions/RIGHTS_TEMPLATE.md`](./submissions/RIGHTS_TEMPLATE.md)
+- [`submissions/VERIFICATION_TEMPLATE.md`](./submissions/VERIFICATION_TEMPLATE.md)
+
+### Submit in four steps
+
+1. Build and deploy the API. Verify its health endpoint and one real capability call.
+2. Fork this repository and create a submission branch.
+3. Add the five required artifacts under `submissions/mcp-hackathon/<team>-<project>/`.
+4. Open a pull request against `xagentAI/xagt-plugin:main` using the MCP Hackathon PR template.
+
+```bash
+git clone https://github.com/<your-github-name>/xagt-plugin.git
+cd xagt-plugin
+git checkout -b submit-team-project
+
+PROJECT_DIR="submissions/mcp-hackathon/team-project"
+mkdir -p "$PROJECT_DIR/source" "$PROJECT_DIR/verification"
+cp submissions/TEMPLATE.md "$PROJECT_DIR/SUBMISSION.md"
+cp submissions/submission.example.json "$PROJECT_DIR/submission.json"
+cp submissions/RIGHTS_TEMPLATE.md "$PROJECT_DIR/RIGHTS.md"
+cp submissions/VERIFICATION_TEMPLATE.md "$PROJECT_DIR/verification/README.md"
+
+# Edit every placeholder, then copy the complete reviewed source into source/.
+git add "$PROJECT_DIR"
+git commit -m "submit: team-project"
+git push -u origin submit-team-project
+```
+
+The repository version of the CLI also generates the three core metadata files after it is built:
+
+```bash
+npm ci
+npm run build
+node dist/cli.js submit \
+  --name "Project name" \
+  --slug "team-project" \
+  --intro "The real task this capability completes" \
+  --repo "https://github.com/you/project" \
+  --api "https://api.example.com/v1" \
+  --health "https://api.example.com/health" \
+  --commit "<40-character-git-commit>"
+```
+
+The manual path above is the canonical submission path. The generator does not upload source or open the PR for you.
+
+### Prove that the deployment is real
+
+The public health endpoint must return the exact reviewed commit:
+
+```json
+{"status":"ok","commit":"<40-character-review-commit>"}
+```
+
+The same API origin must expose `/.well-known/xagent-verification.json`:
+
+```json
+{"schemaVersion":1,"slug":"team-project","commit":"<40-character-review-commit>"}
+```
+
+The automated gate verifies the submission scope, required source package, obvious secret patterns, public GitHub commit, health endpoint, and deployment proof. It uses a trusted validator from the base branch and never installs, imports, builds, or executes participant source inside the repository workflow.
+
+Passing automation proves reachability and version binding. It does not prove quality, ownership, security, or eligibility; those require manual review.
+
+### Rules that protect both builders and the program
+
+- Submit only code, services, dependencies, data, and branding that you have the right to submit and authorize for review.
+- Do not commit credentials, private customer data, malware, backdoors, credential theft, hidden data exfiltration, abusive automation, or undisclosed third-party calls.
+- Plagiarism, fake deployment evidence, false ownership, purchased engagement, identity manipulation, or coordinated scoring abuse results in rejection.
+- Keep the API reachable during the announced review window. Share any short-lived review credential only through the approved private channel, never through Git.
+- A missing API, incomplete source, unverifiable commit, non-reproducible deployment, or serious safety concern blocks acceptance.
+- Closing an unmerged PR withdraws the entry. A merged and rewarded entry remains in the official archive under the submitted rights declaration.
+
+### Updates, archival, and reward release
+
+Builders may keep pushing fixes to an open PR. There is no need to rush a merge:
+
+1. Every new PR head reruns verification; every successfully validated head receives its own official archive reference.
+2. A new push invalidates stale approval; reviewers approve only the exact version they evaluated.
+3. The final accepted version is merged with its complete source.
+4. X-Agent reruns online verification, creates an integrity receipt and source archive, and publishes an immutable acceptance release.
+5. Reward approval happens only after the accepted artifact is sealed and independently backed up.
+6. Later improvements use a new PR and release. They never overwrite the rewarded snapshot.
+
+The submitter can delete their fork or external repository without deleting the official copy. Full operating rules are in [`Submission retention and reward`](./docs/submission-retention-and-reward.md).
+
+### How entries are reviewed
+
+| Hard gate | What reviewers verify |
+| --- | --- |
+| Callable | The API and health endpoint respond, and the documented task can be exercised. |
+| Real and maintainable | Source, pinned commit, dependencies, and instructions correspond to the deployed service. |
+| Reproducible | A reviewer can understand, test, and redeploy the capability from the submitted materials. |
+| Safe to evaluate | No secret exposure, malicious behavior, serious unauthorized access, or hidden data flow. |
+| Useful for agents | Inputs, outputs, errors, limits, and capability boundaries are clear enough for MCP standardization. |
+
+Outcomes are **pass**, **conditional pass**, or **not accepted**. Scoring begins only after every hard gate passes. Reviewers then use the evidence-based [`review scorecard`](./docs/review-scorecard.md).
+
+Selected teams proceed to MCP productization. X-Agent works with them on tool boundaries, schemas, authorization, errors, limits, observability, and an OKX-facing submission package.
+
+## Previous program archive
+
+The May 2026 **X-Agent × OKX Agentic Wallet Hackathon** is closed and preserved separately:
+
+- [`Archived activity description and rules`](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md)
+- [`Submission index and archival status`](./submissions/INDEX.md)
+- `19` participant submission records, including original PR metadata and source snapshots where available
+- Three external source repositories were already unavailable when the archive was created; that limitation is recorded rather than hidden
+
+Historical files are evidence of the previous program and must not be edited as a way to enter the current MCP Hackathon.
+
+## Agent plugin setup
+
+Plugin installation is optional for the current MCP Hackathon submission. It remains available for Cursor, Claude Code, Codex, OpenCode, and AgentSkills-compatible runtimes.
 
 ```bash
 npx @xagt/agent-plugin@latest setup --target all
-```
-
-Or install globally so you can run `xagt-plugin <cmd>` directly later:
-
-```bash
-npm i -g @xagt/agent-plugin
-xagt-plugin setup --target all
-```
-
-Need to switch accounts later?
-
-```bash
-xagt-plugin logout
-xagt-plugin login
-```
-
-Hackathon kicks off **May 11, 2026**. Node `>= 18.17` required.
-
----
-
-## What you get out of the box
-
-After login + install, your agent (Cursor / Claude Code / OpenClaw / any AgentSkills runtime) can:
-
-- **Swap tokens** across 500+ DEXs on 20+ chains (XLayer, Solana, Ethereum, Base, BSC, Arbitrum, Polygon…)
-- **Read any wallet** — balances, holdings, PnL, trade history
-- **Discover DeFi yield** — APY, TVL, lend, borrow, stake, claim, CLMM positions
-- **Scan meme launches** on pump.fun — dev rug history, bundle/sniper detection, bonding curve progress
-- **Track smart money** — leaderboards, KOL trade feeds, aggregated whale signals
-- **Pre-flight transactions** — token risk, honeypot detection, phishing dApp scan, signature safety
-- **Get live market data** — prices, K-lines, OHLC, holder cluster analysis
-- **Route to specific dApps** — Polymarket, Aave V3, Hyperliquid, PancakeSwap, Morpho
-
-Verify you're set up:
-
-```bash
 xagt-plugin doctor
 ```
 
-Prints session status, expiry, backend, and runtime versions.
+Node `>= 18.17` is required.
 
-## How it fits together
-
-```
-                Your hackathon product
-                 (TG bot / web / CLI / extension)
-   ┌──────────────┼──────────────┐
-   │              │              │
- X-Agent       OKX            Agent runtime
- identity       agentic        (Claude Code /
- (us)           wallet         Cursor / any)
-                (OKX)          + OKX skills
-   ↑              ↑              ↑
- hackathon     wallet ops      we ship them;
- registration  + signing       LLM auto-routes
-```
-
-| Layer            | Owned by                | What it does                                                  | What you do                                  |
-|------------------|-------------------------|---------------------------------------------------------------|----------------------------------------------|
-| Identity         | X-Agent (us)            | Knows who the hacker is. Registers entries.                   | `xagt-plugin login` — once.                |
-| Wallet / writes  | OKX agentic wallet      | User signs, swaps, transfers, pays gas.                       | Have your end-users connect their OKX wallet.|
-| Intelligence     | Agent runtime + OKX skills | LLM matches "find me trending memes" → `okx-dex-trenches` etc. | Just chat; the runtime routes.               |
-| Product          | **You**                 | UX, niche, business logic.                                    | Code it.                                     |
-
-A finished hackathon project uses **all four layers**. The first three are already wired — you build the fourth.
-
-## Product shapes that fit
-
-- **AI Trading Telegram Bot** — user types "buy 100u BONK" in TG; X-Agent identity tags the user; OKX agentic wallet signs the swap; OKX skill executes the route.
-- **Smart Money Copy Trading dashboard** — web UI, user connects OKX wallet, backend agent runs `okx-dex-signal` to watch KOL buys, auto-mirrors positions; X-Agent identity isolates per-user config.
-- **DeFi Onboarding Agent** — user asks "where can I earn 8% on USDC?"; `okx-defi-invest` finds the protocol; OKX wallet does the deposit; X-Agent records strategy preference.
-- **Rug-proof Swap Frontend** — every swap quote runs `okx-security` first; honeypots blocked; one-click execution via OKX wallet.
-- **Onchain News Desk** — agent summarizes overnight smart-money signals into a 6 a.m. digest, posts to a hacker-defined channel.
-
-## Build something — open prompts
-
-If you want a thinner spec to riff on:
-
-1. *"Show me the next 10x meme before it 10xs."*
-2. *"Rebalance my portfolio when any LP APY drops below 6%."*
-3. *"Buy any token the top 5 KOLs all bought in the last hour, max 5% slippage."*
-4. *"Summarize what whales did overnight."*
-5. *"Find me the cheapest gas route to bridge USDC from Base to Solana."*
-
-The agent does the on-chain work. You design the experience.
-
-Five seed ideas — pick one or invent better:
-
-1. **Agent-native trading copilot** — "buy $100 of any meme the top 10 KOLs bought in the last hour, max 5% slippage"
-2. **DeFi auto-rebalancer** — agent watches your portfolio, proposes lending/staking moves when APY drifts
-3. **Rug-proof swap UI** — every swap quote runs a security scan first, blocks honeypots automatically
-4. **Onchain news desk** — agent that summarizes every smart-money buy signal into a 6am digest
-5. **Cross-chain arbitrage scout** — finds price gaps the aggregator hasn't priced in yet
-
-The agent does the on-chain work. You design the experience.
-
-## Eligibility
-
-To qualify for judging, you **must** complete `xagt-plugin setup --target all` (or `xagt-plugin login`) so you have an X-Agent participant ID. Your submission file is named after that ID — judges only count submissions whose participant ID corresponds to a real X-Agent account.
-
-Each participant ID owns one folder under `projects/`. Re-submitting overwrites the existing one (open a fresh PR to update before the deadline).
-
-Required for a valid submission:
-
-- ✅ Registered via `xagt-plugin setup --target all` (or `xagt-plugin login`)
-- ✅ Project uses **at least one** OKX skill (DEX, wallet, DeFi, signal, market, security, dApp routing, etc.)
-- ✅ A public GitHub repo with your source code
-- ✅ A one-line description of what it does
-
-Optional but encouraged:
-
-- A deployed demo URL (web app / Telegram bot / hosted API / browser extension)
-- A demo video / GIF embedded in your repo README
-
-## Submit
-
-One command:
+## Repository development
 
 ```bash
-xagt-plugin submit
+npm ci
+npm run lint
+npm test
+npm run build
+npm run validate:submission -- --dir submissions/mcp-hackathon/<team>-<project>
+npm run validate:submission -- --dir submissions/mcp-hackathon/<team>-<project> --online
 ```
 
-Asks you for:
-
-```
-  Project name:           AI Trading Telegram Bot
-  One-line description:   TG bot that swaps via OKX wallet, gated by smart-money signals
-  GitHub repo URL:        https://github.com/alice/ai-trading-bot
-  Deployed URL (optional, blank to skip): https://t.me/my_trading_bot
-```
-
-Then your browser opens GitHub at the right URL with the submission file pre-filled. Click **"Propose new file"** → GitHub forks `xerpa-ai/xagt-plugin` to your account and opens the PR for you. **Click "Create pull request" and you're done.**
-
-The file lands at `projects/<your-participant-id>/README.md`. Judges merge accepted submissions.
-
-Or scripted (CI / Makefile):
-
-```bash
-xagt-plugin submit \
-  --name "AI Trading Telegram Bot" \
-  --intro "TG bot that swaps via OKX wallet, gated by smart-money signals" \
-  --repo "https://github.com/alice/ai-trading-bot" \
-  --deploy "https://t.me/my_trading_bot"
-```
-
-Lost your local credentials? Run `xagt-plugin login` again with the same X-Agent account — your participant ID stays stable, so your existing submission folder stays yours.
-
-## Get help
-
-In-person at the venue. No Discord, no Telegram. Pull a mentor over.
-
----
-
-## Reference
-
-### Commands
-
-```bash
-xagt-plugin setup     [--target all|cursor|claude-code|generic] [--dry-run] [--no-browser] [--skip-substep]
-                          # one-shot: registers + installs OKX skills
-xagt-plugin submit    [--name <s>] [--intro <s>] [--repo <url>] [--deploy <url>]
-                          # opens GitHub in browser to submit (requires login)
-xagt-plugin login     [--no-browser]    # re-login or switch accounts
-xagt-plugin logout                      # clear local credentials
-xagt-plugin install   [--target ...]    # install skills only (no login)
-xagt-plugin doctor                      # login + runtime status
-xagt-plugin report    [--target ...]    # resend install report
-xagt-plugin print-skill                 # print SKILL.md to stdout
-```
-
-Hackathon path: `setup --target all` → build → `submit`. Switch accounts with `logout` then `login`.
-
-### Targets
-
-| Target        | Path                                            |
-|---------------|-------------------------------------------------|
-| `cursor`      | `<workspace>/.cursor/skills/xagt-setup/`      |
-| `claude-code` | `~/.claude/skills/xagt-setup/`                |
-| `generic`     | `~/.agents/skills/xagt-setup/` (AgentSkills, OpenClaw) |
-| `all`         | all of the above                                |
-
-Credentials at `~/.config/xagt/credentials.json` (`%APPDATA%\xagt\credentials.json` on Windows), `chmod 600`.
-
-### Troubleshooting
-
-| Symptom                                  | Fix                                                              |
-|------------------------------------------|-------------------------------------------------------------------|
-| `npx ... setup` exits 0 with no output   | You hit `0.1.0`. Pin `@latest` or `npx clear-npx-cache`.          |
-| Browser opens but never returns          | Frontend allowlist missing host. See `docs/SETUP_FLOW.md`.        |
-| `EACCES` writing to `~/.claude/skills/`  | Wrong user. Don't `sudo`.                                         |
-| `command not found: xagt-plugin`       | Not globally installed. Run `npm i -g @xagt/agent-plugin`.        |
-
-
-License: UNLICENSED — XerpaAI internal tooling, hackathon use granted.
+License: UNLICENSED — program use only unless a separate written license applies.

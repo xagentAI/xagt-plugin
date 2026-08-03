@@ -1,6 +1,27 @@
-# Submissions Index (PR Archive)
+# Hackathon Submissions Index
+
+## Current MCP Hackathon submissions
+
+New submissions use the contract in [`README.md`](./README.md) and a separate namespace:
+
+```text
+submissions/mcp-hackathon/<team-or-builder>-<project-slug>/
+├── SUBMISSION.md
+├── submission.json
+├── RIGHTS.md
+├── source/
+└── verification/
+```
+
+The source, live API, review commit, and reproducible verification evidence are required in the submission pull request. See [`TEMPLATE.md`](./TEMPLATE.md) and [`VERIFICATION_TEMPLATE.md`](./VERIFICATION_TEMPLATE.md).
+
+## May 2026 X-Agent × OKX Agentic Wallet Hackathon archive
+
+The original program description, eligibility rules, and submission flow are preserved in [`docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md`](../docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md).
 
 Archived from `xagent-labs/xagt-plugin` on 2026-05-31. Each entry corresponds to one closed/open PR carrying a hackathon submission.
+
+The historical `pr-submission/projects/<id>/README.md` layout below is preserved as an archive only. Do not use it for new entries.
 
 Each `submissions/<participantId>-<slug>/` contains:
 - `META.md` — original PR link, author, source repo, LICENSE notice, full PR body
