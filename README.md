@@ -6,6 +6,8 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
 This repository is the official code-submission hub for the current X-Agent MCP Hackathon. It also contains the `@xagt/agent-plugin` installer.
 
+Previous program: [X-Agent × OKX Agentic Wallet Hackathon · May 2026](https://xagt.ai/hackathon) · [code and submission archive](./submissions/INDEX.md)
+
 ## Current program: X-Agent MCP Hackathon
 
 The MCP Hackathon is not limited to predefined tracks, languages, frameworks, or project types. Builders may submit any useful capability that an AI agent can call to complete a real task.
@@ -185,5 +187,3 @@ npm run validate:submission -- --dir submissions/mcp-hackathon/<team>-<project> 
 ```
 
 License: UNLICENSED — program use only unless a separate written license applies.
-
-Historical records: [May 2026 program archive](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md) · [submission index](./submissions/INDEX.md)

@@ -6,6 +6,8 @@
 
 本仓库是当前 X-Agent MCP 黑客松的官方代码提交入口，同时包含 `@xagt/agent-plugin` 安装工具。
 
+往期活动：[X-Agent × OKX Agentic Wallet Hackathon · 2026 年 5 月](https://xagt.ai/hackathon) · [代码与提交归档](./submissions/INDEX.md)
+
 ## 当前活动：X-Agent MCP 黑客松
 
 本次活动不设置固定赛道，也不限制语言、框架或项目类型。只要你的能力可以被 AI Agent 调用，并能完成一项真实任务，就可以提交。
@@ -185,5 +187,3 @@ npm run validate:submission -- --dir submissions/mcp-hackathon/<团队>-<项目>
 ```
 
 许可证：UNLICENSED——除非另有书面许可，仅限活动相关用途。
-
-历史资料：[2026 年 5 月活动归档](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md) · [提交索引](./submissions/INDEX.md)
