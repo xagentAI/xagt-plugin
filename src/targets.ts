@@ -11,7 +11,7 @@ export interface InstallTarget {
   id: InstallTargetId;
   label: string;
   base: "cwd" | "home";
-  skillDirectory: string;
+  skillsDirectory: string;
   notes: string;
 }
 
@@ -20,36 +20,36 @@ export const SUPPORTED_TARGETS: readonly InstallTarget[] = [
     id: "cursor",
     label: "Cursor project skill",
     base: "cwd",
-    skillDirectory: ".cursor/skills/xagt-setup",
-    notes: "Installs the skill into the current workspace for Cursor."
+    skillsDirectory: ".cursor/skills",
+    notes: "Installs the skills into the current workspace for Cursor."
   },
   {
     id: "claude-code",
     label: "Claude Code user skill",
     base: "home",
-    skillDirectory: ".claude/skills/xagt-setup",
-    notes: "Installs the skill into the Claude-compatible user skill directory."
+    skillsDirectory: ".claude/skills",
+    notes: "Installs the skills into the Claude-compatible user skill directory."
   },
   {
     id: "codex",
     label: "Codex CLI user skill",
     base: "home",
-    skillDirectory: ".codex/skills/xagt-setup",
-    notes: "Installs the skill into the OpenAI Codex CLI user skill directory."
+    skillsDirectory: ".codex/skills",
+    notes: "Installs the skills into the OpenAI Codex CLI user skill directory."
   },
   {
     id: "opencode",
     label: "OpenCode user skill",
     base: "home",
-    skillDirectory: ".config/opencode/skills/xagt-setup",
-    notes: "Installs the skill into the OpenCode user skill directory."
+    skillsDirectory: ".config/opencode/skills",
+    notes: "Installs the skills into the OpenCode user skill directory."
   },
   {
     id: "generic",
     label: "AgentSkills-compatible user skill",
     base: "home",
-    skillDirectory: ".agents/skills/xagt-setup",
-    notes: "Installs into AgentSkills-compatible user directory used by OpenClaw and similar runtimes."
+    skillsDirectory: ".agents/skills",
+    notes: "Installs into the AgentSkills-compatible user directory used by OpenClaw and similar runtimes."
   }
 ];
 

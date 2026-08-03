@@ -68,6 +68,24 @@ Start with:
 - [`submissions/RIGHTS_TEMPLATE.md`](./submissions/RIGHTS_TEMPLATE.md)
 - [`submissions/VERIFICATION_TEMPLATE.md`](./submissions/VERIFICATION_TEMPLATE.md)
 
+### Submit with Codex, Claude Code, or another coding agent
+
+Vibe-coded projects are welcome. A coding agent can package the source, verify the deployed version, run the official checks, and open the PR. The evidence requirements do not change.
+
+Copy this prompt into Codex, Claude Code, Cursor, OpenCode, or another coding agent:
+
+```text
+Submit the project in the current directory to the X-Agent MCP Hackathon.
+Follow https://github.com/xagentAI/xagt-plugin/blob/main/docs/agent-submission-guide.md
+and the official submission skill linked there.
+
+You are authorized to fork xagentAI/xagt-plugin, create a branch, push the
+validated package, and open a pull request. Never expose secrets or fabricate
+API, deployment, Commit, test, or ownership evidence. Stop if evidence is missing.
+```
+
+The repository includes [`AGENTS.md`](./AGENTS.md) for Codex, [`CLAUDE.md`](./CLAUDE.md) for Claude Code, and the reusable [`xagt-submit-hackathon` skill](./skills/xagt-submit-hackathon/SKILL.md). Add the project name, public repository, exact deployed Commit, API URL, and health URL to the prompt. See the [`coding-agent submission guide`](./docs/agent-submission-guide.md) for the complete version.
+
 ### Submit in four steps
 
 1. Build and deploy the API. Verify its health endpoint and one real capability call.

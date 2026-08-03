@@ -1,4 +1,4 @@
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -19,7 +19,8 @@ export interface InstallResult {
 }
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const bundledSkillPath = join(packageRoot, "skills", "xagt-setup", "SKILL.md");
+const bundledSkillsRoot = join(packageRoot, "skills");
+export const BUNDLED_SKILL_NAMES = ["xagt-setup", "xagt-submit-hackathon"] as const;
 
 export async function installSkills(options: InstallOptions): Promise<InstallResult[]> {
   const cwd = options.cwd ?? process.cwd();
@@ -33,19 +34,23 @@ export async function installSkills(options: InstallOptions): Promise<InstallRes
     if (!baseDirectory) {
       results.push({
         target,
-        destination: target.skillDirectory,
+        destination: target.skillsDirectory,
         status: "skipped",
         message: `Skipped ${target.id}: HOME is not set.`
       });
       continue;
     }
 
-    const destination = join(baseDirectory, target.skillDirectory);
-    const skillFile = join(destination, "SKILL.md");
+    const destination = join(baseDirectory, target.skillsDirectory);
 
     if (!options.dryRun) {
       await mkdir(destination, { recursive: true });
-      await copyFile(bundledSkillPath, skillFile);
+      for (const skillName of BUNDLED_SKILL_NAMES) {
+        await cp(join(bundledSkillsRoot, skillName), join(destination, skillName), {
+          recursive: true,
+          force: true
+        });
+      }
 
       if (target.id === "cursor") {
         await writeCursorManifest(cwd);
@@ -56,7 +61,7 @@ export async function installSkills(options: InstallOptions): Promise<InstallRes
       target,
       destination,
       status: options.dryRun ? "planned" : "installed",
-      message: `${options.dryRun ? "Would install" : "Installed"} ${target.label} at ${skillFile}`
+      message: `${options.dryRun ? "Would install" : "Installed"} ${BUNDLED_SKILL_NAMES.length} X-Agent skills for ${target.label} at ${destination}`
     });
   }
 
