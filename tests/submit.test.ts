@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { parseArgs } from "../src/cli.js";
-import { renderManifest, renderMarkdown, renderRightsDeclaration } from "../src/submit.js";
+import { renderManifest, renderMarkdown, renderRightsDeclaration, runSubmit } from "../src/submit.js";
 
 const payload = {
   name: "Useful capability",
@@ -45,5 +48,17 @@ describe("MCP Hackathon submission", () => {
     const rights = renderRightsDeclaration(payload);
     expect(rights).toContain("does not revoke the official archive rights");
     expect(rights).toContain(payload.slug);
+  });
+
+  it("places new projects in the MCP Hackathon namespace", async () => {
+    const outputDir = await mkdtemp(join(tmpdir(), "xagt-submit-output-"));
+    const result = await runSubmit({
+      cliVersion: "0.4.0",
+      input: payload,
+      outputDir
+    });
+    expect(result.filename).toBe("submissions/mcp-hackathon/team-useful-capability/SUBMISSION.md");
+    expect(result.manifestFilename).toBe("submissions/mcp-hackathon/team-useful-capability/submission.json");
+    expect(result.rightsFilename).toBe("submissions/mcp-hackathon/team-useful-capability/RIGHTS.md");
   });
 });

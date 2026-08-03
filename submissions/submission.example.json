@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Project name",
+  "slug": "team-project",
+  "sourceRepository": "https://github.com/your-github-name/project",
+  "reviewCommit": "0123456789abcdef0123456789abcdef01234567",
+  "apiBaseUrl": "https://api.example.com/v1",
+  "healthCheckUrl": "https://api.example.com/health",
+  "deploymentProofUrl": "https://api.example.com/.well-known/xagent-verification.json"
+}

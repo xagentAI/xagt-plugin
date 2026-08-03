@@ -1,11 +1,16 @@
 # Submission contract
 
-This directory is the official code-submission location for the X-Agent MCP Hackathon.
+This directory contains both the preserved May 2026 hackathon archive and the official code-submission location for the current X-Agent MCP Hackathon.
+
+- Historical entries remain at `submissions/<participant-id>-<project>/` and are indexed in [`INDEX.md`](./INDEX.md).
+- New MCP Hackathon entries go only under `submissions/mcp-hackathon/<team>-<project>/`.
+
+Do not modify a historical project to enter the current program.
 
 ## Create one project directory
 
 ```text
-submissions/<team-or-builder>-<project-slug>/
+submissions/mcp-hackathon/<team-or-builder>-<project-slug>/
 ├── SUBMISSION.md
 ├── submission.json
 ├── RIGHTS.md
@@ -15,14 +20,14 @@ submissions/<team-or-builder>-<project-slug>/
 
 Use lowercase letters, numbers, and hyphens for `<team-or-builder>-<project-slug>`. Do not edit another team's directory. A later material change belongs in a new pull request against the same directory.
 
-Copy [`TEMPLATE.md`](./TEMPLATE.md) to `SUBMISSION.md`, [`RIGHTS_TEMPLATE.md`](./RIGHTS_TEMPLATE.md) to `RIGHTS.md`, and [`VERIFICATION_TEMPLATE.md`](./VERIFICATION_TEMPLATE.md) to `verification/README.md`, then replace every placeholder. `source/` must contain the complete code reviewers need; `verification/` contains repeatable API evidence, such as a redacted `curl` command and response fixture.
+Copy [`TEMPLATE.md`](./TEMPLATE.md) to `SUBMISSION.md`, [`submission.example.json`](./submission.example.json) to `submission.json`, [`RIGHTS_TEMPLATE.md`](./RIGHTS_TEMPLATE.md) to `RIGHTS.md`, and [`VERIFICATION_TEMPLATE.md`](./VERIFICATION_TEMPLATE.md) to `verification/README.md`, then replace every placeholder. `source/` must contain the complete code reviewers need; `verification/` contains repeatable API evidence, such as a redacted `curl` command and response fixture.
 
 ## Required files
 
 | Path | Required content |
 | --- | --- |
 | `SUBMISSION.md` | Capability description, API and health-check URLs, source repository, exact review commit, build/deploy instructions, data/security notes, and support contact. |
-| `submission.json` | Machine-readable slug, source repository, review commit, API URL, health-check URL, and standard deployment-proof URL. Generate it with `xagt-plugin submit`. |
+| `submission.json` | Machine-readable slug, source repository, review commit, API URL, health-check URL, and standard deployment-proof URL. Start with `submission.example.json` or generate it with the repository version of `xagt-plugin submit`. |
 | `RIGHTS.md` | Submitter identity, ownership declaration, third-party licenses, and authorization for review and post-award retention under the official program terms. |
 | `source/` | Complete source code for the reviewed version, including dependency lock files and configuration examples. Exclude generated dependency folders, build output, secrets, and private data. |
 | `verification/README.md` | A reviewer can follow these steps to call the health check and one real capability endpoint. Include expected success and safe error behavior. |
@@ -44,7 +49,7 @@ The health check must be public and return `status: ok|healthy` plus the exact `
 For an offline preflight:
 
 ```bash
-npm run validate:submission -- --dir submissions/<team>-<project>
+npm run validate:submission -- --dir submissions/mcp-hackathon/<team>-<project>
 ```
 
 The GitHub pull request workflow adds online checks for the public source commit and deployed service. Passing automation proves that the artifact is reachable and version-bound; it does not prove product quality. Quality is evaluated separately with [`docs/review-scorecard.md`](../docs/review-scorecard.md).

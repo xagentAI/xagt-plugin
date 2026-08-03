@@ -1,6 +1,6 @@
 # Verification evidence
 
-Copy this file to `submissions/<your-project>/verification/README.md` and replace the placeholders.
+Copy this file to `submissions/mcp-hackathon/<your-project>/verification/README.md` and replace the placeholders.
 
 ## Prerequisites
 

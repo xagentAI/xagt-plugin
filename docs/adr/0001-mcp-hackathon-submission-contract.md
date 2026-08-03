@@ -10,7 +10,7 @@ The earlier hackathon flow accepted a brief project description and an external 
 
 ## Decision
 
-Use one pull request to add `submissions/<team-or-builder>-<project-slug>/` containing a human-readable capability manifest, a machine-readable `submission.json`, complete source code, and reproducible API verification evidence. Require a deployed API, public health check, same-origin deployment proof, pinned commit, source/reproduction instructions, and security/data notes. The trusted base-branch validator verifies scope, source packaging, the public GitHub commit, and the version-bound live service without executing submission code. Do not require MCP or payment-protocol implementation at entry. Selected projects proceed to X-Agent MCP standardization and then an OKX-facing submission package.
+Use one pull request to add `submissions/mcp-hackathon/<team-or-builder>-<project-slug>/` containing a human-readable capability manifest, a machine-readable `submission.json`, complete source code, and reproducible API verification evidence. Require a deployed API, public health check, same-origin deployment proof, pinned commit, source/reproduction instructions, and security/data notes. The trusted base-branch validator verifies scope, source packaging, the public GitHub commit, and the version-bound live service without executing submission code. Do not require MCP or payment-protocol implementation at entry. Selected projects proceed to X-Agent MCP standardization and then an OKX-facing submission package.
 
 ## Alternatives considered
 

@@ -76,19 +76,23 @@ export function findChangedSubmissionDirectory(repoRoot, baseSha, headSha) {
     { encoding: "utf8" }
   );
   const files = output.split("\0").filter(Boolean);
+  return resolveChangedSubmissionDirectory(repoRoot, files);
+}
+
+export function resolveChangedSubmissionDirectory(repoRoot, files) {
   if (files.length === 0) throw new Error("the pull request has no added or modified files");
 
   const directories = new Set();
   for (const file of files) {
     const parts = file.split("/");
-    if (parts[0] !== "submissions" || parts.length < 3) {
-      throw new Error(`submission PRs may only change one project directory under submissions/: ${file}`);
+    if (parts[0] !== "submissions" || parts[1] !== "mcp-hackathon" || parts.length < 4) {
+      throw new Error(`submission PRs may only change one project directory under submissions/mcp-hackathon/: ${file}`);
     }
-    assertSlug(parts[1]);
-    directories.add(parts[1]);
+    assertSlug(parts[2]);
+    directories.add(parts[2]);
   }
   if (directories.size !== 1) throw new Error("a submission PR must change exactly one project directory");
-  return join(repoRoot, "submissions", [...directories][0]);
+  return join(repoRoot, "submissions", "mcp-hackathon", [...directories][0]);
 }
 
 function validateManifest(manifest, directorySlug) {

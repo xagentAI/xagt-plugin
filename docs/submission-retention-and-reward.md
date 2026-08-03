@@ -16,7 +16,7 @@ Closing a pull request before merge is a withdrawal. Deleting a fork, branch, de
 ## Preservation layers
 
 1. **Validated PR archive ref.** After the automated hard gates pass, the exact PR head commit is copied into a unique `submission-archive/pr-<number>-<sha>` branch in the official repository. Synchronizing the PR creates another ref instead of replacing the previous one.
-2. **Official main-branch copy.** Accepted source is merged under `submissions/<slug>/`. Main blocks deletion and force pushes and requires changes to arrive through a pull request.
+2. **Official main-branch copy.** Accepted source is merged under `submissions/mcp-hackathon/<slug>/`. Main blocks deletion and force pushes and requires changes to arrive through a pull request.
 3. **Immutable acceptance release.** Before payment, maintainers run `Seal accepted submission before reward`. It validates the merged project again, creates a full source archive and an acceptance receipt containing Git tree and SHA-256 hashes, and publishes both in an immutable GitHub Release.
 4. **Independent backup.** Program operations must mirror published acceptance releases to X-Agent-controlled storage or a second controlled repository. The mirror location and restore test are internal operational records. A reward must not be sent if this backup check is incomplete.
 

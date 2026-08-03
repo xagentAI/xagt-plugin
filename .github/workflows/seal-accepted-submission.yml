@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       submission_slug:
-        description: Directory name under submissions/
+        description: Directory name under submissions/mcp-hackathon/
         required: true
         type: string
       pull_request_number:
@@ -52,9 +52,9 @@ jobs:
         run: |
           [[ "$SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]
           [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
-          test -d "submissions/$SLUG"
+          test -d "submissions/mcp-hackathon/$SLUG"
           gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state,mergedAt --jq 'select(.state == "MERGED" and .mergedAt != null)'
-          npm run validate:submission -- --dir "submissions/$SLUG" --online
+          npm run validate:submission -- --dir "submissions/mcp-hackathon/$SLUG" --online
 
       - name: Build acceptance receipt and source archive without executing submission code
         env:
@@ -63,7 +63,7 @@ jobs:
           REVIEWER: ${{ inputs.reviewer }}
           REVIEW_RECORD_URL: ${{ inputs.review_record_url }}
         run: |
-          directory="submissions/$SLUG"
+          directory="submissions/mcp-hackathon/$SLUG"
           review_commit="$(jq -r '.reviewCommit' "$directory/submission.json")"
           source_tree="$(git rev-parse "HEAD:$directory")"
           archive="$RUNNER_TEMP/${SLUG}-source.tar.gz"

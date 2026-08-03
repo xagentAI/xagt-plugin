@@ -52,9 +52,9 @@ export async function runSubmit(options: SubmitOptions): Promise<SubmitResult> {
   validatePayload(payload);
 
   const repo = options.submissionRepo ?? DEFAULT_REPO;
-  const filename = `submissions/${payload.slug}/SUBMISSION.md`;
-  const manifestFilename = `submissions/${payload.slug}/submission.json`;
-  const rightsFilename = `submissions/${payload.slug}/RIGHTS.md`;
+  const filename = `submissions/mcp-hackathon/${payload.slug}/SUBMISSION.md`;
+  const manifestFilename = `submissions/mcp-hackathon/${payload.slug}/submission.json`;
+  const rightsFilename = `submissions/mcp-hackathon/${payload.slug}/RIGHTS.md`;
   const markdown = renderMarkdown(payload, options.cliVersion);
   const manifest = renderManifest(payload, options.cliVersion);
   const rights = renderRightsDeclaration(payload);

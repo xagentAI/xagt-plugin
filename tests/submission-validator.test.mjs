@@ -2,7 +2,11 @@ import { mkdtemp, mkdir, rename, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { isPrivateIp, validateSubmissionDirectory } from "../scripts/validate-submission.mjs";
+import {
+  isPrivateIp,
+  resolveChangedSubmissionDirectory,
+  validateSubmissionDirectory
+} from "../scripts/validate-submission.mjs";
 
 const commit = "0123456789abcdef0123456789abcdef01234567";
 
@@ -29,6 +33,24 @@ async function createSubmission({ slug = "team-real-api", source = "export const
 }
 
 describe("submission validator", () => {
+  it("isolates current submissions from historical archive paths", () => {
+    expect(resolveChangedSubmissionDirectory("/repo", [
+      "submissions/mcp-hackathon/team-real-api/SUBMISSION.md",
+      "submissions/mcp-hackathon/team-real-api/source/index.js"
+    ])).toBe("/repo/submissions/mcp-hackathon/team-real-api");
+
+    expect(() => resolveChangedSubmissionDirectory("/repo", [
+      "submissions/2054060038305091584-meme-radar/META.md"
+    ])).toThrow(/submissions\/mcp-hackathon/);
+  });
+
+  it("rejects a pull request that changes more than one current project", () => {
+    expect(() => resolveChangedSubmissionDirectory("/repo", [
+      "submissions/mcp-hackathon/team-one/SUBMISSION.md",
+      "submissions/mcp-hackathon/team-two/SUBMISSION.md"
+    ])).toThrow(/exactly one project directory/i);
+  });
+
   it("accepts a complete offline submission package", async () => {
     const directory = await createSubmission();
     const report = await validateSubmissionDirectory(directory);

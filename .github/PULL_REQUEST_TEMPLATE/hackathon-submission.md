@@ -1,6 +1,6 @@
 ## X-Agent MCP Hackathon submission
 
-- Submission directory: `submissions/<team>-<project>/`
+- Submission directory: `submissions/mcp-hackathon/<team>-<project>/`
 - Live API:
 - Review commit:
 - Source repository:

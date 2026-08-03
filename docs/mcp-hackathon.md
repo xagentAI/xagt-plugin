@@ -4,9 +4,13 @@
 
 The program discovers real agent capabilities, verifies that they can be operated and maintained, standardizes selected capabilities as MCP tools, and assists their submission to the OKX Agent ecosystem.
 
+This is the current program. The May 2026 X-Agent × OKX Agentic Wallet Hackathon is closed and preserved in the [`historical activity archive`](./archive/2026-xagent-okx-agentic-wallet-hackathon.md).
+
 ## Who can participate
 
 Any builder or team may submit a capability that agents can call to complete a real task. There are no prescribed tracks, languages, frameworks, or MCP implementation requirement at entry.
+
+Current entries are submitted only under `submissions/mcp-hackathon/<team>-<project>/`. Historical submission directories are read-only program records and are not valid entry points for this activity.
 
 ## Hard acceptance gates
 

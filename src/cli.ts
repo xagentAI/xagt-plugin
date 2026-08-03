@@ -275,13 +275,13 @@ export async function runCli(args: string[]): Promise<number> {
     process.stdout.write("       git clone https://github.com/<your-gh-username>/xagt-plugin\n");
     process.stdout.write("       cd xagt-plugin\n");
     process.stdout.write(`       git checkout -b submit-${result.slug}\n`);
-    process.stdout.write(`       mkdir -p submissions/${result.slug}/source submissions/${result.slug}/verification\n`);
+    process.stdout.write(`       mkdir -p submissions/mcp-hackathon/${result.slug}/source submissions/mcp-hackathon/${result.slug}/verification\n`);
     process.stdout.write(`       cp "${result.localPath}" ${result.filename}\n`);
     process.stdout.write(`       cp "${result.localManifestPath}" ${result.manifestFilename}\n`);
     process.stdout.write(`       cp "${result.localRightsPath}" ${result.rightsFilename}\n`);
     process.stdout.write("       # copy your complete, reviewable source into source/\n");
     process.stdout.write("       # add reproducible API evidence to verification/README.md\n");
-    process.stdout.write(`       git add submissions/${result.slug}\n`);
+    process.stdout.write(`       git add submissions/mcp-hackathon/${result.slug}\n`);
     process.stdout.write(`       git commit -m "submit: ${result.slug}"\n`);
     process.stdout.write(`       git push -u origin submit-${result.slug}\n\n`);
     process.stdout.write(`    3. Open a PR against ${result.repoUrl}/compare\n\n`);
