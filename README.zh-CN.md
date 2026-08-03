@@ -68,6 +68,24 @@ submissions/mcp-hackathon/<团队或开发者>-<项目名称>/
 - [`submissions/RIGHTS_TEMPLATE.md`](./submissions/RIGHTS_TEMPLATE.md)
 - [`submissions/VERIFICATION_TEMPLATE.md`](./submissions/VERIFICATION_TEMPLATE.md)
 
+### 使用 Codex、Claude Code 或其他编码 Agent 提交
+
+欢迎使用 Vibe Coding 完成的项目。编码 Agent 可以整理源码、验证线上版本、运行官方检查并创建 PR，但真实性和证据要求不会降低。
+
+把下面的提示词复制到 Codex、Claude Code、Cursor、OpenCode 或其他编码 Agent：
+
+```text
+将当前目录中的项目提交到 X-Agent MCP 黑客松。
+遵循 https://github.com/xagentAI/xagt-plugin/blob/main/docs/agent-submission-guide.md
+以及其中链接的官方提交 Skill。
+
+我授权你 Fork xagentAI/xagt-plugin、创建分支、推送验证后的提交包并创建
+Pull Request。不得泄露密钥，也不得伪造 API、部署状态、Commit、测试或
+所有权证据。如果缺少真实证据，请停止提交并告诉我缺少什么。
+```
+
+仓库为 Codex 提供 [`AGENTS.md`](./AGENTS.md)，为 Claude Code 提供 [`CLAUDE.md`](./CLAUDE.md)，并包含可复用的 [`xagt-submit-hackathon` Skill](./skills/xagt-submit-hackathon/SKILL.md)。请在提示词中补充项目名称、公开仓库、准确的线上 Commit、API 地址和健康检查地址。完整版本请阅读 [`编码 Agent 提交指南`](./docs/agent-submission-guide.md)。
+
 ### 四步完成提交
 
 1. 开发并部署 API，确认健康检查和一次真实能力调用成功。

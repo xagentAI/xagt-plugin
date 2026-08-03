@@ -1,0 +1,4 @@
+interface:
+  display_name: "Submit to X-Agent Hackathon"
+  short_description: "Prepare and verify a hackathon submission PR"
+  default_prompt: "Use $xagt-submit-hackathon to prepare, validate, and submit this project as a verifiable X-Agent MCP Hackathon pull request."

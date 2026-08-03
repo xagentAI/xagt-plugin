@@ -68,6 +68,24 @@ submissions/mcp-hackathon/<チームまたは開発者>-<プロジェクト名>/
 - [`submissions/RIGHTS_TEMPLATE.md`](./submissions/RIGHTS_TEMPLATE.md)
 - [`submissions/VERIFICATION_TEMPLATE.md`](./submissions/VERIFICATION_TEMPLATE.md)
 
+### Codex、Claude Code、その他のコーディング Agent で提出する
+
+Vibe Coding で作成したプロジェクトも歓迎します。コーディング Agent は、ソースのパッケージ化、デプロイ済みバージョンの検証、公式チェック、PR 作成を実行できます。ただし、実在性と証拠の要件は変わりません。
+
+次のプロンプトを Codex、Claude Code、Cursor、OpenCode、またはその他のコーディング Agent に貼り付けてください。
+
+```text
+現在のディレクトリにあるプロジェクトを X-Agent MCP ハッカソンに提出してください。
+https://github.com/xagentAI/xagt-plugin/blob/main/docs/agent-submission-guide.md
+および、そこからリンクされている公式提出 Skill に従ってください。
+
+xagentAI/xagt-plugin の Fork、ブランチ作成、検証済みパッケージの Push、
+Pull Request の作成を許可します。シークレットを公開せず、API、デプロイ、
+Commit、テスト、所有権の証拠を捏造しないでください。証拠がなければ停止してください。
+```
+
+このリポジトリには、Codex 用の [`AGENTS.md`](./AGENTS.md)、Claude Code 用の [`CLAUDE.md`](./CLAUDE.md)、再利用可能な [`xagt-submit-hackathon` Skill](./skills/xagt-submit-hackathon/SKILL.md) が含まれています。プロジェクト名、公開リポジトリ、デプロイ済みの正確な Commit、API URL、ヘルス URL をプロンプトに追加してください。完全版は [`コーディング Agent 提出ガイド`](./docs/agent-submission-guide.md) を参照してください。
+
 ### 4 ステップで提出
 
 1. API を開発・デプロイし、ヘルスチェックと実際の機能呼び出しが成功することを確認します。

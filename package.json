@@ -1,7 +1,7 @@
 {
   "name": "@xagt/agent-plugin",
   "version": "0.4.0",
-  "description": "XAgent Skill Agent Plugin installer for Claude Code, OpenClaw-style agents, Cursor, and generic skill runtimes.",
+  "description": "X-Agent skill installer for Codex, Claude Code, Cursor, OpenCode, and AgentSkills-compatible runtimes.",
   "type": "module",
   "bin": {
     "xagt-plugin": "dist/cli.js"

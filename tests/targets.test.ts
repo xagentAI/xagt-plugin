@@ -15,12 +15,12 @@ describe("targets", () => {
   it("places codex skill under ~/.codex and opencode under ~/.config/opencode", () => {
     const codex = planInstallTargets("codex")[0];
     const opencode = planInstallTargets("opencode")[0];
-    expect(codex.skillDirectory).toBe(".codex/skills/xagt-setup");
-    expect(opencode.skillDirectory).toBe(".config/opencode/skills/xagt-setup");
+    expect(codex.skillsDirectory).toBe(".codex/skills");
+    expect(opencode.skillsDirectory).toBe(".config/opencode/skills");
   });
 
   it("does not include openclaw paths", () => {
-    const directories = planInstallTargets("all").map((item) => item.skillDirectory);
+    const directories = planInstallTargets("all").map((item) => item.skillsDirectory);
     expect(directories.some((dir) => dir.includes(".openclaw"))).toBe(false);
   });
 });
