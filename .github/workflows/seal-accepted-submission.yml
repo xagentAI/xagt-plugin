@@ -1,0 +1,101 @@
+name: Seal accepted submission before reward
+
+on:
+  workflow_dispatch:
+    inputs:
+      submission_slug:
+        description: Directory name under submissions/
+        required: true
+        type: string
+      pull_request_number:
+        description: Merged submission pull request number
+        required: true
+        type: string
+      reviewer:
+        description: Accountable X-Agent reviewer or review group
+        required: true
+        type: string
+      review_record_url:
+        description: URL of the final review decision
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  seal:
+    name: Validate, archive, hash, and publish immutable release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the accepted main-branch source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Require repository release immutability
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          enabled="$(gh api "repos/${REPOSITORY}/immutable-releases" --jq '.enabled')"
+          test "$enabled" = "true"
+
+      - name: Validate inputs and merged submission
+        env:
+          SLUG: ${{ inputs.submission_slug }}
+          PR_NUMBER: ${{ inputs.pull_request_number }}
+          XAGT_GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [[ "$SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          test -d "submissions/$SLUG"
+          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state,mergedAt --jq 'select(.state == "MERGED" and .mergedAt != null)'
+          npm run validate:submission -- --dir "submissions/$SLUG" --online
+
+      - name: Build acceptance receipt and source archive without executing submission code
+        env:
+          SLUG: ${{ inputs.submission_slug }}
+          PR_NUMBER: ${{ inputs.pull_request_number }}
+          REVIEWER: ${{ inputs.reviewer }}
+          REVIEW_RECORD_URL: ${{ inputs.review_record_url }}
+        run: |
+          directory="submissions/$SLUG"
+          review_commit="$(jq -r '.reviewCommit' "$directory/submission.json")"
+          source_tree="$(git rev-parse "HEAD:$directory")"
+          archive="$RUNNER_TEMP/${SLUG}-source.tar.gz"
+          receipt="$RUNNER_TEMP/${SLUG}-acceptance.json"
+          tar --create --gzip --file "$archive" "$directory"
+          archive_sha256="$(sha256sum "$archive" | cut -d ' ' -f 1)"
+          jq -n \
+            --arg slug "$SLUG" \
+            --argjson pullRequest "$PR_NUMBER" \
+            --arg officialMergeCommit "$GITHUB_SHA" \
+            --arg reviewCommit "$review_commit" \
+            --arg sourceTree "$source_tree" \
+            --arg sourceArchiveSha256 "$archive_sha256" \
+            --arg reviewer "$REVIEWER" \
+            --arg reviewRecordUrl "$REVIEW_RECORD_URL" \
+            --arg sealedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{schemaVersion:1, slug:$slug, pullRequest:$pullRequest, officialMergeCommit:$officialMergeCommit, reviewCommit:$reviewCommit, sourceTree:$sourceTree, sourceArchiveSha256:$sourceArchiveSha256, reviewer:$reviewer, reviewRecordUrl:$reviewRecordUrl, sealedAt:$sealedAt, rewardGate:"sealed-before-payment"}' \
+            > "$receipt"
+          echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
+          echo "RECEIPT=$receipt" >> "$GITHUB_ENV"
+          echo "REVIEW_COMMIT=$review_commit" >> "$GITHUB_ENV"
+
+      - name: Publish the permanent acceptance release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ inputs.submission_slug }}
+        run: |
+          tag="submission-${SLUG}-${REVIEW_COMMIT:0:12}"
+          gh release create "$tag" \
+            "$ARCHIVE#Complete accepted source" \
+            "$RECEIPT#Acceptance and integrity receipt" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Accepted submission: $SLUG" \
+            --notes "Sealed by X-Agent before reward payment. The attached source archive and receipt are protected by GitHub immutable releases. Corrections require a new additive release; this release is never replaced."
