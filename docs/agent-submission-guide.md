@@ -47,7 +47,7 @@ This prompt works with Codex, Claude Code, Cursor, OpenCode, and other coding ag
 - Claude Code reads the root [`CLAUDE.md`](../CLAUDE.md), which imports the shared instructions.
 - AgentSkills-compatible runtimes can use [`xagt-submit-hackathon`](../skills/xagt-submit-hackathon/SKILL.md).
 
-Both skills are included in this repository package. When installed from this repository, the plugin installer copies the X-Agent setup skill and the hackathon submission skill into supported runtimes. The published npm `@latest` package may not include the new submission skill until the next release, so use the repository instructions or the linked Skill directly in the meantime.
+Both skills are included in the repository package. Starting with `@xagt/agent-plugin@0.5.0`, the npm installer copies the X-Agent setup skill and the hackathon submission skill into supported runtimes.
 
 ## What the agent must deliver
 

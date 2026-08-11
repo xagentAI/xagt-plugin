@@ -1,6 +1,6 @@
 {
   "name": "@xagt/agent-plugin",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "X-Agent skill installer for Codex, Claude Code, Cursor, OpenCode, and AgentSkills-compatible runtimes.",
   "type": "module",
   "bin": {
