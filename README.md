@@ -44,6 +44,8 @@ Every entry must include:
 
 MCP, Streamable HTTP, x402, EIP-3009, A2MCP, and payment SDKs are not required at submission time.
 
+The submission templates also include optional MCP handoff notes. Use them to describe the proposed tool name, input/output shape, error behavior, side effects, and pricing readiness when those details are already known. They help selected projects move faster through later MCP standardization without changing the current submission contract.
+
 ### Where to submit code
 
 Open one pull request that adds exactly one project directory:

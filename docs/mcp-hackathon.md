@@ -50,6 +50,8 @@ The review validates the submitted artifact only. It is not a security certifica
 
 After a pass, X-Agent works with the team to define tool boundaries, input/output schema, authorization, error semantics, timeouts, limits, observability, and an acceptance test. X-Agent owns the adapter and submission package; the submitting team owns the truthfulness, operation, and maintenance of its underlying capability.
 
+The submission templates include an optional MCP handoff section for proposed tool naming, schemas, errors, side effects, and pricing readiness. These notes improve handoff quality but do not require a participant to implement MCP, x402, Streamable HTTP, or a payment SDK before submission.
+
 ## Program changes
 
 Dates, reward terms, repository targets, and the final OKX process are communicated through the official program notice. This repository describes the submission contract and should be followed until a superseding notice is published.

@@ -46,6 +46,17 @@ The reproducible call instructions and redacted example responses are in `verifi
 - **Capability call:** <endpoint and one example input>
 - **Expected error behavior:** <invalid input, authorization, timeout, or limit behavior>
 
+## MCP handoff notes (optional)
+
+These notes are not required for submission. They help X-Agent standardize a selected capability as an MCP tool later.
+
+- **Proposed tool name:** <stable, verb-first tool name>
+- **Agent task:** <when an agent should call this capability>
+- **Input / output schema:** <link to OpenAPI or JSON examples in `source/`>
+- **Error semantics:** <stable error codes and safe messages>
+- **Side effects:** <none, read-only, or describe the mutation and idempotency key>
+- **Pricing readiness:** <free | x402-ready | TBD>
+
 ## Security and data handling
 
 - **Data collected:** <fields or none>

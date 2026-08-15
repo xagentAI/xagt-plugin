@@ -42,3 +42,13 @@ curl --fail --silent --show-error \
 ```
 
 State the expected success response and one safe failure response. Redact all tokens, user data, and production identifiers.
+
+## 4. MCP handoff evidence (optional)
+
+If provided, include one redacted example for each item below. This is not required at submission time, but it makes later MCP standardization faster.
+
+- Input and output JSON shape
+- One invalid-input or authorization failure
+- Timeout or rate-limit behavior
+- Side effects and idempotency behavior, if applicable
+- Current pricing state: free, x402-ready, or not yet decided
