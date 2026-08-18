@@ -38,7 +38,9 @@ test("DexScreener adapter normalizes profile and boost payloads", async () => {
 });
 
 test("DexPaprika adapter normalizes top-pool payloads with liquidity, volume, txns, and price change", async () => {
+  const requestedUrls: string[] = [];
   const fetchImpl: FetchLike = async (url) => {
+    requestedUrls.push(url);
     if (url.includes("/dexes")) {
       return jsonResponse({ dexes: [{ dex_id: "uniswap_v3", dex_name: "Uniswap V3", volume_usd_24h: 1_000_000, txns_24h: 1200 }] });
     }
@@ -56,9 +58,9 @@ test("DexPaprika adapter normalizes top-pool payloads with liquidity, volume, tx
         "24h": { volume_usd: "89000", txns: "630", last_price_usd_change: "7.5" },
       });
     }
-    if (url.includes("/pools?limit=20") && url.includes("/ethereum/")) {
+    if (url.includes("/pools/search?") && url.includes("/ethereum/")) {
       return jsonResponse({
-        pools: [
+        results: [
           {
             id: "eth-pool-1",
             dex_name: "Uniswap V3",
@@ -66,15 +68,16 @@ test("DexPaprika adapter normalizes top-pool payloads with liquidity, volume, tx
               { id: "0xquote", symbol: "USDC", name: "USD Coin" },
               { id: "0xalpha", symbol: "ALPHA", name: "Alpha Token" },
             ],
-            volume_usd: "70000",
-            transactions: "500",
+            volume_usd_24h: "70000",
+            transactions_24h: "500",
+            liquidity_usd: "39000",
             price_usd: "0.4",
-            last_price_change_usd_24h: "5",
+            price_change_percentage_24h: "5",
           },
         ],
       });
     }
-    return jsonResponse({ pools: [] });
+    return jsonResponse({ results: [] });
   };
 
   const result = await fetchDexPaprikaOpportunities({ fetchImpl });
@@ -86,6 +89,54 @@ test("DexPaprika adapter normalizes top-pool payloads with liquidity, volume, tx
   assert.equal(opportunity?.metrics.volumeUsd, 89_000);
   assert.equal(opportunity?.metrics.priceChangePct, 7.5);
   assert.equal(opportunity?.status, "ready");
+  assert.equal(requestedUrls.some((url) => url.includes("/pools?limit=20")), false);
+  assert.equal(
+    requestedUrls.some((url) =>
+      url.includes("/networks/ethereum/pools/search?limit=20&order_by=volume_usd_24h&sort=desc"),
+    ),
+    true,
+  );
+});
+
+test("DexPaprika adapter falls back to pool-search metrics when pool detail is unavailable", async () => {
+  const fetchImpl: FetchLike = async (url) => {
+    if (url.includes("/dexes")) {
+      return jsonResponse({ dexes: [{ dex_id: "uniswap_v3", dex_name: "Uniswap V3" }] });
+    }
+    if (url.includes("/pools/eth-pool-fallback")) {
+      return jsonResponse({ message: "temporarily unavailable" }, false, 503);
+    }
+    if (url.includes("/pools/search?") && url.includes("/ethereum/")) {
+      return jsonResponse({
+        results: [
+          {
+            id: "eth-pool-fallback",
+            dex_name: "Uniswap V3",
+            tokens: [
+              { id: "0xquote", symbol: "USDC", name: "USD Coin" },
+              { id: "0xfallback", symbol: "FALL", name: "Fallback Token" },
+            ],
+            volume_usd_24h: "123456",
+            transactions_24h: "321",
+            liquidity_usd: "45678",
+            price_usd: "0.25",
+            price_change_percentage_24h: "12.5",
+          },
+        ],
+      });
+    }
+    return jsonResponse({ results: [] });
+  };
+
+  const result = await fetchDexPaprikaOpportunities({ fetchImpl });
+  const opportunity = result.opportunities.find((row) => row.symbol === "FALL");
+
+  assert.equal(result.ok, true);
+  assert.equal(opportunity?.metrics.liquidityUsd, 45_678);
+  assert.equal(opportunity?.metrics.volumeUsd, 123_456);
+  assert.equal(opportunity?.metrics.priceUsd, 0.25);
+  assert.equal(opportunity?.metrics.priceChangePct, 12.5);
+  assert.match(opportunity?.evidence[0]?.summary ?? "", /321 txns/);
 });
 
 test("GeckoTerminal adapter normalizes trending-pool payloads", async () => {
