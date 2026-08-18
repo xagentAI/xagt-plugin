@@ -20,7 +20,7 @@ interface DexPaprikaDexes {
 }
 
 interface DexPaprikaPools {
-  pools?: DexPaprikaPool[];
+  results?: DexPaprikaPool[];
 }
 
 interface DexPaprikaPool {
@@ -28,6 +28,10 @@ interface DexPaprikaPool {
   dex_id?: string;
   dex_name?: string;
   chain?: string;
+  liquidity_usd?: number | string;
+  volume_usd_24h?: number | string;
+  transactions_24h?: number | string;
+  price_change_percentage_24h?: number | string;
   volume_usd?: number | string;
   transactions?: number | string;
   price_usd?: number | string;
@@ -38,7 +42,7 @@ interface DexPaprikaPool {
 }
 
 interface DexPaprikaPoolDetail extends DexPaprikaPool {
-  token_reserves?: Array<{ reserve_usd?: number | string; last_price_usd?: number | string; token?: DexPaprikaToken }>;
+  token_reserves?: Array<{ token_id?: string; reserve_usd?: number | string; last_price_usd?: number | string; token?: DexPaprikaToken }>;
   "24h"?: {
     volume_usd?: number | string;
     txns?: number | string;
@@ -77,7 +81,12 @@ export async function fetchDexPaprikaOpportunities(options: ScannerOptions = {})
       {
         name: "DexPaprika",
         ok,
-        command: networks.map((network) => `${baseUrl}/networks/${network}/dexes + /pools?limit=${POOL_LIMIT}`).join(" | "),
+        command: networks
+          .map(
+            (network) =>
+              `${baseUrl}/networks/${network}/dexes + /pools/search?limit=${POOL_LIMIT}&order_by=volume_usd_24h&sort=desc`,
+          )
+          .join(" | "),
         error: ok ? undefined : errors[0] ?? "no rows",
         detail: errors.length > 0 ? errors.join(" | ") : undefined,
       },
@@ -87,10 +96,13 @@ export async function fetchDexPaprikaOpportunities(options: ScannerOptions = {})
 
 async function fetchNetwork(network: string, options: ScannerOptions) {
   const dexes = await fetchJson<DexPaprikaDexes>(`${baseUrl}/networks/${network}/dexes`, options);
-  const pools = await fetchJson<DexPaprikaPools>(`${baseUrl}/networks/${network}/pools?limit=${POOL_LIMIT}`, options);
+  const pools = await fetchJson<DexPaprikaPools>(
+    `${baseUrl}/networks/${network}/pools/search?limit=${POOL_LIMIT}&order_by=volume_usd_24h&sort=desc`,
+    options,
+  );
   const topDex = dexes.dexes?.[0];
   const details = await Promise.all(
-    (pools.pools ?? []).slice(0, POOL_LIMIT).map(async (pool) => {
+    (pools.results ?? []).slice(0, POOL_LIMIT).map(async (pool) => {
       if (!pool.id) return { pool, detail: null as DexPaprikaPoolDetail | null };
       try {
         const detail = await fetchJson<DexPaprikaPoolDetail>(`${baseUrl}/networks/${network}/pools/${encodeURIComponent(pool.id)}`, options);
@@ -112,13 +124,14 @@ function normalizePool(network: string, pool: DexPaprikaPool, detail: DexPaprika
   const quoteToken = tokens.find((token) => token.id !== displayToken?.id);
   const tokenAddress = displayToken?.id ?? pool.id;
   if (!tokenAddress) return null;
-  const liquidityUsd = liquidityFromDetail(detail);
+  const liquidityUsd = liquidityFromDetail(detail) ?? toNumber(pool.liquidity_usd);
   const h24 = detail?.["24h"];
-  const volumeUsd = toNumber(h24?.volume_usd) ?? toNumber(pool.volume_usd);
-  const txns = toNumber(h24?.txns) ?? toNumber(pool.transactions);
+  const volumeUsd = toNumber(h24?.volume_usd) ?? toNumber(pool.volume_usd_24h) ?? toNumber(pool.volume_usd);
+  const txns = toNumber(h24?.txns) ?? toNumber(pool.transactions_24h) ?? toNumber(pool.transactions);
   const buys = firstNumber(h24?.buys, h24?.buy_txns, h24?.buy_count);
   const sells = firstNumber(h24?.sells, h24?.sell_txns, h24?.sell_count);
-  const priceChangePct = toNumber(h24?.last_price_usd_change) ?? toNumber(pool.last_price_change_usd_24h);
+  const priceChangePct =
+    toNumber(h24?.last_price_usd_change) ?? toNumber(pool.price_change_percentage_24h) ?? toNumber(pool.last_price_change_usd_24h);
   const priceUsd = toNumber(detail?.token_reserves?.find((reserve) => reserve.token?.id === displayToken?.id)?.last_price_usd) ?? toNumber(pool.price_usd);
   const dexName = cleanString(pool.dex_name) ?? topDexName ?? "top DEX";
   const poolCreatedAt = detail?.pool_created_at ?? detail?.created_at ?? pool.pool_created_at ?? pool.created_at;
@@ -152,7 +165,7 @@ function normalizePool(network: string, pool: DexPaprikaPool, detail: DexPaprika
 
 function pickDisplayToken(tokens: DexPaprikaToken[], detail: DexPaprikaPoolDetail | null) {
   const enriched = tokens.map((token) => {
-    const reserve = detail?.token_reserves?.find((item) => item.token?.id === token.id);
+    const reserve = detail?.token_reserves?.find((item) => item.token_id === token.id || item.token?.id === token.id);
     return { ...token, reserveUsd: toNumber(reserve?.reserve_usd) ?? 0 };
   });
   return (
