@@ -1,0 +1,13 @@
+{
+    "name":  "safegate-xagent-commerce-outcome",
+    "version":  "0.3.0",
+    "private":  true,
+    "type":  "commonjs",
+    "engines":  {
+                    "node":  "\u003e=18.17.0"
+                },
+    "scripts":  {
+                    "check":  "node --check api/health.js \u0026\u0026 node --check api/xagent-verification.js \u0026\u0026 node --check api/commerce-outcome.js \u0026\u0026 node --check lib/canonical-json.js \u0026\u0026 node --check lib/attestation-verifier.js \u0026\u0026 node --check lib/base-usdc.js \u0026\u0026 node --check lib/commerce-proof-verifier.js",
+                    "test":  "node test/commerce-outcome.test.js \u0026\u0026 node test/base-usdc.test.js \u0026\u0026 node test/attestation-verifier.test.js"
+                }
+}
