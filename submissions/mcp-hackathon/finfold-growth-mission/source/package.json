@@ -1,0 +1,33 @@
+{
+  "name": "finfold-growth-mission-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-bound, trackable growth missions for X-Agent Open Innovation Challenge.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "types": "wrangler types",
+    "lint": "oxlint src test scripts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "secret-scan": "node scripts/secret-scan.mjs",
+    "benchmark": "node scripts/benchmark.mjs",
+    "verify:deployment": "node scripts/verify-deployment.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build && npm run secret-scan"
+  },
+  "dependencies": {
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.22.0",
+    "oxlint": "1.81.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.128.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
