@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ExhaustiveGate — No exhaustive claim without exhaustive evidence</title>
+<style>
+:root{--bg:#0b0e13;--panel:#12161d;--line:#232a35;--txt:#e8edf3;--mut:#9aa4b2;--ok:#4cc38a;--warn:#e5b567;--bad:#e5534b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.55 -apple-system,Segoe UI,Roboto,Inter,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+.hero{padding:48px 0 16px}.hero h1{font-size:42px;margin:0;letter-spacing:-1px}.hero p{color:var(--mut);font-size:17px;max-width:640px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.grow{flex:1;min-width:200px}
+input,select{width:100%;background:#0d1117;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:10px 12px}
+button{background:var(--ok);border:0;color:#06281a;font-weight:700;border-radius:8px;padding:10px 18px;cursor:pointer;margin:4px 4px 4px 0}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+.bar{height:14px;background:#0d1117;border:1px solid var(--line);border-radius:7px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);width:0%}
+.verdict{font-size:44px;font-weight:800}.PROVEN{color:var(--ok)}.UNPROVEN{color:var(--bad)}.CONDITIONAL{color:var(--warn)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);margin:2px}
+pre{background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px}
+.mut{color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:10px}.kpi b{font-size:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+<h1>ExhaustiveGate</h1>
+<p><b>No exhaustive claim without exhaustive evidence.</b><br/>Verify an AI agent actually covered the required result set before it says <i>all, none, exactly N, cheapest, highest, lowest</i>.</p>
+<div class="row">
+<div class="grow"><label>Gate backend</label><input id="gate" value="http://localhost:8100"/></div>
+<div class="grow"><label>Demo CRM</label><input id="crm" value="http://localhost:8101"/></div>
+</div>
+<p><button onclick="startDemo('normal')">Run Demo: exactly-N</button>
+<button class="ghost" onclick="startDemo('timeout_page_3')">NONE + timeout</button>
+<button class="ghost" onclick="startMinDemo()">Cheapest product</button>
+<button class="ghost" onclick="startDemo('snapshot_change')">Snapshot change</button></p>
+</div>
+<div class="card" id="sess" style="display:none">
+<h2>Verification session <span class="mut" id="sid"></span></h2>
+<div class="grid">
+<div class="kpi">Coverage<div><b id="cov">0%</b></div><div class="bar"><i id="bar"></i></div></div>
+<div class="kpi">Pages<div><b id="pages">0</b></div></div>
+<div class="kpi">Records<div><b id="recs">0</b></div></div>
+<div class="kpi">Failures<div><b id="fails">0</b></div></div>
+<div class="kpi">Snapshot<div><b id="snap">—</b></div></div>
+</div>
+<p><button onclick="fetchNext()">Fetch Next Page</button><span class="mut" id="cursor"></span></p>
+<div class="card"><h3>Claim</h3><div class="row"><div class="grow"><input id="claimText" value="There are exactly 100 unpaid invoices."/></div></div>
+<p><button onclick="verifyClaim()">Verify claim</button></p>
+<div class="verdict" id="verdict">—</div><div id="reasons"></div><pre id="cert">—</pre></div>
+<div id="checks"></div>
+</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

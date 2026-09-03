@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8100:8000"
+    environment:
+      GIT_COMMIT: ${GIT_COMMIT:-dev-local}
+      XAGENT_SLUG: ${XAGENT_SLUG:-team-exhaustive-gate}
+    depends_on:
+      - demo-crm
+  demo-crm:
+    build: ./examples/demo-crm
+    ports:
+      - "8101:8001"
+  frontend:
+    build: ./frontend
+    ports:
+      - "8102:80"
+    depends_on:
+      - backend
