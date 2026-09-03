@@ -11,7 +11,7 @@
 
 ## Live API
 
-- **API base URL:** https://api.finfold.app/v1
+- **API base URL:** https://api.finfold.app
 - **Health-check URL:** https://api.finfold.app/health
 - **Deployment proof URL:** https://api.finfold.app/.well-known/xagent-verification.json
 - **Authentication:** Bearer review key delivered only through the program's approved private review channel. The raw key is shown once and only its SHA-256 hash is stored.

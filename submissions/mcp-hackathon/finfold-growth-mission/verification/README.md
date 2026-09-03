@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Review commit: `65a4a545ca74b0e357973de433fd108c375531bc`
-- API base URL: `https://api.finfold.app/v1`
+- API base URL: `https://api.finfold.app`
 - Authentication: obtain the short-lived Bearer review key through the program's approved private review channel and export it as `REVIEW_KEY`. It is not present in this repository.
 
 ## 1. Health check
