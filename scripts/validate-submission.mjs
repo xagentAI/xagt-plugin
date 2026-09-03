@@ -2,7 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import { promises as dns } from "node:dns";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir, lstat } from "node:fs/promises";
 import https from "node:https";
 import { isIP } from "node:net";
 import { basename, join, relative, resolve, sep } from "node:path";
@@ -22,19 +22,23 @@ export async function validateSubmissionDirectory(directory, options = {}) {
   const submissionPath = join(submissionDirectory, "SUBMISSION.md");
   const rightsPath = join(submissionDirectory, "RIGHTS.md");
   const verificationPath = join(submissionDirectory, "verification", "README.md");
-  const sourcePath = join(submissionDirectory, "source");
 
   assertSlug(slug);
+  const files = await collectSubmissionFiles(submissionDirectory);
   await requireFile(submissionPath, "SUBMISSION.md");
   await requireFile(rightsPath, "RIGHTS.md");
   await requireFile(verificationPath, "verification/README.md");
-  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  await requireFile(manifestPath, "submission.json");
+  const manifest = JSON.parse((await readFile(manifestPath, "utf8")).replace(/^\uFEFF/, ""));
   validateManifest(manifest, slug);
   checks.push("submission structure and manifest are valid");
 
-  const sourceFiles = await collectSourceFiles(sourcePath);
-  await scanSourceFiles(sourceFiles);
-  checks.push(`${sourceFiles.length} source files are present and passed the baseline secret scan`);
+  const sourceFiles = files.filter((file) => file.relativePath.startsWith("source/"));
+  if (!sourceFiles.some((file) => /\.(?:[cm]?[jt]sx?|py|go|rs|java|kt|kts|c|cc|cpp|h|hpp|cs|fs|rb|php|swift|scala|sh|bash|sol|vy|ex|exs|erl|clj|lua|r|jl|ipynb|html|vue|svelte|sql)$/i.test(file.relativePath))) {
+    throw new Error("source/ must contain implementation files, not only documentation or repository links; completeness still requires manual review");
+  }
+  await scanSourceFiles(files);
+  checks.push(`${sourceFiles.length} source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)`);
 
   const verification = await readFile(verificationPath, "utf8");
   if (!/curl\s/i.test(verification) || !/health/i.test(verification)) {
@@ -46,7 +50,7 @@ export async function validateSubmissionDirectory(directory, options = {}) {
     const commitVerifier = options.commitVerifier ?? verifyGitHubCommit;
     const jsonRequester = options.jsonRequester ?? requestJsonPinned;
     await commitVerifier(manifest.sourceRepository, manifest.reviewCommit, options.githubToken);
-    checks.push("the declared GitHub commit exists");
+    checks.push("the declared source version has been verified");
 
     const health = await jsonRequester(manifest.healthCheckUrl);
     const healthCommit = health.headers["x-source-commit"] ?? health.body.commit ?? health.body.version;
@@ -70,20 +74,26 @@ export async function validateSubmissionDirectory(directory, options = {}) {
 }
 
 export function findChangedSubmissionDirectory(repoRoot, baseSha, headSha) {
+  if (![baseSha, headSha].every((sha) => /^[a-f0-9]{40}$/i.test(sha))) {
+    throw new Error("scope comparison requires exact commit hashes");
+  }
   const output = execFileSync(
     "git",
-    ["-C", repoRoot, "diff", "--name-only", "--diff-filter=ACMR", "-z", baseSha, headSha],
-    { encoding: "utf8" }
+    ["-C", repoRoot, "diff", "--no-ext-diff", "--no-textconv", "--no-renames", "--name-only", "-z", `${baseSha}...${headSha}`],
+    { encoding: "utf8", timeout: 30_000 }
   );
   const files = output.split("\0").filter(Boolean);
   return resolveChangedSubmissionDirectory(repoRoot, files);
 }
 
 export function resolveChangedSubmissionDirectory(repoRoot, files) {
-  if (files.length === 0) throw new Error("the pull request has no added or modified files");
+  if (files.length === 0) throw new Error("the pull request has no changed files");
 
   const directories = new Set();
   for (const file of files) {
+    if (typeof file !== "string" || file.includes("\\") || /[\x00-\x1f\x7f]/.test(file) || file.split("/").some((part) => !part || part === "." || part === "..")) {
+      throw new Error("invalid submission file path");
+    }
     const parts = file.split("/");
     if (parts[0] !== "submissions" || parts[1] !== "mcp-hackathon" || parts.length < 4) {
       throw new Error(`submission PRs may only change one project directory under submissions/mcp-hackathon/: ${file}`);
@@ -96,6 +106,7 @@ export function resolveChangedSubmissionDirectory(repoRoot, files) {
 }
 
 function validateManifest(manifest, directorySlug) {
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("submission.json must contain an object");
   const requiredStrings = [
     "name",
     "slug",
@@ -118,7 +129,7 @@ function validateManifest(manifest, directorySlug) {
   }
 
   const source = assertPublicHttpsUrl(manifest.sourceRepository, "sourceRepository");
-  if (source.hostname !== "github.com" || source.pathname.split("/").filter(Boolean).length !== 2) {
+  if (source.hostname !== "github.com" || !/^\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?$/.test(source.pathname) || source.search || source.hash) {
     throw new Error("sourceRepository must be a public https://github.com/<owner>/<repo> URL");
   }
   const api = assertPublicHttpsUrl(manifest.apiBaseUrl, "apiBaseUrl");
@@ -176,11 +187,14 @@ export function isPrivateIp(address) {
   );
 }
 
-async function collectSourceFiles(sourcePath) {
+async function collectSubmissionFiles(sourcePath) {
   const files = [];
   let totalBytes = 0;
 
   async function walk(directory) {
+    const directoryStat = await lstat(directory);
+    if (directoryStat.isSymbolicLink()) throw new Error("symbolic links are not allowed in the submission");
+    if (!directoryStat.isDirectory()) throw new Error("submission source must be a directory");
     const entries = await readdir(directory, { withFileTypes: true }).catch(() => {
       throw new Error("source/ must exist and contain the complete review source");
     });
@@ -190,13 +204,13 @@ async function collectSourceFiles(sourcePath) {
       if (entry.isSymbolicLink()) throw new Error(`symbolic links are not allowed in submitted source: ${relativePath}`);
       if (entry.isDirectory()) {
         if (["node_modules", ".git", "dist", "build", ".next", "vendor"].includes(entry.name)) {
-          throw new Error(`generated or vendored directory is not allowed: source/${relativePath}`);
+          throw new Error(`generated or vendored directory is not allowed: ${relativePath}`);
         }
         await walk(fullPath);
         continue;
       }
       if (!entry.isFile()) continue;
-      const details = await stat(fullPath);
+      const details = await lstat(fullPath);
       if (details.size > MAX_FILE_BYTES) throw new Error(`source file exceeds 5 MiB: ${relativePath}`);
       totalBytes += details.size;
       if (totalBytes > MAX_TOTAL_BYTES) throw new Error("submitted source exceeds the 20 MiB review limit");
@@ -221,18 +235,21 @@ async function scanSourceFiles(files) {
   for (const file of files) {
     const name = basename(file.relativePath).toLowerCase();
     if ((name.startsWith(".env") && !name.includes("example")) || /\.(?:pem|p12|pfx|key)$/.test(name)) {
-      throw new Error(`secret-bearing file type is not allowed: source/${file.relativePath}`);
+      throw new Error(`secret-bearing file type is not allowed: ${file.relativePath}`);
     }
-    if (file.size > 1024 * 1024) continue;
-    const content = await readFile(file.fullPath, "utf8").catch(() => "");
+    const content = await readFile(file.fullPath, "utf8");
+    if (content.startsWith("version https://git-lfs.github.com/spec/v1")) {
+      throw new Error(`Git LFS pointers are not source archives; include the actual file: ${file.relativePath}`);
+    }
     if (secretPatterns.some((pattern) => pattern.test(content))) {
-      throw new Error(`possible secret detected in source/${file.relativePath}`);
+      throw new Error(`possible secret detected in ${file.relativePath}`);
     }
   }
 }
 
 async function requireFile(path, label) {
-  const details = await stat(path).catch(() => null);
+  const details = await lstat(path).catch(() => null);
+  if (details?.isSymbolicLink()) throw new Error(`symbolic links are not allowed: ${label}`);
   if (!details?.isFile() || details.size === 0) throw new Error(`${label} is required and cannot be empty`);
 }
 
@@ -241,7 +258,7 @@ async function verifyGitHubCommit(repositoryUrl, commit, githubToken) {
   const [owner, repo] = url.pathname.split("/").filter(Boolean);
   const headers = { accept: "application/vnd.github+json", "user-agent": "xagent-submission-validator" };
   if (githubToken) headers.authorization = `Bearer ${githubToken}`;
-  const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${commit}`, { headers, redirect: "error" });
+  const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${commit}`, { headers, redirect: "error", signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
   if (!response.ok) throw new Error(`declared source commit is not publicly verifiable on GitHub (${response.status})`);
 }
 

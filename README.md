@@ -1,31 +1,70 @@
-# X-Agent MCP Hackathon & Agent Plugin
+# X-Agent AI MCP Hackathon 2026 & Agent Plugin
 
 English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-> **Current program: submit a real, callable capability. X-Agent verifies the API and source, standardizes selected projects as MCP tools, and supports their submission to the OKX Agent ecosystem.**
+[![X-Agent AI MCP Hackathon 2026 — September 2 to October 4; 1,000 USDT and 100,000 X-Points](https://xagt.ai/hackathon/og-cover.jpg)](https://xagt.ai/hackathon?lang=en)
 
-This repository is the official code-submission hub for the current X-Agent MCP Hackathon. It also contains the `@xagt/agent-plugin` installer.
+> **Build live, verifiable Agent and MCP applications with real-world utility. Two tracks, 1,000 USDT + 100,000 X-Points in total rewards. September 2–October 4, 2026.**
 
-Previous program: [X-Agent × OKX Agentic Wallet Hackathon · May 2026](https://xagt.ai/hackathon) · [code and submission archive](./submissions/INDEX.md)
+This repository is the official code-submission hub for the X-Agent AI MCP Hackathon 2026. It also contains the `@xagt/agent-plugin` installer.
 
-## Current program: X-Agent MCP Hackathon
+[Event page and rules](https://xagt.ai/hackathon?lang=en) · [Register on Luma](https://luma.com/h0qt02e4) · [Telegram community](https://t.me/XAgent_official)
 
-The MCP Hackathon is not limited to predefined tracks, languages, frameworks, or project types. Builders may submit any useful capability that an AI agent can call to complete a real task.
+Previous program: [X-Agent × OKX Agentic Wallet Hackathon · May 2026](./docs/archive/2026-xagent-okx-agentic-wallet-hackathon.md) · [code and submission archive](./submissions/INDEX.md)
 
-You do **not** need to implement MCP before applying. You provide a working capability, a live API, and the complete source. X-Agent handles MCP standardization with selected teams after verification.
+## Current program: X-Agent AI MCP Hackathon 2026
+
+Developers and teams worldwide are invited to build useful applications across AI, crypto, data, automation, and agent infrastructure. Choose **one of two tracks**; both submit through this repository and are judged separately. The [event page](https://xagt.ai/hackathon?lang=en) is the reference for the current schedule, rewards, and track rules.
+
+### Choose your track
+
+| Track | What to build | Track prize pool |
+| --- | --- | --- |
+| **General Challenge (Open Innovation)** | An original, useful API-backed Agent or MCP capability. Deploy it and demonstrate a real, verifiable call. | 500 USDT + 50,000 X-Points |
+| **OlaXBT × X-Agent Trading Challenge** | Use OlaXBT Nexus MCP for strategy development, backtesting, performance analysis, and market data. Validate a trading strategy, then build your own Agent or MCP application around it. | 500 USDT + 50,000 X-Points |
+
+OlaXBT sponsors the trading track. A strategy, backtest report, or simple API wrapper alone is **not a complete trading entry**. Start with the [Nexus MCP documentation](https://nexus.olaxbt.xyz/api/mcp/docs) and the [trading challenge rules and developer guide](https://xagt.ai/hackathon/olaxbt-guide?lang=en).
+
+**Excluded from both tracks:** on-chain security and auditing projects, including smart-contract audits, vulnerability or exploit detection, wallet or transaction risk scoring, phishing/scam/Rug Pull detection, security monitoring, and compliance or security analysis.
+
+You do **not** need to build your own MCP server before submitting. You must provide a working capability, a deployed API, and complete source code. This does not waive the trading track's requirement to use OlaXBT Nexus MCP.
+
+### Event timeline
+
+**September 2–October 4, 2026**
+
+| Stage | Dates (2026) | What happens |
+| --- | --- | --- |
+| Registration & Build | September 2–19 (18 days) | Register, form a team, attend technical onboarding and community Q&A, and develop, deploy, test, and submit your project. Registration and building open together. |
+| Technical Review & Judging | September 20–October 1 (12 days) | Eligibility checks, API verification, source-code review, and project scoring. |
+| Winner Announcement | October 2–4 (3 days) | Final results are announced through X-Agent's official channels and community. |
+
+### Rewards and project support
+
+The combined prize pool is **1,000 USDT + 100,000 X-Points**. Each track awards:
+
+| Place in each track | USDT | X-Points |
+| --- | --- | --- |
+| 1st | 500 | 15,000 |
+| 2nd | — | 12,000 |
+| 3rd | — | 10,000 |
+| 4th | — | 8,000 |
+| 5th | — | 5,000 |
+
+Rewards are per team, not per member. Selected projects may also receive support for MCP standardization, marketplace integration, ecosystem exposure, and paid-call monetization. Support does not guarantee marketplace acceptance, revenue, or endorsement from OKX or OKX.AI.
 
 ### The program in one flow
 
 ```text
-Callable capability
+Register, choose a track, and build a callable capability
         ↓
 Deployed API + complete source submitted by PR
         ↓
-API, commit, source, and safety verification
+API, commit, source, and safety verification + judging
         ↓
-X-Agent MCP standardization
+Selected projects: X-Agent MCP standardization support
         ↓
-OKX Agent ecosystem submission support
+Marketplace and ecosystem submission support
 ```
 
 An entry is evaluated as a working capability, not as an idea deck. X-Agent support does not guarantee acceptance, listing, traffic, revenue, or endorsement from OKX.
@@ -42,7 +81,7 @@ Every entry must include:
 6. **A deployment proof endpoint** binding the public service to the project slug and commit.
 7. **Security, data, dependency, and rights declarations** sufficient for safe review and long-term archival.
 
-MCP, Streamable HTTP, x402, EIP-3009, A2MCP, and payment SDKs are not required at submission time.
+Your own MCP server, Streamable HTTP, x402, EIP-3009, A2MCP, and payment SDK implementations are not required at submission time. Trading entries must still use OlaXBT Nexus MCP as described above.
 
 ### Where to submit code
 
@@ -58,7 +97,7 @@ submissions/mcp-hackathon/<team-or-builder>-<project-slug>/
     └── README.md          # repeatable API evidence and expected results
 ```
 
-An external repository link alone is not enough. The complete reviewed source must be present under `source/` so the official record remains available if a fork or external repository is later deleted.
+An external repository link alone is not enough. Include the actual implementation under `source/`, dependency manifests and applicable lockfiles, configuration examples without secrets, and setup/build/run instructions. Disclose any external APIs or private-service dependencies. A README, submodule, symbolic link, or Git LFS pointer is not a substitute for the source files. Once the official archive is confirmed, deleting the original repository does not delete that archived copy.
 
 Start with:
 
@@ -87,6 +126,8 @@ API, deployment, Commit, test, or ownership evidence. Stop if evidence is missin
 The repository includes [`AGENTS.md`](./AGENTS.md) for Codex, [`CLAUDE.md`](./CLAUDE.md) for Claude Code, and the reusable [`xagt-submit-hackathon` skill](./skills/xagt-submit-hackathon/SKILL.md). Add the project name, public repository, exact deployed Commit, API URL, and health URL to the prompt. See the [`coding-agent submission guide`](./docs/agent-submission-guide.md) for the complete version.
 
 ### Submit in four steps
+
+First, [register on Luma](https://luma.com/h0qt02e4) and choose your track. Complete the following during the September 2–19 build period:
 
 1. Build and deploy the API. Verify its health endpoint and one real capability call.
 2. Fork this repository and create a submission branch.
@@ -128,6 +169,21 @@ node dist/cli.js submit \
 
 The manual path above is the canonical submission path. The generator does not upload source or open the PR for you.
 
+### What happens after you submit
+
+The submission workflows cover the current event under `submissions/mcp-hackathon/`, not historical activity.
+
+| Status | What to expect |
+| --- | --- |
+| Receipt | One English acknowledgment confirms that the PR was received. An existing official receipt is reused rather than repeated after every push. |
+| Automated checks | Open the PR's **Checks** tab and the workflow summary for results. Missing or inconsistent materials need a correction in the same PR; repository permission, checkout, or runner failures need maintainer attention. |
+| Source preservation | A separate task rechecks the current version and confirms its official archive. A successful check alone does not establish that archiving finished. |
+| Human review | Reviewers assess eligibility, source completeness, reproducibility, rights, and quality. The event team records review decisions and announces final results separately. |
+
+**A receipt, successful check, source archive, or merge for preservation does not mean the entry passed review or won an award. A workflow failure is not a judging decision.** The automation does not approve or merge PRs.
+
+If a receipt is missing or a repository-side error blocks the checks, share the public PR link in the [Telegram community](https://t.me/XAgent_official). Keep the existing PR; do not open a duplicate or post credentials.
+
 ### Prove that the deployment is real
 
 The public health endpoint must return the exact reviewed commit:
@@ -144,7 +200,7 @@ The same API origin must expose `/.well-known/xagent-verification.json`:
 
 The automated gate verifies the submission scope, required source package, obvious secret patterns, public GitHub commit, health endpoint, and deployment proof. It uses a trusted validator from the base branch and never installs, imports, builds, or executes participant source inside the repository workflow.
 
-Passing automation proves reachability and version binding. It does not prove quality, ownership, security, or eligibility; those require manual review.
+Passing automated checks records reachable endpoints and responses that report the declared commit. It does not independently prove that the deployed service was built from the submitted source, that the source is complete, or that the code is secure. Reproducibility, ownership, quality, and eligibility still require human review.
 
 ### Rules that protect both builders and the program
 
@@ -157,16 +213,16 @@ Passing automation proves reachability and version binding. It does not prove qu
 
 ### Updates, archival, and reward release
 
-Builders may keep pushing fixes to an open PR. There is no need to rush a merge:
+While submissions remain open, builders may push updates to the same PR:
 
-1. Every new PR head reruns verification; every successfully validated head receives its own official archive reference.
-2. A new push invalidates earlier verification and review context; X-Agent evaluates only the exact latest version.
-3. The final accepted version is merged with its complete source.
-4. X-Agent reruns online verification, creates an integrity receipt and source archive, and publishes an immutable acceptance release.
+1. New versions trigger fresh checks. The preservation task independently rechecks the current version before creating its official archive; superseded or closed PR versions are skipped. A failed archive task remains incomplete.
+2. An earlier check result does not apply to changed code. Reviewers evaluate the exact current version and record which commit they reviewed.
+3. Maintainers decide whether to merge the complete source. A merge for preservation does not replace a review decision or establish an award.
+4. After a recorded final review decision, maintainers separately verify the archived and merged source, recheck the live evidence, and publish an immutable acceptance release containing the source and integrity receipt.
 5. Reward approval happens only after the accepted artifact is sealed and independently backed up.
 6. Later improvements use a new PR and release. They never overwrite the rewarded snapshot.
 
-The submitter can delete their fork or external repository without deleting the official copy. Full operating rules are in [`Submission retention and reward`](./docs/submission-retention-and-reward.md).
+Once preservation is confirmed, deleting a fork or external repository does not remove the official archived copy. Independent backup is a separate operational step, not something a green check or an archive in the same GitHub repository guarantees. Full operating rules are in [`Submission retention and reward`](./docs/submission-retention-and-reward.md).
 
 ### How entries are reviewed
 
