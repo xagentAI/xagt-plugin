@@ -1,0 +1,39 @@
+name: Archive validated submission source
+
+on:
+  workflow_run:
+    workflows: [Validate hackathon submission]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: submission-archive-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    if: github.repository == 'xagentAI/xagt-plugin' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    name: Preserve checked source without approving the entry
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the official default-branch implementation only
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Use Node 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Independently recheck the exact PR head and create its archive ref
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/submission-lifecycle.mjs archive
