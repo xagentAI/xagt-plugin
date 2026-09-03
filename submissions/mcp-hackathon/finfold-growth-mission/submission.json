@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "name": "Finfold Growth Mission API",
+  "slug": "finfold-growth-mission",
+  "sourceRepository": "https://github.com/joeymilano/finfold-growth-mission-api",
+  "reviewCommit": "65a4a545ca74b0e357973de433fd108c375531bc",
+  "apiBaseUrl": "https://api.finfold.app",
+  "healthCheckUrl": "https://api.finfold.app/health",
+  "deploymentProofUrl": "https://api.finfold.app/.well-known/xagent-verification.json",
+  "generatedBy": "xagt-plugin@0.5.0"
+}

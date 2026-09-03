@@ -1,0 +1,2 @@
+# Only required when MODEL_PROVIDER=http.
+LLM_API_KEY=replace-with-provider-key
