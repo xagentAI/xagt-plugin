@@ -10,8 +10,6 @@ This repository is the official code-submission hub for the X-Agent AI MCP Hacka
 
 [Event page and rules](https://xagt.ai/hackathon?lang=en) · [Register on Luma](https://luma.com/h0qt02e4) · [Telegram community](https://t.me/XAgent_official)
 
-Previous program: [code and submission archive](./submissions/INDEX.md)
-
 ## Current program: X-Agent AI MCP Hackathon 2026
 
 Developers and teams worldwide are invited to build useful applications across AI, crypto, data, automation, and agent infrastructure. Choose **one of two tracks**; both submit through this repository and are judged separately. The [event page](https://xagt.ai/hackathon?lang=en) is the reference for the current schedule, rewards, and track rules.
