@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "GasPulse",
+  "slug": "visioneer-gaspulse",
+  "sourceRepository": "https://github.com/muhammad-wei/gaspulse",
+  "reviewCommit": "0b5562319a3e1e96adeef5e1231bd4cbd2dd3030",
+  "apiBaseUrl": "https://api.gaspulse.win/v1",
+  "healthCheckUrl": "https://api.gaspulse.win/health",
+  "deploymentProofUrl": "https://api.gaspulse.win/.well-known/xagent-verification.json"
+}
