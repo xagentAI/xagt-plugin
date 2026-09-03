@@ -32,7 +32,7 @@
 ## Source and reproducibility
 
 - **Source repository:** https://github.com/muhammad-wei/gaspulse
-- **Review commit:** `0b5562319a3e1e96adeef5e1231bd4cbd2dd3030`
+- **Review commit:** `44ec16e5187d8a1944d6c058757bf2a06384b3d5`
 - **Source submitted in this PR:** `source/`
 - **Run tests:** `npm ci && npm test`
 - **Run locally:** `npm ci && cp .env.example .env` (fill in `ETHERSCAN_API_KEY`) `&& npm run dev`
@@ -48,12 +48,12 @@ The API must expose:
 
 ```json
 // GET https://api.gaspulse.win/health
-{"status":"ok","commit":"0b5562319a3e1e96adeef5e1231bd4cbd2dd3030"}
+{"status":"ok","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
 ```
 
 ```json
 // GET /.well-known/xagent-verification.json on the same API origin
-{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"0b5562319a3e1e96adeef5e1231bd4cbd2dd3030"}
+{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
 ```
 
 ## Verification
@@ -61,7 +61,7 @@ The API must expose:
 The reproducible call instructions and redacted example responses are in `verification/README.md`.
 
 - **Health-check result:** `GET https://api.gaspulse.win/health` →
-  `{"status":"ok","commit":"0b5562319a3e1e96adeef5e1231bd4cbd2dd3030"}`
+  `{"status":"ok","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}`
 - **Capability call:** `GET https://api.gaspulse.win/v1/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/activity?windowDays=30`
   → `200` with gas trend and activity score for that address.
 - **Expected error behavior:** malformed address → `400 invalid_address`; out-of-range

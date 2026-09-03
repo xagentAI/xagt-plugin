@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Review commit: `0b5562319a3e1e96adeef5e1231bd4cbd2dd3030`
+- Review commit: `44ec16e5187d8a1944d6c058757bf2a06384b3d5`
 - API base URL: `https://api.gaspulse.win/v1`
 - Authentication: none required — all endpoints are public.
 
@@ -15,7 +15,7 @@ curl --fail --silent --show-error https://api.gaspulse.win/health
 Expected response:
 
 ```json
-{"status":"ok","commit":"0b5562319a3e1e96adeef5e1231bd4cbd2dd3030"}
+{"status":"ok","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
 ```
 
 ## 2. Deployment proof
@@ -27,7 +27,7 @@ curl --fail --silent --show-error https://api.gaspulse.win/.well-known/xagent-ve
 Expected response:
 
 ```json
-{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"0b5562319a3e1e96adeef5e1231bd4cbd2dd3030"}
+{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
 ```
 
 ## 3. Capability call
