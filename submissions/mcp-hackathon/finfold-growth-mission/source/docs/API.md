@@ -4,6 +4,8 @@
 
 All mission and usage endpoints require `Authorization: Bearer <key>`. Required scopes are documented per route. `POST` routes also require an `Idempotency-Key` of 8–128 safe characters.
 
+All routes answer browser preflight requests and expose the request/idempotency headers needed by reviewer consoles. Public documentation endpoints also support `HEAD`. Authentication remains explicit Bearer-token based; the service uses no ambient browser cookie.
+
 Reusing a key with the same normalized request returns the original status and body with `Idempotent-Replayed: true`. Reusing it with a different request returns `409 IDEMPOTENCY_CONFLICT`. A concurrent duplicate returns `409 REQUEST_IN_PROGRESS` and is safe to retry later with the same key.
 
 ## Typed source errors
@@ -11,6 +13,7 @@ Reusing a key with the same normalized request returns the original status and b
 | Code | Meaning | Retry? |
 |---|---|---|
 | `SOURCE_URL_BLOCKED` | URL, network target, port, or redirect violates policy | No |
+| `LANDING_PAGE_BLOCKED` | Tracked destination is not HTTPS or leaves the source host hierarchy | No |
 | `SOURCE_FETCH_FAILED` | Timeout, upstream failure, redirect problem, or non-2xx source | Sometimes |
 | `SOURCE_TOO_LARGE` | Response exceeds the streaming byte limit | No |
 | `SOURCE_INVALID_MIME` | Source is not public HTML/XHTML | No |
@@ -18,6 +21,8 @@ Reusing a key with the same normalized request returns the original status and b
 | `INSUFFICIENT_EVIDENCE` | Static page lacks enough semantic evidence | No; provide a richer page |
 | `EVIDENCE_VALIDATION_FAILED` | Generated quote is not an exact section substring | No content is delivered |
 | `QUALITY_VALIDATION_FAILED` | Objective/platform/CTA/length/number/guarantee gate failed | No content is delivered |
+| `OUTCOME_OUTSIDE_WINDOW` | Event time is before mission start or after its measurement deadline | No |
+| `CURRENCY_MISMATCH` | Revenue event currency differs from the mission target currency | No |
 
 Every error includes `code`, `message`, `retryable`, and `requestId`.
 
@@ -31,4 +36,6 @@ Every error includes `code`, `message`, `retryable`, and `requestId`.
 
 MCP client transport URL: `https://api.finfold.app/mcp`. Send the review key as a Bearer Authorization header. The transport is stateless; no session cookie or server-held client session is required.
 
-The complete machine-readable HTTP contract is available at `/openapi.json`.
+Revenue missions accept `targetCurrency` and default to `USD`. Every revenue event must use the same currency. `occurredAt` must fall inside the mission's measurement window.
+
+The complete machine-readable HTTP contract, including public proof, capability, usage, tracking, errors, and MCP authentication, is available at `/openapi.json`.

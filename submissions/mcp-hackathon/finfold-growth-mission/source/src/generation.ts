@@ -217,79 +217,86 @@ function evidenceScore(evidence: GeneratedMission["evidence"][number], source: S
   return kindScore + specificity + lengthScore + Math.min(evidence.quote.length, 300) / 1_000;
 }
 
+function truncateAtWord(value: string, maximum: number): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maximum) return normalized;
+  const candidate = normalized.slice(0, maximum);
+  const boundary = Math.max(candidate.lastIndexOf(" "), candidate.lastIndexOf("。"), candidate.lastIndexOf("，"));
+  return (boundary >= Math.floor(maximum * 0.65) ? candidate.slice(0, boundary) : candidate).trim();
+}
+
+function withoutPlatformBrands(value: string): string {
+  return value
+    .replace(/\b(?:linkedin|reddit|xiaohongshu|wechat)\b/gi, "this channel")
+    .replace(/(?:小红书|微信公众号|微信公众)/g, "这个渠道")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function framedHypothesis(value: string, locale: string, maximum = 480): string {
+  const normalized = withoutPlatformBrands(value);
+  const isChinese = locale.toLowerCase().startsWith("zh");
+  const framed = isChinese
+    ? /(?:测试|假设|可能|或许|尝试|试试|探索)/.test(normalized)
+      ? normalized
+      : `测试这个假设：${normalized}`
+    : /^(?:test|testing|hypothesis|may|might|could|explore|consider|try|experiment)\b/i.test(normalized)
+      ? normalized
+      : `Test whether ${normalized.charAt(0).toLowerCase()}${normalized.slice(1)}`;
+  return truncateAtWord(framed, maximum);
+}
+
+function dynamicTitle(value: string, locale: string, maximum: number): string {
+  const normalized = withoutPlatformBrands(value).replace(/\{\{TRACKING_URL\}\}/g, "").trim();
+  const isChinese = locale.toLowerCase().startsWith("zh");
+  const prefix = isChinese ? "测试：" : "Test: ";
+  const withoutExistingPrefix = normalized.replace(/^(?:test|testing|测试)\s*[:：-]?\s*/i, "");
+  return truncateAtWord(`${prefix}${withoutExistingPrefix}`, maximum);
+}
+
 function compileEvidenceBoundAsset(generated: GeneratedMission, source: SourceEvidence, locale: string): GeneratedMission {
-  const selected = [...generated.evidence].sort((left, right) => evidenceScore(right, source) - evidenceScore(left, source))[0];
-  if (!selected) {
+  const maximumEvidence = generated.mission.platform === "x" ? 1 : generated.mission.platform === "xiaohongshu" ? 2 : 3;
+  const selected = [...generated.evidence]
+    .sort((left, right) => evidenceScore(right, source) - evidenceScore(left, source))
+    .filter((evidence, index, values) => values.findIndex((candidate) => candidate.sectionId === evidence.sectionId) === index)
+    .slice(0, maximumEvidence);
+  if (!selected.length) {
     throw new AppError("INSUFFICIENT_EVIDENCE", "Generation selected no usable evidence.", 422);
   }
-  const copy = {
-    linkedin: {
-      intro: "A product angle worth testing:",
-      outro: "Could this be useful in your workflow?",
-      title: "An evidence-led product angle",
-      cta: "Explore the source",
-      maximumClaim: 1_800,
-    },
-    x: {
-      intro: "Test this product angle:",
-      outro: "Explore:",
-      title: "An evidence-led product angle",
-      cta: "Explore the source",
-      maximumClaim: 150,
-    },
-    reddit: {
-      intro: "I'd like to test one evidence-led product angle:",
-      outro: "Could this be useful in your workflow?",
-      title: "An evidence-led product angle to test",
-      cta: "Explore the source",
-      maximumClaim: 2_500,
-    },
-    xiaohongshu: {
-      intro: "A product angle worth testing:",
-      outro: "Could this be useful in your workflow?",
-      title: "An evidence-led product angle",
-      cta: "Explore the source",
-      maximumClaim: 650,
-    },
-    wechat: {
-      intro: "A product angle worth testing:",
-      outro: "Could this be useful in your workflow?",
-      title: "An evidence-led product angle",
-      cta: "Explore the source",
-      maximumClaim: 2_500,
-    },
-  } as const;
-  const selectedCopy = copy[generated.mission.platform];
-  const platformCopy = locale.toLowerCase().startsWith("zh")
-    ? {
-        ...selectedCopy,
-        intro: "测试一个基于产品证据的角度：",
-        outro: "看看它是否适合你的下一步：",
-        title: "一个值得测试的产品角度",
-        cta: "查看原始页面",
-      }
-    : selectedCopy;
-  const claim = claimFromQuote(selected.quote, platformCopy.maximumClaim);
   const isChinese = locale.toLowerCase().startsWith("zh");
-  const objectiveLabel = {
-    leads: isChinese ? "潜在客户" : "qualified leads",
-    signups: isChinese ? "注册" : "signups",
-    purchases: isChinese ? "购买" : "purchases",
-    revenue: isChinese ? "收入" : "revenue",
-  }[generated.mission.primaryMetric];
-  const hypothesis = (
-    isChinese
-      ? `测试这个假设：${generated.mission.hypothesis}`
-      : /^(?:test|hypothesis|may|might|could)\b/i.test(generated.mission.hypothesis)
-        ? generated.mission.hypothesis
-        : `Test whether ${generated.mission.hypothesis.charAt(0).toLowerCase()}${generated.mission.hypothesis.slice(1)}`
-  ).slice(0, 500);
+  const hypothesis = framedHypothesis(generated.mission.hypothesis, locale, generated.mission.platform === "x" ? 82 : 480);
+  const audience = truncateAtWord(withoutPlatformBrands(generated.mission.audience), generated.mission.platform === "x" ? 48 : 150);
+  const maximumClaim = {
+    linkedin: 420,
+    x: 78,
+    reddit: 650,
+    xiaohongshu: 240,
+    wechat: 650,
+  }[generated.mission.platform];
+  const claims = selected.map((evidence) => ({ evidence, claim: claimFromQuote(evidence.quote, maximumClaim) }));
+  const bulletClaims = claims.map(({ claim }) => `• ${claim}`).join("\n");
+  const body = {
+    linkedin: `${hypothesis}\n\n${isChinese ? "页面证据：" : "Page evidence:"}\n${bulletClaims}\n\n${
+      isChinese ? `面向${audience}，测试这个角度的真实反馈：` : `For ${audience}, test the response to this angle:`
+    } {{TRACKING_URL}}`,
+    x: `${hypothesis}\n\n${claims[0]?.claim ?? ""}\n\n${isChinese ? "测试反馈：" : "Test the response:"} {{TRACKING_URL}}`,
+    reddit: `${isChinese ? "页面怎么说" : "What the page says"}\n\n${bulletClaims}\n\n${
+      isChinese ? "我会测试什么" : "What I would test"
+    }\n\n${hypothesis}\n\n${isChinese ? `如果你属于${audience}，可以测试一下是否有用：` : `If you work with ${audience}, could this be useful?`} {{TRACKING_URL}}`,
+    xiaohongshu: `${isChinese ? "先看页面证据" : "Evidence first"}\n${bulletClaims}\n\n${isChinese ? "我的测试假设" : "The test"}\n${hypothesis}\n\n${
+      isChinese ? `如果你是${audience}，测试一下是否适合：` : `For ${audience}, test whether it fits:`
+    } {{TRACKING_URL}}`,
+    wechat: `${isChinese ? "页面证据：" : "Page evidence:"}\n\n${bulletClaims}\n\n${
+      isChinese ? "基于这些证据，我会测试：" : "Based on that evidence, I would test this hypothesis:"
+    }\n${hypothesis}\n\n${isChinese ? `面向${audience}，测试下一步：` : `For ${audience}, test the next step:`} {{TRACKING_URL}}`,
+  }[generated.mission.platform];
   return {
     ...generated,
     mission: {
       ...generated.mission,
-      title: isChinese ? `测试一条基于证据的信息以获得${objectiveLabel}` : `Test one evidence-led message for ${objectiveLabel}`,
+      title: dynamicTitle(generated.mission.title, locale, 120),
       hypothesis,
+      audience,
     },
     asset: {
       ...generated.asset,
@@ -300,11 +307,12 @@ function compileEvidenceBoundAsset(generated: GeneratedMission, source: SourceEv
         xiaohongshu: "Xiaohongshu post",
         wechat: "WeChat article",
       }[generated.mission.platform],
-      title: platformCopy.title,
-      body: `${platformCopy.intro}\n\n${claim}\n\n${platformCopy.outro} {{TRACKING_URL}}`,
-      cta: platformCopy.cta,
+      title: dynamicTitle(generated.asset.title, locale, 160),
+      body,
+      cta: isChinese ? "查看证据并测试这个角度" : "Review the evidence and test the angle",
     },
-    claimMap: [{ claim, evidenceIds: [selected.id] }],
+    evidence: selected,
+    claimMap: claims.map(({ evidence, claim }) => ({ claim, evidenceIds: [evidence.id] })),
   };
 }
 

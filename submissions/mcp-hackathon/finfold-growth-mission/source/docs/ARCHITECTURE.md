@@ -10,18 +10,18 @@ Finfold Growth Mission is one stateless TypeScript Worker with a D1 binding. It 
 4. Validate the source and every redirect; stream at most 1.5 MB of HTML.
 5. Extract stable `s1…sN` semantic sections from title, metadata, headings, paragraphs, lists, links, and JSON-LD.
 6. Send the sections as explicitly untrusted data in one structured Llama 3.3 70B Instruct Fast request through the in-process Workers AI binding. An OpenAI-compatible HTTP adapter is retained for portability and deterministic tests.
-7. Resolve every selected section ID back to its canonical source text. A deterministic evidence compiler assembles the factual asset sentence and claim map from the selected quote; it does not run only on failures and cannot substitute unknown evidence. Validate the compiled result so each mapped claim appears verbatim in both the deliverable and cited source quote, then validate objective/platform, one CTA, length, numbers, and prohibited guarantees.
+7. Resolve every selected section ID back to its canonical source text. A deterministic evidence compiler preserves the model-selected angle and audience, ranks and combines up to three canonical excerpts, and applies a distinct publishing structure for each platform. It cannot substitute unknown evidence. Validate the compiled result so each mapped claim appears verbatim in both the deliverable and cited source quote, every other substantive sentence is explicitly a test or hypothesis, then validate objective/platform, one CTA, length, numbers, and prohibited guarantees.
 8. Repair once when generation or validation fails. A second failure returns a typed error and persists no mission.
 9. Save evidence snippets, the validated result, the tracking destination, and the 30-day retention deadline.
 
 ## Attribution path
 
-Tracking redirects aggregate anonymous daily click counts. Outcome writes are deduplicated by both the HTTP idempotency key and the caller-provided `eventId`. The read path computes objective totals and the verdict from D1:
+Tracking redirects aggregate anonymous daily raw click counts but do not store identity or bot-classification data. Outcome writes are deduplicated by both the HTTP idempotency key and the caller-provided `eventId`, must fall inside the measurement window, and keep revenue in one target currency. The read path computes objective totals and the verdict from D1:
 
 - `won`: objective total reached target.
 - `running`: target not reached and measurement window remains open.
-- `lost`: window closed with attributable activity below target.
-- `inconclusive`: window closed with no credible attribution.
+- `lost`: window closed with a credible lead, signup, purchase, or revenue outcome below target.
+- `inconclusive`: window closed with no credible outcome; anonymous clicks alone remain inconclusive.
 
 ## Failure semantics
 

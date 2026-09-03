@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AppError } from "../src/errors";
 import { extractSemanticSections, fetchSourceEvidence } from "../src/source";
-import { assertPublicHttpUrl } from "../src/url-safety";
+import { assertPublicHttpUrl, assertSafeLandingPage } from "../src/url-safety";
 import { SOURCE_HTML } from "./fixtures";
 
 describe("source safety and evidence extraction", () => {
@@ -10,11 +10,27 @@ describe("source safety and evidence extraction", () => {
     "http://10.1.2.3/",
     "http://169.254.169.254/latest/meta-data/",
     "http://[::1]/",
+    "http://[::ffff:172.16.0.1]/",
+    "http://[::ffff:169.254.1.1]/",
+    "http://[ff02::1]/",
     "http://service.internal/",
     "https://user:pass@example.com/",
     "https://example.com:8443/",
   ])("blocks unsafe source URL %s", (url) => {
     expect(() => assertPublicHttpUrl(url)).toThrowError(AppError);
+  });
+
+  it("allows only HTTPS landing pages on the source host hierarchy", () => {
+    expect(assertSafeLandingPage("https://www.acme.test/", "https://acme.test/signup").toString()).toBe(
+      "https://acme.test/signup",
+    );
+    expect(assertSafeLandingPage("https://acme.test/", "https://signup.acme.test/start").toString()).toBe(
+      "https://signup.acme.test/start",
+    );
+    expect(() => assertSafeLandingPage("https://acme.test/", "http://acme.test/signup")).toThrow(/HTTPS/);
+    expect(() => assertSafeLandingPage("https://acme.test/", "https://lookalike.test/signup")).toThrow(/source host/);
+    expect(() => assertSafeLandingPage("https://www.acme.test/", "https://app.acme.test/signup")).toThrow(/source host/);
+    expect(() => assertSafeLandingPage("https://acme.test/", "https://test/signup")).toThrow(/source host/);
   });
 
   it("extracts stable semantic sections and removes prompt injection in scripts", () => {

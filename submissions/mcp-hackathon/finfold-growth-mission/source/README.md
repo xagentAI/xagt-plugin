@@ -4,7 +4,7 @@
 
 Finfold Growth Mission turns a public business page and a growth objective into exactly one primary mission, one platform-native content asset, and one tracked CTA. Real clicks, leads, signups, purchases, and revenue feed back into a `won`, `lost`, `running`, or `inconclusive` verdict with a concrete next action.
 
-This is a standalone Cloudflare Worker built for the X-Agent Open Innovation Challenge. It is not a wrapper around the private Finfold application and contains no Finfold customer data or proprietary application source.
+This is a standalone Cloudflare Worker built for the X-Agent MCP Hackathon. It is not a wrapper around the private Finfold application and contains no Finfold customer data or proprietary application source.
 
 ## Why this exists
 
@@ -20,7 +20,7 @@ flowchart LR
   F --> G[Verdict + next action]
 ```
 
-The model selects the mission, audience, hypothesis, and evidence by stable semantic section ID. A deterministic evidence compiler canonicalizes each quote and assembles the factual content sentence and claim map from that source text before validation. Every mapped claim is therefore the exact textual intersection of the deliverable and its cited quote. Invalid structure, unknown evidence IDs, unsupported numbers, missing CTA, platform overflow, or guaranteed-result language triggers one repair attempt and then a clear error—never a fabricated fallback.
+The model selects the mission, audience, hypothesis, and evidence by stable semantic section ID. A deterministic evidence compiler preserves the selected angle, combines up to three canonical source excerpts, and gives each platform its own publishing structure. Every factual claim remains the exact textual intersection of the deliverable and its cited quote; connective language must be framed as a test or hypothesis. Invalid structure, unknown evidence IDs, unsupported numbers, missing CTA, platform overflow, or guaranteed-result language triggers one repair attempt and then a clear error—never a fabricated fallback.
 
 ## Live interfaces
 
@@ -35,7 +35,7 @@ The model selects the mission, audience, hypothesis, and evidence by stable sema
 - `POST /mcp` — stateless Streamable HTTP MCP
 - `GET /openapi.json` — OpenAPI 3.1 contract
 
-Mutation endpoints require both `Authorization: Bearer <review-key>` and `Idempotency-Key`. The review key is SHA-256 hashed at rest, scope-limited, capped at 50 authenticated calls per UTC day, and expires on 2026-10-05.
+Mutation endpoints require both `Authorization: Bearer <review-key>` and `Idempotency-Key`. The review key is SHA-256 hashed at rest, scope-limited, capped at 100 authenticated calls per UTC day, and expires on 2026-10-05.
 
 ## Quick start
 
@@ -86,6 +86,8 @@ curl https://api.finfold.app/v1/missions/$MISSION_ID/outcomes \
   --data '{"eventId":"crm-lead-001","type":"lead","quantity":1}'
 ```
 
+For revenue missions, `targetCurrency` defaults to `USD`; every revenue outcome must use that currency. Custom landing pages must use HTTPS and the source host, its subdomain, or its canonical `www`/apex equivalent.
+
 ## Supported decisions
 
 | Objective | Default target | Measurement window | Winning metric |
@@ -103,15 +105,15 @@ Platforms: `auto`, `linkedin`, `x`, `reddit`, `xiaohongshu`, and `wechat`.
 npm run check
 ```
 
-This runs lint, strict TypeScript, Worker-runtime unit/integration tests, Wrangler dry-run bundling, and a high-confidence secret scan. See [verification/README.md](verification/README.md) for the complete reproducibility and production benchmark procedure.
+This runs lint, strict TypeScript, Worker-runtime unit/integration tests, Wrangler dry-run bundling, and a high-confidence secret scan. See [verification/README.md](verification/README.md) for the complete reproducibility procedure, the five-platform production benchmark, a redacted live mission, and authenticated MCP discovery evidence.
 
 ## Safety boundary
 
 - Reads public HTML, metadata, and JSON-LD only; does not execute page JavaScript.
-- Blocks local/private/metadata URLs, credentials, non-standard ports, unsafe redirects, oversized responses, and non-HTML MIME types.
+- Blocks local/private/metadata URLs, credentials, non-standard ports, unsafe redirects, oversized responses, and non-HTML MIME types. Tracked destinations must use HTTPS and stay on the source host hierarchy.
 - Does not auto-publish, log into external accounts, mutate third-party accounts, or guarantee growth.
 - Does not store raw HTML or raw API keys.
-- Stores source evidence snippets and attributable outcome totals for 30 days.
+- Stores source evidence snippets and attributable outcome totals for 30 days. Anonymous raw clicks are reported separately and never count as credible conversion evidence on their own.
 
 Details: [Security](docs/SECURITY.md), [Data handling](docs/DATA-HANDLING.md), [Architecture](docs/ARCHITECTURE.md), [API and MCP](docs/API.md), and [Scorecard evidence](docs/SCORECARD.md).
 

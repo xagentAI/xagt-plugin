@@ -7,6 +7,10 @@ import { openApiDocument } from "./openapi";
 import { createMissionSchema, outcomeSchema } from "./schemas";
 
 const SECURITY_HEADERS = {
+  "access-control-allow-headers": "authorization, content-type, idempotency-key, accept, mcp-protocol-version",
+  "access-control-allow-methods": "GET, HEAD, POST, OPTIONS",
+  "access-control-allow-origin": "*",
+  "access-control-expose-headers": "x-request-id, idempotent-replayed, location",
   "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
   "referrer-policy": "no-referrer",
@@ -35,6 +39,10 @@ async function routeRequest(request: Request, env: Env, requestId: string): Prom
   const url = new URL(request.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
 
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: { allow: "GET, HEAD, POST, OPTIONS" } });
+  }
+
   if (request.method === "GET" && path === "/health") {
     return jsonResponse({ status: "ok", commit: env.COMMIT_SHA });
   }
@@ -47,7 +55,7 @@ async function routeRequest(request: Request, env: Env, requestId: string): Prom
   if (request.method === "GET" && path === "/v1/capability") {
     return jsonResponse({
       slug: "finfold-growth-mission",
-      version: "1.0.0",
+      version: "1.1.0",
       unit: "one validated mission",
       input: "one public business URL plus one growth objective",
       output: "one evidence-bound mission, one content asset, one tracked CTA",
@@ -152,9 +160,6 @@ async function routeRequest(request: Request, env: Env, requestId: string): Prom
     });
   }
 
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: { allow: "GET, POST, OPTIONS" } });
-  }
   throw new AppError("MISSION_NOT_FOUND", "Route not found.", 404);
 }
 
@@ -164,7 +169,12 @@ export default {
     const requestId = requestIdFrom(request);
     let response: Response;
     try {
-      response = await routeRequest(request, env, requestId);
+      const routedRequest =
+        request.method === "HEAD" ? new Request(request, { method: "GET", body: null }) : request;
+      response = await routeRequest(routedRequest, env, requestId);
+      if (request.method === "HEAD") {
+        response = new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers });
+      }
     } catch (error) {
       response = errorResponse(error, requestId);
     }

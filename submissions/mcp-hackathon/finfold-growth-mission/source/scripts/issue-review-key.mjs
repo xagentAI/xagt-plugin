@@ -14,7 +14,7 @@ const now = new Date().toISOString();
 const expires = "2026-10-05T23:59:59.000Z";
 const sql = [
   "INSERT INTO api_keys (id, token_hash, label, scopes, daily_limit, expires_at, created_at)",
-  `VALUES ('${keyId}', '${hash}', 'xagent-review', 'mission:create mission:read outcome:write', 50, '${expires}', '${now}');`,
+  `VALUES ('${keyId}', '${hash}', 'xagent-review', 'mission:create mission:read outcome:write', 100, '${expires}', '${now}');`,
 ].join(" ");
 
 const result = spawnSync(
@@ -29,4 +29,4 @@ if (result.status !== 0) {
 console.log(result.stdout.trim());
 console.log("\nReview key (shown once; store it in an approved password manager):");
 console.log(raw);
-console.log(`Expires: ${expires}; daily limit: 50; scopes: mission:create mission:read outcome:write`);
+console.log(`Expires: ${expires}; daily limit: 100; scopes: mission:create mission:read outcome:write`);

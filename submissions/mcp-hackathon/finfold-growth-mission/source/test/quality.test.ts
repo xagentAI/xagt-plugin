@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { groundEvidenceQuotes } from "../src/generation";
 import { validateGeneratedMission } from "../src/quality";
-import { generatedMissionSchema, type SemanticSection } from "../src/schemas";
+import { generatedMissionSchema, type SemanticSection, type SourceEvidence } from "../src/schemas";
 import { GENERATED } from "./fixtures";
 
 const sections: SemanticSection[] = [
@@ -39,6 +40,27 @@ describe("claim-to-evidence and content quality", () => {
         "linkedin",
       ),
     ).toMatchObject({ passed: true, evidenceExactMatch: true });
+  });
+
+  it("accepts bullet-formatted canonical multi-sentence evidence", () => {
+    const quote = "Plan work in one calm workspace. Review customer evidence before launch.";
+    const generated = generatedMissionSchema.parse({
+      ...GENERATED,
+      asset: {
+        ...GENERATED.asset,
+        body: `Test whether this evidence resonates.\n\nPage evidence:\n• ${quote}\n\nTest the response: {{TRACKING_URL}}`,
+      },
+      evidence: [{ id: "e1", sectionId: "s1", quote, confidence: 0.99 }],
+      claimMap: [{ claim: quote, evidenceIds: ["e1"] }],
+    });
+    expect(
+      validateGeneratedMission(
+        generated,
+        [{ id: "s1", kind: "paragraph", text: quote }],
+        "leads",
+        "linkedin",
+      ),
+    ).toMatchObject({ passed: true });
   });
 
   it("rejects a quote that is not an exact source substring", () => {
@@ -92,5 +114,43 @@ describe("claim-to-evidence and content quality", () => {
       asset: { ...GENERATED.asset, body: `${GENERATED.asset.body} Test whether this LinkedIn post attracts relevant teams.` },
     });
     expect(() => validateGeneratedMission(generated, sections, "leads", "linkedin")).toThrow(/names linkedin/);
+  });
+});
+
+describe("platform-native evidence compiler", () => {
+  const source: SourceEvidence = {
+    finalUrl: "https://acme.test/",
+    digest: "a".repeat(64),
+    title: "Acme Workflow",
+    sections: [
+      ...sections,
+      { id: "s5", kind: "paragraph", text: "Teams can begin with a public brief before inviting collaborators." },
+      { id: "s6", kind: "paragraph", text: "The workspace keeps customer evidence beside launch decisions." },
+    ],
+  };
+
+  it.each([
+    ["linkedin", "Page evidence:"],
+    ["x", "Test the response:"],
+    ["reddit", "What the page says"],
+    ["xiaohongshu", "Evidence first"],
+    ["wechat", "Based on that evidence"],
+  ] as const)("builds a distinct, validated %s asset", (platform, marker) => {
+    const candidate = generatedMissionSchema.parse({
+      ...GENERATED,
+      mission: { ...GENERATED.mission, platform },
+      asset: { ...GENERATED.asset, format: `${platform} post` },
+      evidence: [
+        GENERATED.evidence[0],
+        { id: "e2", sectionId: "s5", quote: source.sections[1]!.text, confidence: 0.92 },
+        { id: "e3", sectionId: "s6", quote: source.sections[2]!.text, confidence: 0.91 },
+      ],
+      claimMap: GENERATED.claimMap,
+    });
+    const compiled = groundEvidenceQuotes(candidate, source, "en");
+    expect(compiled.asset.body).toContain(marker);
+    expect(compiled.asset.body).toContain("{{TRACKING_URL}}");
+    expect(compiled.mission.title).toContain("Invite independent teams");
+    expect(validateGeneratedMission(compiled, source.sections, "leads", platform)).toMatchObject({ passed: true });
   });
 });

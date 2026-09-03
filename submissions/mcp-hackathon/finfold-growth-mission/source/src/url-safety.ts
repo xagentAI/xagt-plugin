@@ -30,7 +30,27 @@ function isPrivateIpv4(hostname: string): boolean {
 function isPrivateIpv6(hostname: string): boolean {
   const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (!host.includes(":")) return false;
-  return host === "::" || host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe8") || host.startsWith("fe9") || host.startsWith("fea") || host.startsWith("feb") || host.startsWith("::ffff:127.") || host.startsWith("::ffff:10.") || host.startsWith("::ffff:192.168.");
+  const mappedHex = host.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (mappedHex?.[1] && mappedHex[2]) {
+    const high = Number.parseInt(mappedHex[1], 16);
+    const low = Number.parseInt(mappedHex[2], 16);
+    const mapped = `${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`;
+    if (isPrivateIpv4(mapped)) return true;
+  }
+  return (
+    host === "::" ||
+    host === "::1" ||
+    host.startsWith("fc") ||
+    host.startsWith("fd") ||
+    host.startsWith("fe8") ||
+    host.startsWith("fe9") ||
+    host.startsWith("fea") ||
+    host.startsWith("feb") ||
+    host.startsWith("ff") ||
+    host.startsWith("::ffff:127.") ||
+    host.startsWith("::ffff:10.") ||
+    host.startsWith("::ffff:192.168.")
+  );
 }
 
 export function assertPublicHttpUrl(rawUrl: string): URL {
@@ -63,6 +83,29 @@ export function assertPublicHttpUrl(rawUrl: string): URL {
   }
   url.hash = "";
   return url;
+}
+
+export function assertSafeLandingPage(sourceUrl: string, rawLandingPage: string): URL {
+  const source = assertPublicHttpUrl(sourceUrl);
+  const landing = assertPublicHttpUrl(rawLandingPage);
+  if (landing.protocol !== "https:") {
+    throw new AppError("LANDING_PAGE_BLOCKED", "Tracked landing pages must use HTTPS.", 422);
+  }
+  const sourceHost = source.hostname.toLowerCase().replace(/\.$/, "");
+  const landingHost = landing.hostname.toLowerCase().replace(/\.$/, "");
+  const relatedHosts =
+    sourceHost === landingHost ||
+    landingHost.endsWith(`.${sourceHost}`) ||
+    sourceHost === `www.${landingHost}` ||
+    landingHost === `www.${sourceHost}`;
+  if (!relatedHosts) {
+    throw new AppError(
+      "LANDING_PAGE_BLOCKED",
+      "The tracked landing page must use the source host, its subdomain, or its canonical www/apex equivalent.",
+      422,
+    );
+  }
+  return landing;
 }
 
 export function trackedDestination(rawUrl: string, platform: string, missionId: string): string {

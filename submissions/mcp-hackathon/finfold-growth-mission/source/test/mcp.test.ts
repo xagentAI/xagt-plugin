@@ -80,6 +80,64 @@ describe("Streamable HTTP MCP", () => {
     expect(body.result.structuredContent.mission.id).toMatch(/^gm_[a-z0-9]{24}$/);
   });
 
+  it("completes create, read, outcome, and read through tools/call", async () => {
+    const createdResponse = await mcp({
+      jsonrpc: "2.0",
+      id: 20,
+      method: "tools/call",
+      params: {
+        name: "finfold_create_growth_mission",
+        arguments: {
+          sourceUrl: "https://acme.test/",
+          objective: "leads",
+          platform: "linkedin",
+          locale: "en",
+          idempotencyKey: "mcp-loop-create-0001",
+        },
+      },
+    });
+    const created = (await createdResponse.json()) as Record<string, any>;
+    const missionId = created.result.structuredContent.mission.id as string;
+
+    const firstReadResponse = await mcp({
+      jsonrpc: "2.0",
+      id: 21,
+      method: "tools/call",
+      params: { name: "finfold_get_growth_mission", arguments: { missionId } },
+    });
+    const firstRead = (await firstReadResponse.json()) as Record<string, any>;
+    expect(firstRead.result.structuredContent.outcome.verdict).toBe("running");
+
+    const outcomeResponse = await mcp({
+      jsonrpc: "2.0",
+      id: 22,
+      method: "tools/call",
+      params: {
+        name: "finfold_record_growth_outcome",
+        arguments: {
+          missionId,
+          idempotencyKey: "mcp-loop-outcome-0001",
+          eventId: "mcp-lead-0001",
+          type: "lead",
+          quantity: 1,
+        },
+      },
+    });
+    const outcome = (await outcomeResponse.json()) as Record<string, any>;
+    expect(outcome.result.isError).toBe(false);
+    expect(outcome.result.structuredContent.outcome.verdict).toBe("won");
+
+    const finalReadResponse = await mcp({
+      jsonrpc: "2.0",
+      id: 23,
+      method: "tools/call",
+      params: { name: "finfold_get_growth_mission", arguments: { missionId } },
+    });
+    const finalRead = (await finalReadResponse.json()) as Record<string, any>;
+    expect(finalRead.result.structuredContent.attribution.leads).toBe(1);
+    expect(finalRead.result.structuredContent.outcome.verdict).toBe("won");
+  });
+
   it("uses MCP tool error semantics for invalid arguments", async () => {
     const response = await mcp({
       jsonrpc: "2.0",

@@ -2,7 +2,9 @@
 
 ## Source fetch
 
-Only `http:` and `https:` URLs without credentials are accepted. The validator blocks localhost, private/link-local IPv4, loopback and unique-local IPv6, metadata endpoints, internal suffixes, non-standard ports, HTTPS downgrade redirects, and more than three redirects. Every redirect target is revalidated. Responses must be HTML/XHTML and are streamed with a 1.5 MB hard limit and a 10-second timeout.
+Only `http:` and `https:` source URLs without credentials are accepted. The validator blocks localhost, private/link-local IPv4, IPv4-mapped private IPv6, loopback, unique-local, link-local and multicast IPv6, metadata endpoints, internal suffixes, non-standard ports, HTTPS downgrade redirects, and more than three redirects. Every redirect target is revalidated. Responses must be HTML/XHTML and are streamed with a 1.5 MB hard limit and a 10-second timeout.
+
+Tracked destinations are stricter than source reads: they must use HTTPS and remain on the source host, its subdomain, or its canonical `www`/apex equivalent. This prevents review-key holders from turning the Finfold tracking domain into an arbitrary public redirector without depending on an incomplete public-suffix guess.
 
 Cloudflare's outbound network boundary is an additional control. As with any hostname-based allow model, DNS rebinding is a residual risk; the Worker never sends credentials or internal headers to a source and Cloudflare Workers do not expose the account's private network by default.
 
@@ -20,6 +22,6 @@ Structured logs contain request ID, route, method, status, latency, provider att
 
 ## Side effects
 
-The capability persists its own mission and anonymous attribution data. It does not publish content, authenticate to social platforms, modify third-party accounts, or initiate payments. Tracking links redirect only to a destination validated when the mission is created.
+The capability persists its own mission and anonymous attribution data. It does not publish content, authenticate to social platforms, modify third-party accounts, or initiate payments. Tracking links redirect only to a same-site HTTPS destination validated when the mission is created. Raw click counts are not treated as credible conversion outcomes by themselves.
 
 Report vulnerabilities privately to `support@finfold.app`. Do not include active keys or customer data in a report subject line.

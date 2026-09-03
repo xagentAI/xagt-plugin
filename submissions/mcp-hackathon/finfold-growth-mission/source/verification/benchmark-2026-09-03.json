@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-09-03T11:47:39.039Z",
+  "apiBase": "https://api.finfold.app",
+  "sourceUrl": "https://www.finfold.app/en",
+  "runs": 20,
+  "successes": 20,
+  "successRate": 1,
+  "firstAttemptSuccessRate": 1,
+  "uniqueValidatedAssetsLowerBound": 12,
+  "p50Ms": 16897,
+  "p95Ms": 22548,
+  "p99Ms": 24206,
+  "syncGatePassed": true,
+  "winningTargetPassed": true,
+  "platformSummary": [
+    { "platform": "linkedin", "runs": 4, "successes": 4, "p95Ms": 17611 },
+    { "platform": "x", "runs": 4, "successes": 4, "p95Ms": 22548 },
+    { "platform": "reddit", "runs": 4, "successes": 4, "p95Ms": 24206 },
+    { "platform": "xiaohongshu", "runs": 4, "successes": 4, "p95Ms": 19897 },
+    { "platform": "wechat", "runs": 4, "successes": 4, "p95Ms": 18751 }
+  ],
+  "results": [
+    { "run": 1, "platform": "linkedin", "status": 201, "durationMs": 16897, "providerAttempts": 1, "evidenceCount": 2, "assetLength": 457 },
+    { "run": 2, "platform": "x", "status": 201, "durationMs": 16322, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 237 },
+    { "run": 3, "platform": "reddit", "status": 201, "durationMs": 18511, "providerAttempts": 1, "evidenceCount": 3, "assetLength": 702 },
+    { "run": 4, "platform": "xiaohongshu", "status": 201, "durationMs": 18358, "providerAttempts": 1, "evidenceCount": 2, "assetLength": 478 },
+    { "run": 5, "platform": "wechat", "status": 201, "durationMs": 16242, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 409 },
+    { "run": 6, "platform": "linkedin", "status": 201, "durationMs": 17611, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 350 },
+    { "run": 7, "platform": "x", "status": 201, "durationMs": 16765, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 237 },
+    { "run": 8, "platform": "reddit", "status": 201, "durationMs": 20424, "providerAttempts": 1, "evidenceCount": 3, "assetLength": 707 },
+    { "run": 9, "platform": "xiaohongshu", "status": 201, "durationMs": 19897, "providerAttempts": 1, "evidenceCount": 2, "assetLength": 518 },
+    { "run": 10, "platform": "wechat", "status": 201, "durationMs": 16766, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 467 },
+    { "run": 11, "platform": "linkedin", "status": 201, "durationMs": 15569, "providerAttempts": 1, "evidenceCount": 2, "assetLength": 457 },
+    { "run": 12, "platform": "x", "status": 201, "durationMs": 14594, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 237 },
+    { "run": 13, "platform": "reddit", "status": 201, "durationMs": 24206, "providerAttempts": 1, "evidenceCount": 3, "assetLength": 635 },
+    { "run": 14, "platform": "xiaohongshu", "status": 201, "durationMs": 17079, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 455 },
+    { "run": 15, "platform": "wechat", "status": 201, "durationMs": 18751, "providerAttempts": 1, "evidenceCount": 3, "assetLength": 657 },
+    { "run": 16, "platform": "linkedin", "status": 201, "durationMs": 17315, "providerAttempts": 1, "evidenceCount": 2, "assetLength": 457 },
+    { "run": 17, "platform": "x", "status": 201, "durationMs": 22548, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 237 },
+    { "run": 18, "platform": "reddit", "status": 201, "durationMs": 15336, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 412 },
+    { "run": 19, "platform": "xiaohongshu", "status": 201, "durationMs": 16095, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 420 },
+    { "run": 20, "platform": "wechat", "status": 201, "durationMs": 15431, "providerAttempts": 1, "evidenceCount": 1, "assetLength": 477 }
+  ],
+  "notes": [
+    "This credential-free report combines a five-call smoke run and the immediately following fifteen-call run against the same deployed commit.",
+    "The lower bound for unique assets is conservative because fingerprints were counted independently in each run; tracking URLs were normalized before hashing.",
+    "No failed call or latency sample was removed."
+  ]
+}

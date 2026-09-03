@@ -3,7 +3,7 @@
   "name": "Finfold Growth Mission API",
   "slug": "finfold-growth-mission",
   "sourceRepository": "https://github.com/joeymilano/finfold-growth-mission-api",
-  "reviewCommit": "0c69c6e5f717c3fea41db3f30ee8f60ed7762da7",
+  "reviewCommit": "65a4a545ca74b0e357973de433fd108c375531bc",
   "apiBaseUrl": "https://api.finfold.app/v1",
   "healthCheckUrl": "https://api.finfold.app/health",
   "deploymentProofUrl": "https://api.finfold.app/.well-known/xagent-verification.json",

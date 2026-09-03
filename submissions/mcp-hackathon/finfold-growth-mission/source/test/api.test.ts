@@ -50,12 +50,26 @@ describe("REST growth mission loop", () => {
     });
   });
 
+  it("supports browser preflight and HEAD documentation checks", async () => {
+    const preflight = await call("/mcp", { method: "OPTIONS" });
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get("access-control-allow-origin")).toBe("*");
+    expect(preflight.headers.get("access-control-allow-headers")).toContain("authorization");
+
+    const head = await call("/openapi.json", { method: "HEAD" });
+    expect(head.status).toBe(200);
+    expect(head.headers.get("content-type")).toContain("application/json");
+    expect(await head.text()).toBe("");
+  });
+
   it("creates exactly one evidence-bound mission and one tracked asset", async () => {
     const { response, body } = await createMission();
     expect(response.status).toBe(201);
     expect(body.mission.id).toMatch(/^gm_[a-z0-9]{24}$/);
-    expect(body.mission.title).toBe("Test one evidence-led message for qualified leads");
+    expect(body.mission.title).toBe("Test: Invite independent teams to test one calmer launch workflow");
     expect(body.mission.hypothesis).toMatch(/^Test whether /);
+    expect(body.asset.title).toBe("Test: A calmer launch workflow");
+    expect(body.asset.body).toContain("Page evidence:");
     expect(body.asset.body).toContain(`https://api.finfold.app/r/${body.tracking.code}`);
     expect(body.asset.body).not.toContain("{{TRACKING_URL}}");
     expect(body.evidence[0].quote).toBe(GENERATED.evidence[0]?.quote);
@@ -93,11 +107,10 @@ describe("REST growth mission loop", () => {
 
     const { response, body } = await createMission("canonical-quote-0001");
     expect(response.status).toBe(201);
-    expect(body.evidence[0].quote).toBe("Acme Workflow");
+    expect(body.evidence.map((evidence: { quote: string }) => evidence.quote)).toContain("Acme Workflow");
     expect(body.asset.body).toContain(GENERATED.evidence[0]?.quote);
     expect(body.asset.body).not.toContain("model paraphrase");
-    expect(body.claimMap[0].claim).toBe(GENERATED.evidence[0]?.quote);
-    expect(body.claimMap[0].evidenceIds).toEqual(["e2"]);
+    expect(body.claimMap).toContainEqual({ claim: GENERATED.evidence[0]?.quote, evidenceIds: ["e2"] });
   });
 
   it("extracts a schema-valid JSON object from a provider reasoning envelope", async () => {
@@ -173,13 +186,14 @@ describe("REST growth mission loop", () => {
         "2026-01-01T00:00:00.000Z",
         missionId,
       ),
-      env.DB.prepare("INSERT INTO tracking_daily (mission_id, event_day, clicks) VALUES (?, ?, 1)").bind(
-        missionId,
-        "2026-09-02",
-      ),
+      env.DB.prepare(
+        `INSERT INTO outcome_events
+         (id, mission_id, event_id, outcome_type, quantity, value, currency, occurred_at, created_at)
+         VALUES (?, ?, ?, 'lead', 1, NULL, NULL, ?, ?)`,
+      ).bind("out_below_target", missionId, "lead-below-target", "2026-09-02T00:00:01.000Z", "2026-09-02T00:00:01.000Z"),
     ]);
     const read = await call(`/v1/missions/${missionId}`, { headers: authorizedHeaders() });
-    expect((await read.json()) as object).toMatchObject({ outcome: { verdict: "lost", measuredValue: 0 } });
+    expect((await read.json()) as object).toMatchObject({ outcome: { verdict: "lost", measuredValue: 1 } });
   });
 
   it("returns inconclusive after the window without credible outcome data", async () => {
@@ -190,6 +204,57 @@ describe("REST growth mission loop", () => {
       .run();
     const read = await call(`/v1/missions/${missionId}`, { headers: authorizedHeaders() });
     expect((await read.json()) as object).toMatchObject({ outcome: { verdict: "inconclusive", measuredValue: 0 } });
+  });
+
+  it("treats anonymous clicks alone as inconclusive after the window", async () => {
+    const created = await createMission("click-only-0001");
+    const missionId = created.body.mission.id as string;
+    await env.DB.batch([
+      env.DB.prepare("UPDATE missions SET measurement_due_at = ? WHERE id = ?").bind(
+        "2026-01-01T00:00:00.000Z",
+        missionId,
+      ),
+      env.DB.prepare("INSERT INTO tracking_daily (mission_id, event_day, clicks) VALUES (?, ?, 1)").bind(
+        missionId,
+        "2026-09-02",
+      ),
+    ]);
+    const read = await call(`/v1/missions/${missionId}`, { headers: authorizedHeaders() });
+    expect((await read.json()) as object).toMatchObject({
+      attribution: { clicks: 1 },
+      outcome: { verdict: "inconclusive", measuredValue: 0 },
+    });
+  });
+
+  it("rejects outcomes outside the measurement window", async () => {
+    const created = await createMission("outcome-window-0001");
+    const missionId = created.body.mission.id as string;
+    const response = await call(`/v1/missions/${missionId}/outcomes`, {
+      method: "POST",
+      headers: authorizedHeaders({ "content-type": "application/json", "idempotency-key": "outcome-window-key-0001" }),
+      body: JSON.stringify({ eventId: "lead-too-early", type: "lead", occurredAt: "2026-01-01T00:00:00.000Z" }),
+    });
+    expect(response.status).toBe(422);
+    expect((await response.json()) as object).toMatchObject({ error: { code: "OUTCOME_OUTSIDE_WINDOW" } });
+  });
+
+  it("keeps revenue verdicts in one target currency", async () => {
+    const created = await createMission("revenue-create-0001");
+    const stored = created.body;
+    stored.mission.objective = "revenue";
+    stored.mission.primaryMetric = "revenue";
+    stored.mission.targetValue = 100;
+    stored.mission.targetCurrency = "USD";
+    await env.DB.prepare("UPDATE missions SET objective = 'revenue', target_value = 100, result_json = ? WHERE id = ?")
+      .bind(JSON.stringify(stored), stored.mission.id)
+      .run();
+    const response = await call(`/v1/missions/${stored.mission.id}/outcomes`, {
+      method: "POST",
+      headers: authorizedHeaders({ "content-type": "application/json", "idempotency-key": "revenue-outcome-0001" }),
+      body: JSON.stringify({ eventId: "revenue-eur-0001", type: "revenue", value: 100, currency: "EUR" }),
+    });
+    expect(response.status).toBe(422);
+    expect((await response.json()) as object).toMatchObject({ error: { code: "CURRENCY_MISMATCH" } });
   });
 });
 

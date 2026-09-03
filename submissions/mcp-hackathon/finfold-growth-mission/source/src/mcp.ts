@@ -31,7 +31,12 @@ const TOOLS = [
         platform: { type: "string", enum: ["auto", "linkedin", "x", "reddit", "xiaohongshu", "wechat"], default: "auto" },
         locale: { type: "string", default: "en" },
         targetValue: { type: "number", exclusiveMinimum: 0 },
-        landingPage: { type: "string", format: "uri" },
+        targetCurrency: { type: "string", minLength: 3, maxLength: 3, description: "Revenue target currency; defaults to USD." },
+        landingPage: {
+          type: "string",
+          format: "uri",
+          description: "HTTPS destination on the source host, its subdomain, or its canonical www/apex equivalent.",
+        },
         idempotencyKey: { type: "string", minLength: 8, maxLength: 128 },
       },
     },
@@ -54,7 +59,7 @@ const TOOLS = [
     name: "finfold_record_growth_outcome",
     title: "Record a Finfold growth outcome",
     description:
-      "Records one attributable lead, signup, purchase, or revenue event and recomputes the verdict. Mutation: writes one idempotent outcome. No external side effects. Requires outcome:write. Retry with the same eventId and idempotencyKey.",
+      "Records one attributable lead, signup, purchase, or revenue event inside the mission measurement window and recomputes the verdict. Revenue must use the mission target currency. Mutation: writes one idempotent outcome. No external side effects. Requires outcome:write. Retry with the same eventId and idempotencyKey.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -147,7 +152,7 @@ export async function handleMcp(request: Request, env: Env, body: unknown, reque
       rpcResult(id, {
         protocolVersion,
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "finfold-growth-mission", title: "Finfold Growth Mission API", version: "1.0.0" },
+        serverInfo: { name: "finfold-growth-mission", title: "Finfold Growth Mission API", version: "1.1.0" },
         instructions:
           "Create one evidence-bound mission, use its tracked CTA, then record real outcomes. The server never auto-publishes.",
       }),

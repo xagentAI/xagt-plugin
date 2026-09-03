@@ -11,7 +11,7 @@ import { AppError } from "./errors";
 import { generateMission } from "./generation";
 import type { CreateMissionInput, Objective, OutcomeInput } from "./schemas";
 import { fetchSourceEvidence } from "./source";
-import { assertPublicHttpUrl, trackedDestination } from "./url-safety";
+import { assertSafeLandingPage, trackedDestination } from "./url-safety";
 
 const WINDOW_DAYS: Record<Objective, number> = {
   leads: 14,
@@ -31,6 +31,7 @@ type StoredMissionResult = {
     audience: string;
     primaryMetric: Objective;
     targetValue: number;
+    targetCurrency?: string;
     measurementWindowDays: number;
     measurementStartedAt: string;
     measurementDueAt: string;
@@ -113,7 +114,7 @@ export async function createMissionOperation(
     const windowDays = WINDOW_DAYS[input.objective];
     const dueAt = new Date(Date.parse(generatedAt) + windowDays * 86_400_000).toISOString();
     const expiresAt = new Date(Date.parse(generatedAt) + 30 * 86_400_000).toISOString();
-    const landingPage = assertPublicHttpUrl(input.landingPage ?? source.finalUrl).toString();
+    const landingPage = assertSafeLandingPage(source.finalUrl, input.landingPage ?? source.finalUrl).toString();
     const destinationUrl = trackedDestination(landingPage, generatedResult.generated.mission.platform, missionId);
     const trackedUrl = `${env.APP_BASE_URL.replace(/\/$/, "")}/r/${trackingCode}`;
     const asset = {
@@ -129,6 +130,7 @@ export async function createMissionOperation(
         objective: input.objective,
         locale: input.locale,
         targetValue,
+        ...(input.objective === "revenue" ? { targetCurrency: input.targetCurrency ?? "USD" } : {}),
         measurementWindowDays: windowDays,
         measurementStartedAt: generatedAt,
         measurementDueAt: dueAt,
@@ -250,8 +252,8 @@ function verdictFor(row: MissionRow, attribution: Attribution): { verdict: strin
       nextAction: "Keep the mission running until the measurement window closes; record attributable outcomes as they occur.",
     };
   }
-  const hasAttribution = attribution.clicks + attribution.leads + attribution.signups + attribution.purchases + attribution.revenue > 0;
-  if (hasAttribution) {
+  const hasCredibleOutcome = attribution.leads + attribution.signups + attribution.purchases + attribution.revenue > 0;
+  if (hasCredibleOutcome) {
     return {
       verdict: "lost",
       measuredValue,
@@ -301,8 +303,21 @@ export async function recordOutcomeOperation(
     const mission = await loadMission(env.DB, missionId, auth.apiKeyId);
     if (!mission) throw new AppError("MISSION_NOT_FOUND", "Mission not found.", 404);
     const occurredAt = input.occurredAt ?? nowIso();
-    if (Date.parse(occurredAt) > Date.now() + 5 * 60_000) {
+    const occurredAtMs = Date.parse(occurredAt);
+    if (occurredAtMs > Date.now() + 5 * 60_000) {
       throw new AppError("INVALID_REQUEST", "occurredAt cannot be in the future.", 400);
+    }
+    if (occurredAtMs < Date.parse(mission.measurement_started_at) || occurredAtMs > Date.parse(mission.measurement_due_at)) {
+      throw new AppError("OUTCOME_OUTSIDE_WINDOW", "occurredAt must fall inside the mission measurement window.", 422);
+    }
+    const storedMission = parsedMission(mission);
+    const targetCurrency = storedMission.mission.targetCurrency ?? (mission.objective === "revenue" ? "USD" : undefined);
+    if (input.type === "revenue" && targetCurrency && input.currency !== targetCurrency) {
+      throw new AppError(
+        "CURRENCY_MISMATCH",
+        `Revenue outcomes for this mission must use ${targetCurrency}.`,
+        422,
+      );
     }
     const inserted = await env.DB.prepare(
       `INSERT OR IGNORE INTO outcome_events

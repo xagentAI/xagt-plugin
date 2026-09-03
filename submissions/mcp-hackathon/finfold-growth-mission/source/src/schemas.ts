@@ -11,9 +11,19 @@ export const createMissionSchema = z
     platform: platformSchema.default("auto"),
     locale: z.string().trim().min(2).max(35).default("en"),
     targetValue: z.number().finite().positive().max(1_000_000).optional(),
+    targetCurrency: z.string().trim().length(3).toUpperCase().optional(),
     landingPage: z.url({ protocol: /^https?$/ }).max(2_048).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    if (value.targetCurrency && value.objective !== "revenue") {
+      context.addIssue({
+        code: "custom",
+        path: ["targetCurrency"],
+        message: "targetCurrency is only valid for revenue missions.",
+      });
+    }
+  });
 
 export const outcomeSchema = z
   .object({
