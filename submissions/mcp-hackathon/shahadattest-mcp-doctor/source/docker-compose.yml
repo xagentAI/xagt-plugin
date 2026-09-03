@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      ALLOW_PRIVATE_NETWORK: "false"
+      GIT_COMMIT: ${GIT_COMMIT:-dev-local}
+      PROJECT_SLUG: ${PROJECT_SLUG:-team-mcp-doctor}
+    depends_on:
+      - demo-api
+  demo-api:
+    build: ./examples/broken-demo-api
+    ports:
+      - "8001:8001"
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
