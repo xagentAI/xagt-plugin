@@ -1,0 +1,17 @@
+{
+  "name": "venueclock",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Agent-callable market session calendar: session state, holidays, and next open/close for NYSE, Nasdaq, LSE, and 24/7 crypto.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "mcp": "node src/mcp.js",
+    "test": "node --test",
+    "generate": "node src/generate-site.js"
+  }
+}
