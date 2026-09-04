@@ -20,18 +20,30 @@ interface EtherscanListResponse {
   result: EtherscanTx[] | string;
 }
 
-export async function fetchTransactions(address: string, apiKey: string): Promise<EtherscanTx[]> {
+interface EtherscanGasOracleResult {
+  SafeGasPrice: string;
+  ProposeGasPrice: string;
+  FastGasPrice: string;
+}
+
+interface EtherscanGasOracleResponse {
+  status: string;
+  message: string;
+  result: EtherscanGasOracleResult | string;
+}
+
+export interface GasOraclePrices {
+  safeGwei: number;
+  standardGwei: number;
+  fastGwei: number;
+}
+
+async function etherscanGet<T>(params: Record<string, string>): Promise<T> {
   const url = new URL(ETHERSCAN_BASE_URL);
   url.searchParams.set("chainid", String(CHAIN_ID_ETHEREUM_MAINNET));
-  url.searchParams.set("module", "account");
-  url.searchParams.set("action", "txlist");
-  url.searchParams.set("address", address);
-  url.searchParams.set("startblock", "0");
-  url.searchParams.set("endblock", "99999999");
-  url.searchParams.set("page", "1");
-  url.searchParams.set("offset", String(MAX_TRANSACTIONS));
-  url.searchParams.set("sort", "desc");
-  url.searchParams.set("apikey", apiKey);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -51,7 +63,44 @@ export async function fetchTransactions(address: string, apiKey: string): Promis
     throw new EtherscanError(`Etherscan responded with HTTP ${response.status}`, "unavailable");
   }
 
-  const body = (await response.json()) as EtherscanListResponse;
+  return (await response.json()) as T;
+}
+
+export async function fetchGasOracle(apiKey: string): Promise<GasOraclePrices> {
+  const body = await etherscanGet<EtherscanGasOracleResponse>({
+    module: "gastracker",
+    action: "gasoracle",
+    apikey: apiKey,
+  });
+
+  if (body.status === "0" || typeof body.result === "string") {
+    const message = typeof body.result === "string" ? body.result : body.message;
+    if (/rate limit/i.test(message)) {
+      throw new EtherscanError(message, "rate_limited");
+    }
+    throw new EtherscanError(message, "unavailable");
+  }
+
+  return {
+    safeGwei: Number(body.result.SafeGasPrice),
+    standardGwei: Number(body.result.ProposeGasPrice),
+    fastGwei: Number(body.result.FastGasPrice),
+  };
+}
+
+export async function fetchTransactions(address: string, apiKey: string): Promise<EtherscanTx[]> {
+  const body = await etherscanGet<EtherscanListResponse>({
+    module: "account",
+    action: "txlist",
+    address,
+    startblock: "0",
+    endblock: "99999999",
+    page: "1",
+    offset: String(MAX_TRANSACTIONS),
+    sort: "desc",
+    apikey: apiKey,
+  });
+
   if (body.status === "0") {
     if (typeof body.result === "string" && /rate limit/i.test(body.result)) {
       throw new EtherscanError(body.result, "rate_limited");

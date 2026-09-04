@@ -3,7 +3,7 @@
   "name": "GasPulse",
   "slug": "visioneer-gaspulse",
   "sourceRepository": "https://github.com/muhammad-wei/gaspulse",
-  "reviewCommit": "44ec16e5187d8a1944d6c058757bf2a06384b3d5",
+  "reviewCommit": "f1edc68641d5bee0f6c8a72f11abc75bfa837c75",
   "apiBaseUrl": "https://api.gaspulse.win/v1",
   "healthCheckUrl": "https://api.gaspulse.win/health",
   "deploymentProofUrl": "https://api.gaspulse.win/.well-known/xagent-verification.json"

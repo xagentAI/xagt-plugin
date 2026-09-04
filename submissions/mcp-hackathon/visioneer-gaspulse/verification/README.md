@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Review commit: `44ec16e5187d8a1944d6c058757bf2a06384b3d5`
+- Review commit: `f1edc68641d5bee0f6c8a72f11abc75bfa837c75`
 - API base URL: `https://api.gaspulse.win/v1`
 - Authentication: none required — all endpoints are public.
 
@@ -15,7 +15,7 @@ curl --fail --silent --show-error https://api.gaspulse.win/health
 Expected response:
 
 ```json
-{"status":"ok","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
+{"status":"ok","commit":"f1edc68641d5bee0f6c8a72f11abc75bfa837c75"}
 ```
 
 ## 2. Deployment proof
@@ -27,7 +27,7 @@ curl --fail --silent --show-error https://api.gaspulse.win/.well-known/xagent-ve
 Expected response:
 
 ```json
-{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
+{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"f1edc68641d5bee0f6c8a72f11abc75bfa837c75"}
 ```
 
 ## 3. Capability call
@@ -80,3 +80,23 @@ curl --silent "https://api.gaspulse.win/v1/address/not-an-address/activity"
 An address with no transactions in the window returns `HTTP 200` with every numeric field
 zeroed and `gasTrend.direction: "insufficient_data"` — never a `404` — so callers get a
 deterministic response shape regardless of activity level.
+
+## 4. Free capability call — current network gas price
+
+```bash
+curl --fail --silent --show-error https://api.gaspulse.win/v1/gas/current
+```
+
+No parameters, no authentication. Expected response shape (values reflect live network
+conditions at call time):
+
+```json
+{
+  "network": "ethereum-mainnet",
+  "asOf": "2026-09-04T03:59:55.975Z",
+  "safeGwei": 0.061819813,
+  "standardGwei": 0.062017679,
+  "fastGwei": 0.072819813,
+  "dataSource": "etherscan"
+}
+```

@@ -33,6 +33,15 @@ export interface ActivityResponse {
   dataSource: "etherscan";
 }
 
+export interface GasOracleResponse {
+  network: "ethereum-mainnet";
+  asOf: string;
+  safeGwei: number;
+  standardGwei: number;
+  fastGwei: number;
+  dataSource: "etherscan";
+}
+
 export interface EtherscanTx {
   hash: string;
   timeStamp: string;

@@ -4,6 +4,7 @@ import { PORT } from "./config.js";
 import { registerHealthRoute } from "./routes/health.js";
 import { registerVerificationRoute } from "./routes/verification.js";
 import { registerActivityRoute } from "./routes/activity.js";
+import { registerGasCurrentRoute } from "./routes/gasCurrent.js";
 
 export async function buildServer() {
   const app = Fastify({ logger: true });
@@ -11,6 +12,7 @@ export async function buildServer() {
   await registerHealthRoute(app);
   await registerVerificationRoute(app);
   await registerActivityRoute(app);
+  await registerGasCurrentRoute(app);
 
   app.setNotFoundHandler((_request, reply) => {
     reply.code(404).send({ error: { code: "not_found", message: "no route matches this path" } });

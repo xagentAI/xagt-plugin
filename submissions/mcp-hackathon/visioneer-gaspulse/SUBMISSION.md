@@ -27,12 +27,14 @@
   as `429`/`502` (see error taxonomy below and in `source/README.md`).
 - **API contract:** `GET /v1/address/{address}/activity?windowDays=30` — full request/response
   shapes, field meanings, and the activity-score methodology are documented in
-  `source/README.md` (reproduced with a live example in `verification/README.md`).
+  `source/README.md` (reproduced with a live example in `verification/README.md`). A second,
+  free endpoint, `GET /v1/gas/current`, returns the current network-wide gas price (no address,
+  no parameters) — also documented in `source/README.md`.
 
 ## Source and reproducibility
 
 - **Source repository:** https://github.com/muhammad-wei/gaspulse
-- **Review commit:** `44ec16e5187d8a1944d6c058757bf2a06384b3d5`
+- **Review commit:** `f1edc68641d5bee0f6c8a72f11abc75bfa837c75`
 - **Source submitted in this PR:** `source/`
 - **Run tests:** `npm ci && npm test`
 - **Run locally:** `npm ci && cp .env.example .env` (fill in `ETHERSCAN_API_KEY`) `&& npm run dev`
@@ -48,12 +50,12 @@ The API must expose:
 
 ```json
 // GET https://api.gaspulse.win/health
-{"status":"ok","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
+{"status":"ok","commit":"f1edc68641d5bee0f6c8a72f11abc75bfa837c75"}
 ```
 
 ```json
 // GET /.well-known/xagent-verification.json on the same API origin
-{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}
+{"schemaVersion":1,"slug":"visioneer-gaspulse","commit":"f1edc68641d5bee0f6c8a72f11abc75bfa837c75"}
 ```
 
 ## Verification
@@ -61,7 +63,7 @@ The API must expose:
 The reproducible call instructions and redacted example responses are in `verification/README.md`.
 
 - **Health-check result:** `GET https://api.gaspulse.win/health` →
-  `{"status":"ok","commit":"44ec16e5187d8a1944d6c058757bf2a06384b3d5"}`
+  `{"status":"ok","commit":"f1edc68641d5bee0f6c8a72f11abc75bfa837c75"}`
 - **Capability call:** `GET https://api.gaspulse.win/v1/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/activity?windowDays=30`
   → `200` with gas trend and activity score for that address.
 - **Expected error behavior:** malformed address → `400 invalid_address`; out-of-range

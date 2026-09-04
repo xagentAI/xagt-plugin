@@ -71,6 +71,27 @@ raw transaction list per address for 60 seconds in memory to absorb repeated age
 1,000 transactions Etherscan returns for the address; extremely long-lived, high-volume
 addresses may have earlier history that isn't reflected. Ethereum mainnet only.
 
+### `GET /v1/gas/current` — free
+
+Current Ethereum mainnet gas price, no parameters, no authentication. Distinct from the
+per-address activity endpoint above: this is a network-wide snapshot, not tied to any address.
+
+```json
+{
+  "network": "ethereum-mainnet",
+  "asOf": "2026-09-04T03:58:43.479Z",
+  "safeGwei": 12.1,
+  "standardGwei": 14.3,
+  "fastGwei": 18.7,
+  "dataSource": "etherscan"
+}
+```
+
+**Errors**: `429 upstream_rate_limited`, `502 upstream_unavailable` — same taxonomy as above.
+
+**Caching**: the current gas price is cached in memory for 15 seconds (shorter than the
+per-address cache, since the value is meant to be "current" and changes roughly every block).
+
 ## Setup
 
 Requirements: Node.js `>=18.17`, a free Etherscan API key (https://etherscan.io/apis).
