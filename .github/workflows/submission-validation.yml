@@ -1,8 +1,8 @@
 name: Validate hackathon submission
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "submissions/mcp-hackathon/**"
 
@@ -10,67 +10,30 @@ permissions:
   contents: read
   pull-requests: read
 
+concurrency:
+  group: submission-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: Source, commit, and deployment proof
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - name: Check out trusted validator from the base branch
-        uses: actions/checkout@v4
+      - name: Check out the trusted base-branch validator only
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: trusted
           persist-credentials: false
 
-      - name: Check out the untrusted submission without credentials
-        uses: actions/checkout@v4
+      - name: Use Node 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
-          path: candidate
-          fetch-depth: 0
-          persist-credentials: false
+          node-version: "24"
+          package-manager-cache: false
 
-      - name: Fetch the trusted base commit for scope comparison
+      - name: Read and validate submission files without executing them
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          BASE_REPOSITORY: ${{ github.repository }}
-        run: git -C candidate fetch --no-tags --depth=1 "https://github.com/${BASE_REPOSITORY}.git" "$BASE_SHA"
-
-      - name: Validate changed scope, source package, commit, and live deployment
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          XAGT_GITHUB_TOKEN: ${{ github.token }}
-        run: >-
-          node trusted/scripts/validate-submission.mjs
-          --repo-root candidate
-          --base "$BASE_SHA"
-          --head "$HEAD_SHA"
-          --online
-
-  archive:
-    name: Preserve validated PR commit in the official repository
-    needs: validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    steps:
-      - name: Check out the official repository with write access
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          fetch-depth: 0
-
-      - name: Copy the validated fork commit into a unique official archive ref
-        env:
-          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          short_sha="${HEAD_SHA:0:12}"
-          archive_ref="refs/heads/submission-archive/pr-${PR_NUMBER}-${short_sha}"
-          git fetch --no-tags "https://github.com/${HEAD_REPOSITORY}.git" "$HEAD_SHA"
-          git push origin "$HEAD_SHA:$archive_ref"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node trusted/scripts/submission-lifecycle.mjs validate

@@ -1,9 +1,11 @@
-import { mkdtemp, mkdir, rename, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, rename, writeFile, symlink, rm, readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   isPrivateIp,
+  findChangedSubmissionDirectory,
   resolveChangedSubmissionDirectory,
   validateSubmissionDirectory
 } from "../scripts/validate-submission.mjs";
@@ -33,6 +35,63 @@ async function createSubmission({ slug = "team-real-api", source = "export const
 }
 
 describe("submission validator", () => {
+  it("counts deletions outside the submission directory", async () => {
+    const root = await mkdtemp(join(tmpdir(), "xagt-scope-"));
+    const git = (...args) => execFileSync("git", ["-C", root, ...args], { encoding: "utf8" }).trim();
+    try {
+      git("init", "-q");
+      git("config", "user.email", "test@example.invalid");
+      git("config", "user.name", "Test");
+      await writeFile(join(root, "README.md"), "Keep this file\n");
+      git("add", ".");
+      git("commit", "-qm", "base");
+      const base = git("rev-parse", "HEAD");
+      await rm(join(root, "README.md"));
+      await mkdir(join(root, "submissions/mcp-hackathon/team-api/source"), { recursive: true });
+      await writeFile(join(root, "submissions/mcp-hackathon/team-api/source/index.js"), "export const value = 1;\n");
+      git("add", "-A");
+      git("commit", "-qm", "candidate");
+      expect(() => findChangedSubmissionDirectory(root, base, git("rev-parse", "HEAD"))).toThrow(/one project directory/);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects documentation-only source and Git LFS pointers", async () => {
+    const directory = await createSubmission();
+    await rename(join(directory, "source/index.js"), join(directory, "source/README.md"));
+    await expect(validateSubmissionDirectory(directory)).rejects.toThrow(/implementation/);
+    await rename(join(directory, "source/README.md"), join(directory, "source/index.js"));
+    await writeFile(join(directory, "source/index.js"), "version https://git-lfs.github.com/spec/v1\noid sha256:abc\nsize 100\n");
+    await expect(validateSubmissionDirectory(directory)).rejects.toThrow(/LFS/);
+  });
+
+  it("rejects symlinked source roots and required documents", async () => {
+    const directory = await createSubmission();
+    await rename(join(directory, "source"), join(directory, "saved-source"));
+    await symlink("saved-source", join(directory, "source"));
+    await expect(validateSubmissionDirectory(directory)).rejects.toThrow(/symbolic links/);
+    await rm(join(directory, "source"));
+    await rename(join(directory, "saved-source"), join(directory, "source"));
+    await rename(join(directory, "RIGHTS.md"), join(directory, "saved-rights.md"));
+    await symlink("saved-rights.md", join(directory, "RIGHTS.md"));
+    await expect(validateSubmissionDirectory(directory)).rejects.toThrow(/symbolic links/);
+  });
+
+  it("scans verification documents and large source files for secrets", async () => {
+    const directory = await createSubmission();
+    const evidence = join(directory, "verification/README.md");
+    const original = await readFile(evidence, "utf8");
+    await writeFile(evidence, `${original}\nsk-abcdefghijklmnopqrstuvwxyz123456\n`);
+    await expect(validateSubmissionDirectory(directory)).rejects.toThrow(/possible secret/);
+    await writeFile(evidence, original);
+    await writeFile(join(directory, "source/index.js"), `${" ".repeat(1024 * 1024 + 1)}sk-abcdefghijklmnopqrstuvwxyz123456`);
+    await expect(validateSubmissionDirectory(directory)).rejects.toThrow(/possible secret/);
+  });
+
+  it("rejects path traversal in scope metadata", () => {
+    expect(() => resolveChangedSubmissionDirectory("/repo", ["submissions/mcp-hackathon/team-api/../../README.md"])).toThrow(/path/);
+  });
   it("isolates current submissions from historical archive paths", () => {
     expect(resolveChangedSubmissionDirectory("/repo", [
       "submissions/mcp-hackathon/team-real-api/SUBMISSION.md",
