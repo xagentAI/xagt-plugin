@@ -1,5 +1,11 @@
 # Verification evidence
 
+## Validation refresh — 2026-09-07
+
+The submission branch now includes official base commit `a9f5526` so a fresh PR event can use the repaired validation workflow. Attempt 2 of run `33752945312` stopped before inspecting this submission: the workflow checked out old base commit `fc76acc206bbefeaf846d30206656e2c87558785`, which does not contain `scripts/submission-lifecycle.mjs`, and Node exited with `MODULE_NOT_FOUND`.
+
+The current official offline validator passes. The current online validator also passes against the unchanged source commit and live endpoints below. For this local online check, DNS was resolved through Google's public DNS-over-HTTPS service because the workstation proxy returns a reserved `198.18.x.x` address; the validator's public-IP checks, pinned HTTPS requests, certificate verification, and exact commit comparisons remained enabled. This local result is separate from the fresh GitHub Actions result.
+
 ## Prerequisites
 
 - Review commit: `65a4a545ca74b0e357973de433fd108c375531bc`
