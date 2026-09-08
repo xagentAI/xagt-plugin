@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "INVALID_ISSUE_URL",
+    "message": "issueUrl must be a canonical public GitHub issue URL.",
+    "requestId": "250139de4cdf10dc7308161126d09682"
+  }
+}

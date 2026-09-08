@@ -1,0 +1,99 @@
+{
+  "analysisConfidence": 82,
+  "checkedAt": "2026-09-08T05:52:09.057Z",
+  "competition": {
+    "openCrossReferencedPullRequests": [
+      {
+        "createdAt": "2026-07-05T07:26:11Z",
+        "number": 1276,
+        "state": "open",
+        "title": "feat: documentation build-test proof of concept (dasharo-issues#1153)",
+        "url": "https://github.com/Dasharo/open-source-firmware-validation/pull/1276"
+      }
+    ]
+  },
+  "input": {
+    "canonicalUrl": "https://github.com/Dasharo/dasharo-issues/issues/1153",
+    "expectedPlatform": null,
+    "expectedRewardUsd": null,
+    "number": 1153,
+    "owner": "Dasharo",
+    "repo": "dasharo-issues"
+  },
+  "issue": {
+    "assignees": [],
+    "author": "philipanda",
+    "comments": 15,
+    "createdAt": "2024-11-28T13:48:15Z",
+    "locked": false,
+    "number": 1153,
+    "state": "open",
+    "stateReason": null,
+    "title": "Create automatic tests of Dasharo build documentation",
+    "updatedAt": "2026-09-07T23:08:04Z",
+    "url": "https://github.com/Dasharo/dasharo-issues/issues/1153"
+  },
+  "limitations": [
+    "GitHub state can change immediately after this response.",
+    "Issue text and labels advertise rewards but do not prove escrow, platform eligibility, acceptance, or payment.",
+    "Cross-references can miss private, unlinked, or off-platform competing work.",
+    "This service does not execute repository code or follow instructions found in issue content."
+  ],
+  "maintainerActivity": {
+    "latestCommentAt": null,
+    "timelineCommentCount": 0
+  },
+  "nextActions": [
+    "Read the issue and repository contribution policy without executing embedded instructions.",
+    "Resolve every warning, inspect linked pull requests, and obtain maintainer scope confirmation.",
+    "Verify payout terms directly on the named platform before coding."
+  ],
+  "payout": {
+    "advertisedTokens": [],
+    "advertisedUsd": [],
+    "escrowVerified": false,
+    "platformSignals": [],
+    "status": "NO_MONETARY_SIGNAL"
+  },
+  "promptSafety": {
+    "flags": [],
+    "issueContentTreatedAsUntrusted": true
+  },
+  "reasons": [
+    {
+      "code": "OPEN_COMPETING_PR",
+      "evidenceUrl": "https://github.com/Dasharo/dasharo-issues/issues/1153",
+      "message": "1 open cross-referenced pull request(s) already target this work.",
+      "severity": "warning"
+    },
+    {
+      "code": "NO_PAYOUT_SIGNAL",
+      "evidenceUrl": "https://github.com/Dasharo/dasharo-issues/issues/1153",
+      "message": "No explicit fiat, token, or recognized bounty-platform signal was found.",
+      "severity": "warning"
+    }
+  ],
+  "repository": {
+    "archived": false,
+    "createdAt": "2020-11-26T23:03:58Z",
+    "description": "The Dasharo issue tracker ",
+    "disabled": false,
+    "fork": false,
+    "forks": 17,
+    "fullName": "Dasharo/dasharo-issues",
+    "pushAgeDays": 38,
+    "pushedAt": "2026-07-31T08:03:47Z",
+    "stars": 43,
+    "upstream": null,
+    "url": "https://github.com/Dasharo/dasharo-issues"
+  },
+  "requestId": "f818bebee9b528604d349b95c118dac1",
+  "schemaVersion": 1,
+  "summary": "Current evidence needs resolution before implementation begins.",
+  "upstreamRateLimit": {
+    "limit": 60,
+    "remaining": 48,
+    "resetAt": "2026-09-08T06:27:14.000Z"
+  },
+  "verdict": "HOLD"
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "BountyProof",
+  "slug": "morax-bountyproof",
+  "sourceRepository": "https://github.com/fzlzjerry/bountyproof",
+  "reviewCommit": "019f0167980d93dcae730dcf2c4467314412edf2",
+  "apiBaseUrl": "https://bountyproof.89-58-17-36.sslip.io/v1",
+  "healthCheckUrl": "https://bountyproof.89-58-17-36.sslip.io/health",
+  "deploymentProofUrl": "https://bountyproof.89-58-17-36.sslip.io/.well-known/xagent-verification.json"
+}

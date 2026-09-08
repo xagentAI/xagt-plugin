@@ -1,0 +1,23 @@
+{
+  "name": "bountyproof",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-first GitHub bounty preflight API for humans and agents.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "node --eval \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "test": "vitest run tests",
+    "check": "npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=24.18"
+  },
+  "devDependencies": {
+    "@types/node": "26.5.0",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
+  }
+}
