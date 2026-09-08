@@ -30,11 +30,11 @@
 ## Source and reproducibility
 
 - **Source repository:** https://github.com/fzlzjerry/bountyproof
-- **Review commit:** `019f0167980d93dcae730dcf2c4467314412edf2`
+- **Review commit:** `8f8fafc37ff8495839b3a54658cb0ea23c52e7da`
 - **Source submitted in this PR:** `source/`
 - **Run tests:** `npm ci --ignore-scripts && npm run check && npm audit --audit-level=low`
 - **Run locally:** `REVIEW_COMMIT=development npm start` after `npm run build`
-- **Deploy:** Set `REVIEW_COMMIT=019f0167980d93dcae730dcf2c4467314412edf2`
+- **Deploy:** Set `REVIEW_COMMIT=8f8fafc37ff8495839b3a54658cb0ea23c52e7da`
   in an uncommitted environment file, run
   `docker compose --env-file .env.production -f compose.production.yml up -d --build`,
   install `deploy/bountyproof.nginx.conf`, obtain the named Let's Encrypt certificate,
@@ -47,11 +47,11 @@
 The live responses are:
 
 ```json
-{"status":"ok","service":"bountyproof","version":"0.1.0","commit":"019f0167980d93dcae730dcf2c4467314412edf2","checkedAt":"<current ISO timestamp>"}
+{"status":"ok","service":"bountyproof","version":"0.1.0","commit":"8f8fafc37ff8495839b3a54658cb0ea23c52e7da","checkedAt":"<current ISO timestamp>"}
 ```
 
 ```json
-{"schemaVersion":1,"slug":"morax-bountyproof","commit":"019f0167980d93dcae730dcf2c4467314412edf2"}
+{"schemaVersion":1,"slug":"morax-bountyproof","commit":"8f8fafc37ff8495839b3a54658cb0ea23c52e7da"}
 ```
 
 ## Verification

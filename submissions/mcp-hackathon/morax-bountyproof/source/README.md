@@ -100,7 +100,7 @@ npm audit --audit-level=low
 docker build --build-arg VCS_REF="$REVIEW_COMMIT" -t bountyproof .
 ```
 
-- 21 unit/service tests cover URL boundaries, money/platform parsing, prompt-injection
+- 22 unit/service tests cover URL boundaries, money/platform parsing, prompt-injection
   flags, competition extraction, verdicts, cache expiry/eviction, version proof,
   structured errors, and request-size limits.
 - The dependency audit currently reports zero vulnerabilities.

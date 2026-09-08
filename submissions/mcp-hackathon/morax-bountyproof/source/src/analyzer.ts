@@ -68,6 +68,10 @@ export function extractPayoutSignals(issue: GitHubIssue): PayoutSignals {
     const amount = match[1] ? moneyAmount(match[1], match[2]) : null;
     if (amount !== null && amount <= 10_000_000) usd.add(amount);
   }
+  for (const match of labels.join("\n").matchAll(/(?:^|[\s:])([0-9][0-9,]*(?:\.[0-9]{1,2})?)\s*\$/gm)) {
+    const amount = match[1] ? moneyAmount(match[1], undefined) : null;
+    if (amount !== null && amount <= 10_000_000) usd.add(amount);
+  }
   for (const match of text.matchAll(/\b([0-9][0-9,]*(?:\.[0-9]{1,2})?)\s*(USD|USDC|USDT|USDG)\b/gi)) {
     const amount = match[1] ? moneyAmount(match[1], undefined) : null;
     const token = match[2]?.toUpperCase();

@@ -1,6 +1,6 @@
 {
   "analysisConfidence": 82,
-  "checkedAt": "2026-09-08T05:52:09.057Z",
+  "checkedAt": "2026-09-08T06:06:11.750Z",
   "competition": {
     "openCrossReferencedPullRequests": [
       {
@@ -87,12 +87,12 @@
     "upstream": null,
     "url": "https://github.com/Dasharo/dasharo-issues"
   },
-  "requestId": "f818bebee9b528604d349b95c118dac1",
+  "requestId": "274288293bc5c54279f87567688bd0f2",
   "schemaVersion": 1,
   "summary": "Current evidence needs resolution before implementation begins.",
   "upstreamRateLimit": {
     "limit": 60,
-    "remaining": 48,
+    "remaining": 28,
     "resetAt": "2026-09-08T06:27:14.000Z"
   },
   "verdict": "HOLD"

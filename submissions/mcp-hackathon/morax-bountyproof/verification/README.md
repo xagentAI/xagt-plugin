@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Review commit: `019f0167980d93dcae730dcf2c4467314412edf2`
+- Review commit: `8f8fafc37ff8495839b3a54658cb0ea23c52e7da`
 - API base URL: `https://bountyproof.89-58-17-36.sslip.io/v1`
 - Authentication: None
 - Tools: `curl`; optionally `jq`
@@ -23,7 +23,7 @@ Expected: HTTP 200, `x-source-commit` equal to the review commit, and a response
   "status": "ok",
   "service": "bountyproof",
   "version": "0.1.0",
-  "commit": "019f0167980d93dcae730dcf2c4467314412edf2",
+  "commit": "8f8fafc37ff8495839b3a54658cb0ea23c52e7da",
   "checkedAt": "<current ISO timestamp>"
 }
 ```
@@ -43,7 +43,7 @@ Expected exact stable fields:
 {
   "schemaVersion": 1,
   "slug": "morax-bountyproof",
-  "commit": "019f0167980d93dcae730dcf2c4467314412edf2"
+  "commit": "8f8fafc37ff8495839b3a54658cb0ea23c52e7da"
 }
 ```
 
@@ -95,16 +95,16 @@ npm ci --ignore-scripts
 npm run check
 npm audit --audit-level=low
 docker build \
-  --build-arg VCS_REF=019f0167980d93dcae730dcf2c4467314412edf2 \
+  --build-arg VCS_REF=8f8fafc37ff8495839b3a54658cb0ea23c52e7da \
   --tag bountyproof:review .
 docker run --detach --rm --name bountyproof-review \
   --publish 127.0.0.1:18787:8787 \
-  --env REVIEW_COMMIT=019f0167980d93dcae730dcf2c4467314412edf2 \
+  --env REVIEW_COMMIT=8f8fafc37ff8495839b3a54658cb0ea23c52e7da \
   bountyproof:review
 curl --fail --silent http://127.0.0.1:18787/health
 docker stop bountyproof-review
 ```
 
-Expected local checks for the review commit: 21 tests pass, TypeScript compiles, npm audit
+Expected local checks for the review commit: 22 tests pass, TypeScript compiles, npm audit
 reports zero vulnerabilities, the container health check becomes healthy, and both
 version endpoints return the exact review commit.
