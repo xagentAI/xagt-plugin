@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "VenueClock",
+    "version": "1.0.0",
+    "description": "Agent-callable market session calendar."
+  },
+  "servers": [{ "url": "https://kele0929.github.io" }],
+  "paths": {
+    "/health.json": {
+      "get": {
+        "summary": "Health and commit binding",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/.well-known/xagent-verification.json": {
+      "get": {
+        "summary": "X-Agent deployment proof",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/v1/venues.json": {
+      "get": {
+        "summary": "List venues",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/v1/venues/{id}.json": {
+      "get": {
+        "summary": "Venue rules",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "ok" }, "404": { "description": "unknown venue" } }
+      }
+    },
+    "/v1/resolve/{id}/{date}.json": {
+      "get": {
+        "summary": "Day schedule",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "date", "in": "path", "required": true, "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": { "200": { "description": "ok" }, "400": { "description": "bad date" }, "404": { "description": "unknown venue" } }
+      }
+    }
+  }
+}
