@@ -1,0 +1,97 @@
+{
+  "capture": {
+    "capturedAt": "2026-09-03T11:46:29.557Z",
+    "deployedCommit": "d3b4d645f75d743616700930bcf027c34c68f5b6",
+    "redactions": ["mission ID", "tracking code", "request ID"]
+  },
+  "mission": {
+    "id": "gm_REDACTED",
+    "title": "Test: Finfold Growth Mission",
+    "hypothesis": "Test whether most small teams do not have a content problem, they have a translation problem, and Finfold can help turn one update into content you can use on different platforms",
+    "audience": "small teams",
+    "primaryMetric": "leads",
+    "platform": "linkedin",
+    "objective": "leads",
+    "locale": "en",
+    "targetValue": 1,
+    "measurementWindowDays": 14,
+    "measurementStartedAt": "2026-09-03T11:46:29.557Z",
+    "measurementDueAt": "2026-09-17T11:46:29.557Z"
+  },
+  "asset": {
+    "format": "LinkedIn post",
+    "title": "Test: Turn one update into content you can use on different platforms",
+    "body": "Test whether most small teams do not have a content problem, they have a translation problem, and Finfold can help turn one update into content you can use on different platforms\n\nPage evidence:\n• Most small teams do not have a content problem. They have a translation problem.\n• Turn one update into content you can use on different platforms\n\nFor small teams, test the response to this angle: https://api.finfold.app/r/REDACTED",
+    "cta": "Review the evidence and test the angle"
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "sectionId": "s37",
+      "quote": "Most small teams do not have a content problem. They have a translation problem.",
+      "confidence": 0.9,
+      "sourceUrl": "https://www.finfold.app/en"
+    },
+    {
+      "id": "e2",
+      "sectionId": "s70",
+      "quote": "Turn one update into content you can use on different platforms",
+      "confidence": 0.9,
+      "sourceUrl": "https://www.finfold.app/en"
+    }
+  ],
+  "claimMap": [
+    {
+      "claim": "Most small teams do not have a content problem. They have a translation problem.",
+      "evidenceIds": ["e1"]
+    },
+    {
+      "claim": "Turn one update into content you can use on different platforms",
+      "evidenceIds": ["e2"]
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "evidenceExactMatch": true,
+    "unsupportedNumbers": [],
+    "platformChecks": {
+      "platform": "linkedin",
+      "characterCount": 457,
+      "characterLimit": 3000,
+      "hasTrackingCta": true
+    },
+    "warnings": []
+  },
+  "tracking": {
+    "destinationUrl": "https://www.finfold.app/en?utm_source=finfold_growth_mission&utm_medium=linkedin&utm_campaign=gm_REDACTED",
+    "trackedUrl": "https://api.finfold.app/r/REDACTED"
+  },
+  "provenance": {
+    "requestId": "REDACTED",
+    "generatedAt": "2026-09-03T11:46:29.557Z",
+    "sourceDigest": "38aff779bb1a014b9f0eb709313aed3d39d57bd9d8c0aea7767919e51fdad29c",
+    "providerAttempts": 1,
+    "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "commit": "d3b4d645f75d743616700930bcf027c34c68f5b6"
+  },
+  "sideEffects": {
+    "persisted": true,
+    "published": false,
+    "externalAccountsModified": false
+  },
+  "attribution": {
+    "clicks": 0,
+    "leads": 0,
+    "signups": 0,
+    "purchases": 0,
+    "revenue": 0,
+    "currencies": []
+  },
+  "outcome": {
+    "verdict": "running",
+    "measuredValue": 0,
+    "targetValue": 1,
+    "measurementDueAt": "2026-09-17T11:46:29.557Z",
+    "nextAction": "Keep the mission running until the measurement window closes; record attributable outcomes as they occur."
+  }
+}
