@@ -1,0 +1,10 @@
+[project]
+name = "titan-edge-mcp"
+version = "1.0.0"
+description = "Autonomous ASIL-D compliant edge MCP server"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
