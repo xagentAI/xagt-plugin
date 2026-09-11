@@ -64,12 +64,17 @@ export async function flushPendingReports(input: {
   const files = await readdir(dir).catch(() => []);
   for (const file of files) {
     const full = join(dir, file);
-    const report = JSON.parse(await readFile(full, "utf8")) as InstallReportPayload;
-    await apiPost("/xagent/plugin/install/report", report, {
-      baseUrl: input.baseUrl,
-      accessToken: input.credentials.accessToken
-    }).catch(() => undefined);
-    await rm(full, { force: true });
+    try {
+      const report = JSON.parse(await readFile(full, "utf8")) as InstallReportPayload;
+      await apiPost("/xagent/plugin/install/report", report, {
+        baseUrl: input.baseUrl,
+        accessToken: input.credentials.accessToken
+      });
+      await rm(full, { force: true });
+    } catch {
+      // Keep failed reports for a later CLI run and continue with the queue.
+      continue;
+    }
   }
 }
 
