@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "MarketMind AI",
+  "slug": "marketmind-ai",
+  "sourceRepository": "https://github.com/gurusankar55/MarketMind-AI",
+  "reviewCommit": "2578c4097be83add08543464b05c628b07425b79",
+  "apiBaseUrl": "https://marketmind-ai-js97.onrender.com",
+  "healthCheckUrl": "https://marketmind-ai-js97.onrender.com/health",
+  "deploymentProofUrl": "https://marketmind-ai-js97.onrender.com/.well-known/xagent-verification.json"
+}
