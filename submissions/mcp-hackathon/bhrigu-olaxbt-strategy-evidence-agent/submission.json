@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "BHRIGU OlaXBT Strategy Evidence Agent",
+  "slug": "bhrigu-olaxbt-strategy-evidence-agent",
+  "sourceRepository": "https://github.com/AiBhrigu/bhrigu-bitcoin-research-state-api",
+  "reviewCommit": "d29423daf121a4318dec063d0694b5fec8eb2ed3",
+  "apiBaseUrl": "https://bhrigu-bitcoin-research-state-rn4vpiwc8-aibhrigus-projects.vercel.app",
+  "healthCheckUrl": "https://bhrigu-bitcoin-research-state-rn4vpiwc8-aibhrigus-projects.vercel.app/health",
+  "deploymentProofUrl": "https://bhrigu-bitcoin-research-state-rn4vpiwc8-aibhrigus-projects.vercel.app/.well-known/xagent-verification.json"
+}
