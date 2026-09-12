@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: code-review-agent
+    runtime: docker
+    plan: free
+    envVars:
+      - key: COMMIT
+        sync: false
+      - key: LLM_BASE_URL
+        value: https://api.deepseek.com/v1
+      - key: LLM_MODEL
+        value: deepseek-chat
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_TIMEOUT_SECONDS
+        value: "120"
+    healthCheckPath: /health
+    autoDeploy: true

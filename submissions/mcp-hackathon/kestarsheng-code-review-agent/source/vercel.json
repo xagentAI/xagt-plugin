@@ -1,0 +1,17 @@
+{
+  "services": {
+    "code-review-agent": {
+      "root": ".",
+      "entrypoint": "api/index.py"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "code-review-agent"
+      }
+    }
+  ]
+}

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Review Agent — Dual-Engine AI Code Review</title>
+<meta name="description" content="Rule engine + LLM semantic analysis + cross-validation, producing structured reports with per-dimension scores and applicable fix code.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<style>
+/* ═══ Design System ═══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg-2:#0f0f17;--surface:rgba(255,255,255,.03);--surface-2:rgba(255,255,255,.05);
+  --border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.12);
+  --text:#f4f4f5;--text-2:#a1a1aa;--text-3:#71717a;
+  --primary:#5e6ad2;--primary-2:#6e6af0;--primary-glow:rgba(94,106,210,.4);
+  --accent:#0ea5e9;--success:#22c55e;--warn:#f59e0b;--danger:#ef4444;
+  --radius:12px;--radius-sm:8px;--font:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  --shadow:0 2px 8px rgba(0,0,0,.3);--shadow-lg:0 8px 32px rgba(0,0,0,.4);
+}
+[data-theme="light"]{
+  --bg:#fafafb;--bg-2:#f4f4f7;--surface:rgba(0,0,0,.02);--surface-2:rgba(0,0,0,.04);
+  --border:rgba(0,0,0,.08);--border-2:rgba(0,0,0,.12);
+  --text:#18181b;--text-2:#52525b;--text-3:#a1a1aa;
+  --shadow:0 2px 8px rgba(0,0,0,.06);--shadow-lg:0 8px 32px rgba(0,0,0,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+code{font-family:var(--mono);font-size:.85em}
+
+/* ═══ Nav ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(12px);background:rgba(10,10,15,.7);border-bottom:1px solid var(--border);transition:background .3s}
+[data-theme="light"] nav{background:rgba(250,250,251,.8)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1rem;letter-spacing:-.02em}
+.nav-logo .dot{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:.85rem;color:var(--text-2);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.theme-toggle,.lang-toggle{height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;color:var(--text)}
+.theme-toggle{width:36px}
+.lang-toggle{padding:0 10px;font-weight:600;font-size:.78rem}
+.theme-toggle:hover,.lang-toggle:hover{border-color:var(--border-2);background:var(--surface-2)}
+.nav-cta{font-size:.82rem;font-weight:600;padding:7px 14px;border-radius:8px;background:var(--primary);color:#fff;border:0;cursor:pointer;transition:all .2s}
+.nav-cta:hover{background:var(--primary-2);transform:translateY(-1px)}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ═══ Hero ═══ */
+.hero{position:relative;padding:140px 24px 80px;text-align:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;opacity:.5}
+.hero-bg::before{content:"";position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(94,106,210,.15),transparent 60%);filter:blur(40px)}
+.hero-bg::after{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border-2),transparent)}
+.hero-content{position:relative;z-index:1;max-width:720px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;border:1px solid var(--border);background:var(--surface);font-size:.78rem;color:var(--text-2);margin-bottom:24px}
+.hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.hero h1 .grad{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.05rem;color:var(--text-2);max-width:560px;margin:0 auto 32px}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:var(--primary);color:#fff;font-weight:600;font-size:.9rem;border:0;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px var(--primary-glow)}
+.btn-primary:hover{background:var(--primary-2);transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;border:1px solid var(--border-2);background:var(--surface);color:var(--text);font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s}
+.btn-ghost:hover{background:var(--surface-2);border-color:var(--primary);transform:translateY(-1px)}
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-top:48px}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+.hero-stat .lbl{font-size:.78rem;color:var(--text-3);margin-top:2px}
+
+/* ═══ Section ═══ */
+section{padding:80px 24px}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-head{text-align:center;margin-bottom:48px}
+.section-head h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+.section-head p{color:var(--text-2);font-size:.95rem;max-width:480px;margin:0 auto}
+
+/* ═══ Features ═══ */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.feature-card{padding:24px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);transition:all .3s;position:relative;overflow:hidden}
+.feature-card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent);opacity:0;transition:opacity .3s}
+.feature-card:hover{border-color:var(--border-2);background:var(--surface-2);transform:translateY(-2px)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;background:var(--surface-2);border:1px solid var(--border)}
+.feature-card h3{font-size:1rem;font-weight:700;margin-bottom:6px}
+.feature-card p{font-size:.85rem;color:var(--text-2);line-height:1.5}
+
+/* ═══ Demo ═══ */
+.demo-section{background:var(--bg-2)}
+.demo-card{max-width:960px;margin:0 auto;border-radius:16px;border:1px solid var(--border);background:var(--bg);overflow:hidden;box-shadow:var(--shadow-lg)}
+.demo-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 4px}
+.demo-tab{padding:14px 18px;font-size:.85rem;font-weight:600;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.demo-tab:hover{color:var(--text-2)}
+.demo-tab.active{color:var(--text);border-bottom-color:var(--primary)}
+.demo-body{padding:24px}
+.demo-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.demo-row input{flex:1;min-width:140px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;background:var(--surface);color:var(--text);outline:none;transition:border-color .2s}
+.demo-row input:focus{border-color:var(--primary)}
+textarea,pre.code{width:100%;min-height:200px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--mono);font-size:.82rem;resize:vertical;background:var(--bg-2);color:var(--text);outline:none;line-height:1.6;transition:border-color .2s}
+textarea:focus{border-color:var(--primary)}
+pre.code{background:#0d1117!important;color:#e2e8f0!important;min-height:60px;white-space:pre-wrap;word-break:break-word;border:0;padding:12px;border-radius:var(--radius-sm)}
+.demo-hint{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:var(--text-2)}
+.demo-hint b{color:var(--text)}
+.demo-hint code{background:var(--surface-2);padding:2px 6px;border-radius:5px}
+.btn-run{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius-sm);background:var(--primary);color:#fff;font-weight:600;font-size:.88rem;border:0;cursor:pointer;margin-top:12px;transition:all .2s}
+.btn-run:hover{background:var(--primary-2);transform:translateY(-1px)}
+.btn-run:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.demo-status{font-size:.8rem;color:var(--text-3);margin-top:8px}
+
+/* ═══ Report ═══ */
+.report-card{max-width:960px;margin:16px auto 0;border-radius:16px;border:1px solid var(--border);background:var(--bg);padding:24px;box-shadow:var(--shadow)}
+.report-empty{color:var(--text-3);text-align:center;padding:40px 0;font-size:.9rem}
+.report-head{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.score-ring{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.score-ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--bg)}
+.score-ring .val{position:relative;z-index:1;font-size:1.4rem;font-weight:800;line-height:1}
+.score-ring .grade{position:relative;z-index:1;font-size:.72rem;color:var(--text-3)}
+.report-meta{flex:1;min-width:200px}
+.report-meta h4{font-size:.95rem;font-weight:600;margin-bottom:4px;line-height:1.4}
+.report-meta .sub{font-size:.8rem;color:var(--text-3)}
+.dim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.dim{background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px}
+.dim-top{display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;margin-bottom:5px}
+.dim-bar{height:6px;border-radius:99px;background:var(--border);overflow:hidden}
+.dim-bar i{display:block;height:100%;border-radius:99px;transition:width .8s ease}
+.eng-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+.eng{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center;background:var(--surface)}
+.eng .n{font-size:1.2rem;font-weight:800}
+.eng .l{font-size:.72rem;color:var(--text-3);margin-top:2px}
+.eng.rule .n{color:var(--success)}.eng.llm .n{color:var(--primary)}.eng.conf .n{color:#a855f7}
+.issue{border:1px solid var(--border);border-left:3px solid var(--text-3);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:12px 14px;margin:8px 0;background:var(--surface);cursor:pointer;transition:all .2s}
+.issue:hover{background:var(--surface-2);border-left-color:var(--primary)}
+.issue.open{background:var(--surface-2)}
+.issue-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.84rem;font-weight:600}
+.issue-body{display:none;margin-top:10px}
+.issue.open .issue-body{display:block}
+.issue-body p{margin:6px 0;font-size:.82rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700}
+.b-critical{background:rgba(239,68,68,.15);color:#f87171}.b-major{background:rgba(249,115,22,.15);color:#fb923c}
+.b-minor{background:rgba(245,158,11,.15);color:#fbbf24}.b-info{background:rgba(59,130,246,.15);color:#60a5fa}
+.b-rule{background:rgba(34,197,94,.15);color:#4ade80}.b-llm{background:rgba(94,106,210,.15);color:#818cf8}
+.b-confirmed{background:rgba(168,85,247,.15);color:#c084fc}
+.tag{color:var(--text-3);font-size:.76rem}
+.fix-block{margin-top:8px}
+.copy-btn{background:var(--surface-2);color:var(--text-2);border:1px solid var(--border);border-radius:6px;font-size:.74rem;padding:4px 10px;cursor:pointer;margin-top:6px;transition:all .2s}
+.copy-btn:hover{border-color:var(--primary);color:var(--text)}
+.copy-btn.apply{background:var(--success);color:#fff;border-color:var(--success)}
+ul.plain{margin:8px 0;padding-left:18px}ul.plain li{margin:4px 0;font-size:.85rem}
+.report-section-title{font-size:.88rem;font-weight:700;margin:20px 0 8px;display:flex;align-items:center;gap:6px}
+
+/* ═══ API Section ═══ */
+.api-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:960px;margin:0 auto}
+.api-card{padding:20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);transition:all .2s}
+.api-card:hover{border-color:var(--border-2);background:var(--surface-2)}
+.api-method{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.72rem;font-weight:700;font-family:var(--mono)}
+.api-get{background:rgba(34,197,94,.15);color:#4ade80}
+.api-post{background:rgba(94,106,210,.15);color:#818cf8}
+.api-card .path{font-family:var(--mono);font-size:.85rem;margin:8px 0;color:var(--text)}
+.api-card .desc{font-size:.8rem;color:var(--text-2)}
+
+/* ═══ Footer ═══ */
+footer{border-top:1px solid var(--border);padding:40px 24px;background:var(--bg-2)}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.footer-left{display:flex;align-items:center;gap:10px}
+.footer-left .dot{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.footer-left span{font-weight:700;font-size:.9rem}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:.82rem;color:var(--text-3);transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:.78rem;color:var(--text-3)}
+
+/* ═══ Toast ═══ */
+#toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--bg-2);border:1px solid var(--border-2);color:var(--text);padding:8px 18px;border-radius:99px;font-size:.82rem;z-index:200;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .3s}
+</style>
+</head>
+<body>
+
+<!-- ═══ Nav ═══ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><span class="dot">🔍</span> Code Review Agent</a>
+    <div class="nav-links">
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#demo" data-i18n="nav.demo">Try Online</a>
+      <a href="#api">API</a>
+      <a href="https://github.com/kestarsheng/code-review-agent" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-actions">
+      <button class="lang-toggle" onclick="toggleLang()" id="lang-btn">中文</button>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️</button>
+      <button class="nav-cta" onclick="document.getElementById('demo').scrollIntoView()" data-i18n="nav.cta">Try Now</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="pulse"></span> <span data-i18n="hero.badge">Dual-engine review · Out of the box · Multi-language</span></div>
+    <h1 data-i18n-html="hero.title">Make every line of code<br>go through <span class="grad">dual-engine review</span></h1>
+    <p data-i18n="hero.desc">Rule engine performs deterministic static scan, LLM does semantic deep analysis, cross-validation reduces false positives. Outputs 5-dimension scores and directly applicable fix code.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView()" data-i18n="hero.tryBtn">🚀 Try Online</button>
+      <button class="btn-ghost" onclick="copyCli()" data-i18n="hero.cliBtn">📋 Copy CLI Command</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">26</div><div class="lbl" data-i18n="hero.statRules">Built-in Rules</div></div>
+      <div class="hero-stat"><div class="num">5</div><div class="lbl" data-i18n="hero.statDims">Dimension Scores</div></div>
+      <div class="hero-stat"><div class="num">7</div><div class="lbl" data-i18n="hero.statMcp">MCP Tools</div></div>
+      <div class="hero-stat"><div class="num">4</div><div class="lbl" data-i18n="hero.statLangs">Languages</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Features ═══ -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-head">
+      <h2 data-i18n="features.title">Why Dual-Engine</h2>
+      <p data-i18n="features.desc">A single rule engine only finds known patterns; a single LLM may miss issues. Dual-engine cross-validation balances determinism and depth.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 data-i18n="features.f1t">Rule Engine — Deterministic Scan</h3>
+        <p data-i18n="features.f1d">22 cross-language rules covering security vulnerabilities, performance anti-patterns, AI hallucination patterns. Millisecond response, zero API cost, offline capable.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3 data-i18n="features.f2t">LLM Semantic Analysis — Deep Understanding</h3>
+        <p data-i18n="features.f2d">Receives rule pre-scan results then does semantic review: logic errors, architecture flaws, business boundaries. Confirms or denies rule hits, eliminating false positives.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✅</div>
+        <h3 data-i18n="features.f3t">Cross-Validation — 3-Level Traceability</h3>
+        <p data-i18n="features.f3d">Each issue is tagged with source: rule (engine only), llm (LLM only), confirmed (both agree). Confidence auto-boosted.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 data-i18n="features.f4t">5-Dimension Scoring — Quantified Quality</h3>
+        <p data-i18n="features.f4d">Correctness, Security, Performance, Maintainability, Best Practice — each 0–100. Composite score weighted: security 30% + correctness 25%.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔧</div>
+        <h3 data-i18n="features.f5t">Fix Code — Directly Applicable</h3>
+        <p data-i18n="features.f5d">Each issue includes a fix_code snippet, copy-paste ready. Rule engine auto-generates for 8 key rule types, LLM covers complex scenarios.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <h3 data-i18n="features.f6t">MCP + REST — Dual Protocol</h3>
+        <p data-i18n="features.f6d">7 MCP tools for Agent calls, REST API for integration. Remote /mcp endpoint and /v1/* coexist on the same server.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Demo ═══ -->
+<section id="demo" class="demo-section">
+  <div class="section-inner">
+    <div class="section-head">
+      <h2 data-i18n="demo.title">Try Online</h2>
+      <p data-i18n="demo.desc">Paste code or diff, click review. Or use CLI: <code>python cli.py --commit HEAD~1</code></p>
+    </div>
+    <div class="demo-card">
+      <div class="demo-tabs">
+        <div class="demo-tab active" id="tab-code" onclick="switchTab('code')" data-i18n="demo.tabCode">Code Review</div>
+        <div class="demo-tab" id="tab-diff" onclick="switchTab('diff')" data-i18n="demo.tabDiff">Diff Review</div>
+        <div class="demo-tab" id="tab-files" onclick="switchTab('files')" data-i18n="demo.tabFiles">Multi-File</div>
+        <div class="demo-tab" id="tab-fix" onclick="switchTab('fix')" data-i18n="demo.tabFix">Auto Fix</div>
+      </div>
+      <div class="demo-body">
+        <div class="demo-row">
+          <input id="language" data-i18n-ph="demo.phLang" placeholder="Language (python / java / js / go)" value="python">
+          <input id="context" data-i18n-ph="demo.phCtx" placeholder="Task context (optional)" style="flex:2;">
+        </div>
+        <div id="single-block">
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px" id="code-label" data-i18n="demo.lblCode">Source Code</label>
+          <textarea id="code" spellcheck="false">def get_user(user_id):
+    query = f"SELECT * FROM users WHERE id = {user_id}"
+    return db.execute(query).fetchone()
+
+def save_profile(user):
+    password = "hardcoded123456"
+    db.execute(f"UPDATE users SET bio = '{user['bio']}' WHERE id = {user['id']}")
+    db.commit()</textarea>
+        </div>
+        <div id="files-block" style="display:none;">
+          <div class="demo-hint" data-i18n="demo.hint">💡 <b>CLI recommended:</b><code>python cli.py --staged</code> or <code>python cli.py --commit HEAD~1</code> to review git changes directly, no pasting needed.</div>
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px" data-i18n="demo.lblFiles">Multi-file (separate with <code># == filename ==</code>)</label>
+          <textarea id="files-area" spellcheck="false"># == utils.py ==
+import os
+
+def load_config(path):
+    token = "sk-1234567890abcdef"
+    data = open(path).read()
+    return eval(data)
+
+# == main.py ==
+from utils import load_config
+
+def handler(event, context):
+    cfg = load_config("config.txt")
+    result = eval(event["body"])
+    return {"statusCode": 200, "body": result}</textarea>
+        </div>
+        <button class="btn-run" id="btn" data-i18n="demo.runBtn">▶ Start Review</button>
+        <div class="demo-status" id="status"></div>
+      </div>
+    </div>
+    <div class="report-card" id="result-card">
+      <div class="report-empty" id="report" data-i18n="demo.emptyResult">Click "Start Review" to see results</div>
+    </div>
+    <div class="report-card" id="fix-card" style="display:none;">
+      <h3 style="font-size:.9rem;font-weight:700;margin-bottom:12px" data-i18n="demo.fixTitle">🔧 Fix Solution</h3>
+      <div id="fix-report"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ API ═══ -->
+<section id="api">
+  <div class="section-inner">
+    <div class="section-head">
+      <h2 data-i18n="api.title">API Overview</h2>
+      <p data-i18n="api.desc">REST API and MCP tools coexist on the same server, ready to use after deployment.</p>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><span class="api-method api-post">POST</span><div class="path">/v1/review</div><div class="desc" data-i18n="api.r1">Review source code, return 5-dimension scores + issues + fix code</div></div>
+      <div class="api-card"><span class="api-method api-post">POST</span><div class="path">/v1/review_diff</div><div class="desc" data-i18n="api.r2">Review Unified Diff, return change metadata + review report</div></div>
+      <div class="api-card"><span class="api-method api-post">POST</span><div class="path">/v1/review_files</div><div class="desc" data-i18n="api.r3">Multi-file batch review, per-file scan + cross-file analysis</div></div>
+      <div class="api-card"><span class="api-method api-post">POST</span><div class="path">/v1/suggest_fix</div><div class="desc" data-i18n="api.r4">Generate complete fixed version (fixed_code + change notes)</div></div>
+      <div class="api-card"><span class="api-method api-get">GET</span><div class="path">/v1/rules</div><div class="desc" data-i18n="api.r5">List all 26 rule engine rules</div></div>
+      <div class="api-card"><span class="api-method api-get">GET</span><div class="path">/v1/rules/{rule_id}</div><div class="desc" data-i18n="api.r6">View single rule details and fix guidance</div></div>
+      <div class="api-card"><span class="api-method api-get">GET</span><div class="path">/mcp</div><div class="desc" data-i18n="api.r7">Remote MCP streamable HTTP endpoint (7 tools)</div></div>
+      <div class="api-card"><span class="api-method api-get">GET</span><div class="path">/health</div><div class="desc" data-i18n="api.r8">Health check, returns deployment commit</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <span class="dot">🔍</span>
+      <span>Code Review Agent</span>
+    </div>
+    <div class="footer-links">
+      <a href="#features" data-i18n="footer.features">Features</a>
+      <a href="#demo" data-i18n="footer.demo">Try</a>
+      <a href="#api">API</a>
+      <a href="https://github.com/kestarsheng/code-review-agent" target="_blank">GitHub</a>
+      <a href="https://code-review-agent-ashy-six.vercel.app/docs" target="_blank">Swagger</a>
+    </div>
+    <div class="footer-copy">X-Agent Hackathon 2026 · kestarsheng</div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+<script>
+/* ═══ i18n ═══ */
+const I18N={
+  en:{
+    "nav.features":"Features","nav.demo":"Try Online","nav.cta":"Try Now",
+    "hero.badge":"Dual-engine review · Out of the box · Multi-language",
+    "hero.title":'Make every line of code<br>go through <span class="grad">dual-engine review</span>',
+    "hero.desc":"Rule engine performs deterministic static scan, LLM does semantic deep analysis, cross-validation reduces false positives. Outputs 5-dimension scores and directly applicable fix code.",
+    "hero.tryBtn":"🚀 Try Online","hero.cliBtn":"📋 Copy CLI Command",
+    "hero.statRules":"Built-in Rules","hero.statDims":"Dimension Scores","hero.statMcp":"MCP Tools","hero.statLangs":"Languages",
+    "features.title":"Why Dual-Engine","features.desc":"A single rule engine only finds known patterns; a single LLM may miss issues. Dual-engine cross-validation balances determinism and depth.",
+    "features.f1t":"Rule Engine — Deterministic Scan","features.f1d":"22 cross-language rules covering security vulnerabilities, performance anti-patterns, AI hallucination patterns. Millisecond response, zero API cost, offline capable.",
+    "features.f2t":"LLM Semantic Analysis — Deep Understanding","features.f2d":"Receives rule pre-scan results then does semantic review: logic errors, architecture flaws, business boundaries. Confirms or denies rule hits, eliminating false positives.",
+    "features.f3t":"Cross-Validation — 3-Level Traceability","features.f3d":"Each issue is tagged with source: rule (engine only), llm (LLM only), confirmed (both agree). Confidence auto-boosted.",
+    "features.f4t":"5-Dimension Scoring — Quantified Quality","features.f4d":"Correctness, Security, Performance, Maintainability, Best Practice — each 0–100. Composite score weighted: security 30% + correctness 25%.",
+    "features.f5t":"Fix Code — Directly Applicable","features.f5d":"Each issue includes a fix_code snippet, copy-paste ready. Rule engine auto-generates for 8 key rule types, LLM covers complex scenarios.",
+    "features.f6t":"MCP + REST — Dual Protocol","features.f6d":"7 MCP tools for Agent calls, REST API for integration. Remote /mcp endpoint and /v1/* coexist on the same server.",
+    "demo.title":"Try Online","demo.desc":"Paste code or diff, click review. Or use CLI: <code>python cli.py --commit HEAD~1</code>",
+    "demo.tabCode":"Code Review","demo.tabDiff":"Diff Review","demo.tabFiles":"Multi-File","demo.tabFix":"Auto Fix",
+    "demo.phLang":"Language (python / java / js / go)","demo.phCtx":"Task context (optional)",
+    "demo.lblCode":"Source Code","demo.lblFiles":"Multi-file (separate with <code># == filename ==</code>)",
+    "demo.hint":"💡 <b>CLI recommended:</b><code>python cli.py --staged</code> or <code>python cli.py --commit HEAD~1</code> to review git changes directly, no pasting needed.",
+    "demo.runBtn":"▶ Start Review","demo.emptyResult":'Click "Start Review" to see results',"demo.fixTitle":"🔧 Fix Solution",
+    "api.title":"API Overview","api.desc":"REST API and MCP tools coexist on the same server, ready to use after deployment.",
+    "api.r1":"Review source code, return 5-dimension scores + issues + fix code","api.r2":"Review Unified Diff, return change metadata + review report",
+    "api.r3":"Multi-file batch review, per-file scan + cross-file analysis","api.r4":"Generate complete fixed version (fixed_code + change notes)",
+    "api.r5":"List all 26 rule engine rules","api.r6":"View single rule details and fix guidance",
+    "api.r7":"Remote MCP streamable HTTP endpoint (7 tools)","api.r8":"Health check, returns deployment commit",
+    "footer.features":"Features","footer.demo":"Try",
+    "dim.correctness":"Correctness","dim.security":"Security","dim.performance":"Performance","dim.maintainability":"Maintainability","dim.best_practice":"Best Practice",
+    "eng.rule":"⚡ Rule Hits","eng.llm":"🧠 LLM Found","eng.conf":"✅ Cross-Confirmed","eng.total":"🔍 Rules Run",
+    "issue.noIssues":"✅ No issues found","issue.category":"Category:","issue.suggestion":"Suggestion:",
+    "issue.fixCode":"Fix code:","report.dims":"📊 Dimension Scores","report.issues":"🚨 Issues","report.strengths":"👍 Strengths","report.improvements":"🚀 Improvements",
+    "report.model":"Model:","report.issuesCount":"issues","report.grade":"grade",
+    "toast.copied":"Copied ✅","toast.copyFail":"Copy failed","toast.cliCopied":"CLI command copied ✅","toast.applied":"Applied to input box",
+    "demo.reviewing":"⏳ Dual-engine reviewing (3-10s)...","demo.reviewingShort":"⏳ Reviewing...","demo.done":"✅ Review complete","demo.pasteFirst":"Please paste content first",
+    "demo.fixGenerated":"✅ Fix solution generated","demo.fixDetected":"rule issues detected","demo.copyFix":"📋 Copy fix code",
+    "demo.applied":"Fix code applied to input box","demo.noFiles":"No files parsed",
+  },
+  zh:{
+    "nav.features":"功能","nav.demo":"在线试用","nav.cta":"立即试用",
+    "hero.badge":"双引擎评审 · 开箱即用 · 多语言支持",
+    "hero.title":'让每一行代码<br>都经过<span class="grad"> 双引擎评审</span>',
+    "hero.desc":"规则引擎做确定性静态扫描，LLM 做语义级深度分析，交叉验证降低误报。输出五维度评分和可直接应用的修复代码。",
+    "hero.tryBtn":"🚀 在线试用","hero.cliBtn":"📋 复制 CLI 命令",
+    "hero.statRules":"内置规则","hero.statDims":"维度评分","hero.statMcp":"MCP 工具","hero.statLangs":"语言覆盖",
+    "features.title":"为什么选择双引擎","features.desc":"单一规则引擎只能发现已知模式，单一 LLM 容易漏报。双引擎交叉验证兼顾确定性与深度。",
+    "features.f1t":"规则引擎 — 确定性扫描","features.f1d":"26 条跨语言规则覆盖安全漏洞、性能反模式、AI 幻觉模式。毫秒级返回，零 API 成本，离线可跑。",
+    "features.f2t":"LLM 语义分析 — 深度理解","features.f2d":"接收规则预检结果后做语义级评审：逻辑错误、架构缺陷、业务边界。确认或否定规则命中，消除误报。",
+    "features.f3t":"交叉验证 — 三级溯源","features.f3d":"每个 issue 标注来源：rule（仅规则）、llm（仅 LLM）、confirmed（双引擎一致）。置信度自动提升。",
+    "features.f4t":"五维度评分 — 量化质量","features.f4d":"正确性、安全性、性能、可维护性、最佳实践各 0–100 分。综合分按安全 30% + 正确性 25% 加权。",
+    "features.f5t":"修复代码 — 可直接应用","features.f5d":"每个 issue 附带 fix_code 片段，复制即可替换。规则引擎为 8 类关键规则自动生成，LLM 覆盖复杂场景。",
+    "features.f6t":"MCP + REST — 双协议","features.f6d":"7 个 MCP 工具供 Agent 调用，REST API 供集成。远程 /mcp 端点与 /v1/* 共存于同一服务器。",
+    "demo.title":"在线试用","demo.desc":"粘贴代码或 diff，点击评审。也可用 CLI 一键评审 git 改动：<code>python cli.py --commit HEAD~1</code>",
+    "demo.tabCode":"代码评审","demo.tabDiff":"Diff 评审","demo.tabFiles":"多文件","demo.tabFix":"自动修复",
+    "demo.phLang":"语言 (python / java / js / go)","demo.phCtx":"任务上下文（可选）",
+    "demo.lblCode":"源代码","demo.lblFiles":"多文件（用 <code># == 文件名 ==</code> 分隔）",
+    "demo.hint":"💡 <b>推荐用 CLI：</b><code>python cli.py --staged</code> 或 <code>python cli.py --commit HEAD~1</code> 直接评审 git 改动，无需手动粘贴。",
+    "demo.runBtn":"▶ 开始评审","demo.emptyResult":"点击「开始评审」查看结果","demo.fixTitle":"🔧 修复方案",
+    "api.title":"API 一览","api.desc":"REST API 与 MCP 工具共存于同一服务器，部署后即可使用。",
+    "api.r1":"评审源代码，返回五维度评分 + 问题列表 + 修复代码","api.r2":"评审 Unified Diff，返回变更元数据 + 评审报告",
+    "api.r3":"多文件批量评审，per-file 扫描 + 跨文件架构分析","api.r4":"为问题代码生成完整修复版本（fixed_code + 变更说明）",
+    "api.r5":"列出全部 26 条规则引擎规则","api.r6":"查看单条规则详情与修复指引",
+    "api.r7":"远程 MCP streamable HTTP 端点（7 个工具）","api.r8":"健康检查，返回部署 commit",
+    "footer.features":"功能","footer.demo":"试用",
+    "dim.correctness":"正确性","dim.security":"安全性","dim.performance":"性能","dim.maintainability":"可维护性","dim.best_practice":"最佳实践",
+    "eng.rule":"⚡ 规则命中","eng.llm":"🧠 LLM 发现","eng.conf":"✅ 交叉确认","eng.total":"🔍 规则执行",
+    "issue.noIssues":"✅ 未发现问题","issue.category":"类别：","issue.suggestion":"建议：",
+    "issue.fixCode":"修复代码：","report.dims":"📊 分维度评分","report.issues":"🚨 问题","report.strengths":"👍 优点","report.improvements":"🚀 改进方向",
+    "report.model":"模型：","report.issuesCount":"个问题","report.grade":"级",
+    "toast.copied":"已复制 ✅","toast.copyFail":"复制失败","toast.cliCopied":"已复制 CLI 命令 ✅","toast.applied":"已应用到输入框",
+    "demo.reviewing":"⏳ 双引擎评审中（3-10 秒）...","demo.reviewingShort":"⏳ 评审中...","demo.done":"✅ 评审完成","demo.pasteFirst":"请先粘贴内容",
+    "demo.fixGenerated":"✅ 修复方案已生成","demo.fixDetected":"个规则问题","demo.copyFix":"📋 复制修复代码",
+    "demo.applied":"已应用修复代码到输入框","demo.noFiles":"未解析到文件",
+  }
+};
+let LANG='en';
+function t(key){return(I18N[LANG]||I18N.en)[key]||key}
+function applyLang(lang){
+  LANG=lang;
+  document.documentElement.lang=lang==='zh'?'zh-CN':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.innerHTML=t(el.dataset.i18n)});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=t(el.dataset.i18nPh)});
+  document.getElementById('lang-btn').textContent=lang==='en'?'中文':'EN';
+  try{localStorage.setItem('cr-lang',lang)}catch(e){}
+}
+function toggleLang(){applyLang(LANG==='en'?'zh':'en')}
+
+/* ═══ Theme ═══ */
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('theme-btn').textContent=next==='dark'?'☀️':'🌙';
+  try{localStorage.setItem('cr-theme',next)}catch(e){}
+}
+(function(){try{const s=localStorage.getItem('cr-theme')||'dark';document.documentElement.setAttribute('data-theme',s);document.getElementById('theme-btn').textContent=s==='dark'?'☀️':'🌙'}catch(e){}})();
+
+/* ═══ CLI copy ═══ */
+function copyCli(){
+  navigator.clipboard.writeText('python cli.py --commit HEAD~1 --remote').then(()=>toast(t('toast.cliCopied'))).catch(()=>toast(t('toast.copyFail')))
+}
+let toastT=null;
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.style.opacity='1';clearTimeout(toastT);toastT=setTimeout(()=>e.style.opacity='0',1800)}
+
+/* ═══ Demo logic ═══ */
+let mode='code';
+const btn=document.getElementById('btn');
+const statusEl=document.getElementById('status');
+const reportEl=document.getElementById('report');
+const fixReportEl=document.getElementById('fix-report');
+const fixCard=document.getElementById('fix-card');
+const codeEl=document.getElementById('code');
+const filesBlock=document.getElementById('files-block');
+const singleBlock=document.getElementById('single-block');
+
+function switchTab(tab){
+  mode=tab;
+  ['code','diff','files','fix'].forEach(tt=>document.getElementById('tab-'+tt).classList.toggle('active',tt===tab));
+  const isFiles=tab==='files';
+  filesBlock.style.display=isFiles?'block':'none';
+  singleBlock.style.display=(tab==='fix')?'block':(isFiles?'none':'block');
+  fixCard.style.display='none';
+  const label=document.getElementById('code-label');
+  if(tab==='diff'){label.textContent='Unified Diff';codeEl.placeholder=LANG==='zh'?'粘贴 git diff 输出...':'Paste git diff output...'}
+  else if(tab==='fix'){label.innerHTML=t('demo.lblCode');codeEl.placeholder=LANG==='zh'?'粘贴有问题的代码...':'Paste problematic code...'}
+  else{label.innerHTML=t('demo.lblCode');codeEl.placeholder=LANG==='zh'?'粘贴要评审的代码...':'Paste code to review...'}
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function attrEsc(s){return esc(s).replace(/"/g,'&quot;')}
+function gradeColor(g){return{'A':'#22c55e','B':'#3b82f6','C':'#f59e0b','D':'#ef4444'}[g]||'#71717a'}
+
+function hl(code,lang){
+  let text=String(code||'');
+  if(window.hljs&&text.trim()){try{const w=(lang||'python').toLowerCase();return hljs.highlight(text,{language:hljs.getLanguage(w)?w:'python'}).value}catch(e){}try{return hljs.highlightAuto(text).value}catch(e){}}
+  let html=esc(text);
+  html=html.replace(/(#[^\n]*)/g,'<span style="color:#64748b">$1</span>');
+  html=html.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span style="color:#f59e0b">$1</span>');
+  html=html.replace(/\b(def|class|import|from|return|if|elif|else|for|while|try|except|with|async|await|const|let|var|function)\b/g,'<span style="color:#c084fc">$1</span>');
+  return html;
+}
+
+function renderDims(dim){
+  if(!dim)return'';
+  const labels={correctness:t('dim.correctness'),security:t('dim.security'),performance:t('dim.performance'),maintainability:t('dim.maintainability'),best_practice:t('dim.best_practice')};
+  return'<div class="dim-grid">'+Object.keys(labels).map(k=>{
+    const v=dim[k]??0;const c=v>=85?'#22c55e':v>=70?'#3b82f6':v>=50?'#f59e0b':'#ef4444';
+    return`<div class="dim"><div class="dim-top"><span>${labels[k]}</span><span style="color:${c}">${v}</span></div><div class="dim-bar"><i style="width:${v}%;background:${c}"></i></div></div>`;
+  }).join('')+'</div>';
+}
+
+function renderEng(info){
+  if(!info||!info.engines)return'';
+  return`<div class="eng-grid">
+    <div class="eng rule"><div class="n">${info.rule_count||0}</div><div class="l">${t('eng.rule')}</div></div>
+    <div class="eng llm"><div class="n">${info.llm_count||0}</div><div class="l">${t('eng.llm')}</div></div>
+    <div class="eng conf"><div class="n">${info.confirmed_count||0}</div><div class="l">${t('eng.conf')}</div></div>
+    <div class="eng"><div class="n">${info.total_rules_run||0}</div><div class="l">${t('eng.total')}</div></div>
+  </div>`;
+}
+
+function renderIssues(report){
+  if(!report.issues||!report.issues.length)return`<p style="color:var(--text-3)">${t('issue.noIssues')}</p>`;
+  return report.issues.map((i,idx)=>{
+    const line=i.line?` · ${i.line}`:'';
+    const src=i.source?`<span class="badge b-${i.source}">${i.source}</span>`:'';
+    const rid=i.rule_id?`<span class="tag">${esc(i.rule_id)}</span>`:'';
+    const conf=(i.confidence!=null)?`<span class="tag">${(i.confidence*100|0)}%</span>`:'';
+    const fix=i.fix_code?`<div class="fix-block"><p style="color:var(--text-3);font-size:.78rem;margin-bottom:4px">${t('issue.fixCode')}</p><pre class="code"><code>${hl(i.fix_code)}</code></pre><button class="copy-btn" onclick="copyText(this.dataset.c)" data-c="${attrEsc(i.fix_code)}">📋 ${LANG==='zh'?'复制':'Copy'}</button><button class="copy-btn apply" onclick="applyFix(${idx})">⚡ ${LANG==='zh'?'应用':'Apply'}</button></div>`:'';
+    return`<div class="issue" onclick="this.classList.toggle('open')"><div class="issue-top"><span class="badge b-${i.severity}">${i.severity}</span>${src}${esc(i.title)}${line}${rid}${conf}</div><div class="issue-body"><p><b>${t('issue.category')}</b>${esc(i.category)}</p><p>${esc(i.description)}</p><p style="color:var(--text-3)"><b>${t('issue.suggestion')}</b>${esc(i.suggestion)}</p>${fix}</div></div>`;
+  }).join('');
+}
+
+function renderReport(r,model){
+  const sc=gradeColor(r.grade);
+  return`<div class="report-head">
+    <div class="score-ring" style="background:conic-gradient(${sc} ${r.score*3.6}deg,var(--border) 0)">
+      <span class="val" style="color:${sc}">${r.score}</span><span class="grade">${r.grade}${t('report.grade')}</span>
+    </div>
+    <div class="report-meta"><h4>${esc(r.summary)}</h4><div class="sub">${t('report.model')}${esc(model||'')} · ${(r.issues||[]).length} ${t('report.issuesCount')}</div></div>
+  </div>${renderEng(r.engine_info)}<div class="report-section-title">${t('report.dims')}</div>${renderDims(r.dimension_scores)}<div class="report-section-title">${t('report.issues')} (${(r.issues||[]).length})</div>${renderIssues(r)}${(r.strengths&&r.strengths.length)?`<div class="report-section-title">${t('report.strengths')}</div><ul class="plain">${r.strengths.map(s=>'<li>'+esc(s)+'</li>').join('')}</ul>`:''}${(r.improvements&&r.improvements.length)?`<div class="report-section-title">${t('report.improvements')}</div><ul class="plain">${r.improvements.map(s=>'<li>'+esc(s)+'</li>').join('')}</ul>`:''}`;
+}
+
+function copyText(t2){navigator.clipboard.writeText(t2||'').then(()=>toast(t('toast.copied'))).catch(()=>toast(t('toast.copyFail')))}
+function applyFix(i){codeEl.value=(i.fix_code||'');statusEl.textContent=t('demo.applied');toast(t('toast.applied'))}
+
+function parseFilesArea(text){
+  const blocks=(text||'').split(/^#\s*==(.+?)==\s*$/m);
+  const files=[];for(let i=1;i<blocks.length;i+=2){const n=blocks[i].trim(),c=(blocks[i+1]||'').replace(/^\n+/,'').replace(/\n+$/,'');if(n&&c)files.push({filename:n,content:c,language:''})}
+  if(!files.length)files.push({filename:'untitled.txt',content:(text||'').replace(/^#.*\n/g,''),language:''});
+  files.forEach(f=>{const m=f.filename.toLowerCase().match(/\.(py|js|ts|java|go|rs|rb|php|c|cpp|sh)$/);if(m)f.language={py:'python',js:'javascript',ts:'javascript',java:'java',go:'go',rs:'rust',rb:'ruby',php:'php',c:'c',cpp:'c',sh:'shell'}[m[1]]||''});
+  return files;
+}
+
+async function run(){
+  const language=document.getElementById('language').value.trim();
+  const context=document.getElementById('context').value.trim();
+  const pick=mode==='files'?document.getElementById('files-area'):codeEl;
+  const content=pick.value.trim();
+  if(!content){statusEl.textContent=t('demo.pasteFirst');return}
+  btn.disabled=true;fixCard.style.display='none';
+  statusEl.textContent=t('demo.reviewing');
+  reportEl.className='';reportEl.innerHTML=`<div class="report-empty">${t('demo.reviewingShort')}</div>`;
+  const body={language,context};
+  try{
+    let endpoint;
+    if(mode==='files'){endpoint='/v1/review_files';body.files=parseFilesArea(content);if(!body.files.length)throw new Error(t('demo.noFiles'))}
+    else if(mode==='diff'){endpoint='/v1/review_diff';body.diff=content}
+    else if(mode==='fix'){endpoint='/v1/suggest_fix';body.code=content}
+    else{endpoint='/v1/review';body.code=content}
+    const resp=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await resp.json();
+    if(!resp.ok){reportEl.innerHTML=`<div class="report-empty" style="color:var(--danger)">❌ ${esc(data.error||resp.statusText)}</div>`;statusEl.textContent='';return}
+    if(mode==='fix'){
+      const res=data.result||{};fixCard.style.display='block';
+      reportEl.innerHTML=`<p style="color:var(--text-2);font-size:.85rem">${esc(res.explanation||'')}</p>`;
+      fixReportEl.innerHTML=`<p style="color:var(--text-3);font-size:.8rem">${res.found_issues||0} ${t('demo.fixDetected')}</p><pre class="code"><code>${hl(res.fixed_code,language)}</code></pre><button class="copy-btn" onclick="copyText(this.dataset.c)" data-c="${attrEsc(res.fixed_code||'')}">${t('demo.copyFix')}</button>${(res.changes&&res.changes.length)?`<ul class="plain" style="margin-top:8px">${res.changes.map(c=>'<li>'+esc(c)+'</li>').join('')}</ul>`:''}`;
+      statusEl.textContent=t('demo.fixGenerated');return;
+    }
+    const r=data.report||data.overall_report||{};
+    let extra='';
+    if(data.files_changed)extra=`<div class="sub">${LANG==='zh'?'变更':'Changes'}: ${esc(data.files_changed.join(', '))} · +${data.added_lines} -${data.removed_lines}</div>`;
+    reportEl.innerHTML=renderReport(r,data.model)+(extra?`<div style="margin-top:12px">${extra}</div>`:'');
+    statusEl.textContent=t('demo.done');
+  }catch(e){reportEl.innerHTML=`<div class="report-empty" style="color:var(--danger)">❌ ${esc(e.message)}</div>`;statusEl.textContent=''}
+  finally{btn.disabled=false}
+}
+btn.addEventListener('click',run);
+
+/* ═══ Init lang ═══ */
+(function(){try{const l=localStorage.getItem('cr-lang')||'en';applyLang(l)}catch(e){applyLang('en')}})();
+</script>
+</body>
+</html>

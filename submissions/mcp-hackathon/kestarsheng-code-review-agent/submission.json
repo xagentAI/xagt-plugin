@@ -1,0 +1,10 @@
+﻿{
+  "schemaVersion": 1,
+  "name": "Code Review Agent",
+  "slug": "kestarsheng-code-review-agent",
+  "sourceRepository": "https://github.com/kestarsheng/code-review-agent",
+  "reviewCommit": "a4b5d3d644a0a0bcd0ca7db780671f47d77fedc8",
+  "apiBaseUrl": "https://code-review-agent-ashy-six.vercel.app/v1",
+  "healthCheckUrl": "https://code-review-agent-ashy-six.vercel.app/health",
+  "deploymentProofUrl": "https://code-review-agent-ashy-six.vercel.app/.well-known/xagent-verification.json"
+}
