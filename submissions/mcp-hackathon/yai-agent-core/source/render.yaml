@@ -1,0 +1,41 @@
+# Render Blueprint（https://render.com/docs/blueprint-spec）
+# 用法：Render 控制台 New → Blueprint → 连接 GitHub 仓库 yai-agent-core，
+# Render 会按本文件自动创建免费 Docker Web Service；首次部署时按提示填写 OPENAI_API_KEY。
+# 说明：
+# - PORT 由 Render 自动注入（默认 10000），Dockerfile 的 CMD 已兼容；
+# - RENDER_GIT_COMMIT 由 Render 自动注入为本次部署的 commit，/health 直接读取，无需手填；
+# - 免费实例 15 分钟无流量会休眠，仅用于演练，正式评审请用常驻 VPS（见
+#   docs/competitions/deployment.md）。
+services:
+  - type: web
+    name: yai-agent-core
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false # Secret：首次部署时在控制台粘贴，不入库
+      - key: OPENAI_BASE_URL
+        value: https://api.deepseek.com
+      - key: LLM_MODEL
+        value: deepseek-chat
+      - key: LLM_STRONG_MODEL
+        value: deepseek-chat
+      - key: YAI_PROJECT_SLUG
+        value: yai-agent-core # X-Agent 提交 slug：必须与提交目录名、验证 JSON 一致
+      - key: MCP_SERVER_URL
+        # 公共免鉴权 MCP Server（DeepWiki）：让线上 API 也能真实调用外部 MCP 工具
+        value: https://mcp.deepwiki.com/mcp
+      - key: YAI_DB_PATH
+        # 持久化记忆（v0.2）：容器内相对路径 -> /app/data/yai.db，进程启动时自动建目录。
+        # 注意：Render 免费层磁盘是临时盘，redeploy 后会丢库，演示口径见 docs/competitions/deployment.md
+        value: data/yai.db
+      - key: YAI_HISTORY_MAX_MESSAGES
+        # 历史保留策略（v0.3）：保留最近 N 条消息，按对话轮对齐裁剪（不拆散工具调用对）
+        value: "200"
+      - key: YAI_HISTORY_TTL_SECONDS
+        # 超过 7 天的历史在写入与启动时清理；两者都是 opt-in，不设置则不裁剪
+        value: "604800"
