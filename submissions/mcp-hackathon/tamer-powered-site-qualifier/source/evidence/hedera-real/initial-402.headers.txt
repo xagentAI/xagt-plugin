@@ -1,0 +1,7 @@
+HTTP/1.1 402 Payment Required
+date: Sat, 12 Sep 2026 04:12:56 GMT
+server: uvicorn
+payment-required: eyJ4NDAyVmVyc2lvbiI6MiwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiaGVkZXJhOnRlc3RuZXQiLCJhbW91bnQiOiIxMDAwMDAiLCJwYXlUbyI6IjAuMC4xMDQ4OTc3MCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImFzc2V0IjoiMC4wLjAiLCJleHRyYSI6eyJmZWVQYXllciI6IjAuMC43MTYyNzg0In19XSwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIn0=
+access-control-expose-headers: PAYMENT-REQUIRED
+content-length: 218
+content-type: application/json

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Powered-Site Qualifier",
+  "slug": "tamer-powered-site-qualifier",
+  "sourceRepository": "https://github.com/CryptoLeaks/powered-site-qualifier",
+  "reviewCommit": "b2fc190fad8705c89ca2f07b0d0cb19c8c6c75ee",
+  "apiBaseUrl": "https://qualifier.cryptoleaks.agency/v1",
+  "healthCheckUrl": "https://qualifier.cryptoleaks.agency/health",
+  "deploymentProofUrl": "https://qualifier.cryptoleaks.agency/.well-known/xagent-verification.json"
+}

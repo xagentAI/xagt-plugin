@@ -1,0 +1,29 @@
+{
+  "bitcoin_mining_readiness": {
+    "score": 100,
+    "basis": "weighted, known inputs only"
+  },
+  "ai_data_center_readiness": {
+    "score": 100,
+    "basis": "weighted, known inputs only"
+  },
+  "key_positives": [
+    "Power is ready now",
+    "Capacity is useful for mining scale",
+    "Known power pricing supports underwriting",
+    "Utility/interconnection status is advanced",
+    "Power-source pathway is identified",
+    "Fiber information supports low-latency operations",
+    "Water information supports cooling planning"
+  ],
+  "missing_information": [],
+  "major_blockers": [],
+  "recommended_next_questions": [],
+  "classification": "READY",
+  "intended_use": "both",
+  "method": {
+    "deterministic": true,
+    "unknowns_are_not_guessed": true,
+    "scores_are_not_advice": true
+  }
+}

@@ -1,0 +1,75 @@
+services:
+  powered-site-qualifier:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: powered-site-qualifier:f70b48d862d1d78b9f3e25346c44409e5b687a44
+    environment:
+      XAGENT_REVIEW_COMMIT: ${XAGENT_REVIEW_COMMIT:?Set XAGENT_REVIEW_COMMIT to the exact deployed reviewed commit}
+      X402_MODE: remote
+      X402_FACILITATOR_URL: https://api.testnet.blocky402.com
+      X402_NETWORK: hedera:testnet
+      X402_ASSET: 0.0.0
+      X402_AMOUNT: "100000"
+      X402_MAX_TIMEOUT_SECONDS: "300"
+      X402_PAY_TO: 0.0.10489770
+      X402_FEE_PAYER: 0.0.7162784
+    expose:
+      - "8787"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 64
+    mem_limit: 1g
+    cpus: 1.0
+    restart: unless-stopped
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2.10-alpine
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Set PUBLIC_DOMAIN to an approved FQDN before deployment}
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,noexec,nosuid,nodev
+      - /var/log/caddy:size=32m,nosuid,nodev
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.5
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+    depends_on:
+      - powered-site-qualifier
+    networks:
+      - internal
+
+networks:
+  internal:
+    # No host port is published for the API. Outbound egress is required for
+    # Blocky402 verification/settlement and Caddy ACME certificate renewal.
+
+volumes:
+  caddy_data:
+  caddy_config:
