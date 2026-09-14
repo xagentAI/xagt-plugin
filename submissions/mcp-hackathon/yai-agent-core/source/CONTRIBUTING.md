@@ -13,13 +13,15 @@
 uv venv
 .venv\Scripts\activate            # Windows PowerShell；Linux/macOS 用 source .venv/bin/activate
 
-# 2. 安装：可编辑模式 + 开发/真实模型/在线API 可选依赖（接入 MCP 工具再加 ,mcp）
+# 2. 安装：可编辑模式 + 开发/真实模型/在线API 可选依赖（接入 MCP/OpenAPI 再加对应 extra）
 uv pip install -e ".[dev,llm,server]"
 uv pip install -e ".[mcp]"          # 仅在开发/运行 MCP Client 集成时需要
+uv pip install -e ".[openapi]"      # 仅在开发/运行 OpenAPI 发现时需要（httpx + pyyaml）
+# 一次装齐（全量 125 项测试）：uv sync --extra dev --extra llm --extra server --extra mcp --extra openapi
 
-# 3. 验证：离线测试与冒烟，全程不需要 API Key
-pytest
-python scripts/smoke_test.py
+# 3. 验证：离线测试与冒烟，全程不需要 API Key（激活 venv 后可直接用 pytest；未激活用 uv run pytest）
+uv run pytest                       # 125 passed，离线（extras 组合与 CI 一致时无 skip）
+uv run python scripts/smoke_test.py
 ```
 
 需要跑通真实模型（DeepSeek 等 OpenAI 兼容端点）时，复制 `.env.example` 为 `.env` 并填入 Key：

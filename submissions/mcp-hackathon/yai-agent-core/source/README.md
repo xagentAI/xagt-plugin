@@ -16,8 +16,10 @@
 ```bash
 uv venv
 uv pip install -e ".[dev,llm,server]"
-python scripts/smoke_test.py     # 离线冒烟：同一 Core 自适应三个不同宿主
-pytest                           # 单元 + 端到端测试（不需要 API Key）
+uv run python scripts/smoke_test.py  # 离线冒烟：同一 Core 自适应三个不同宿主
+uv run pytest                        # 单元 + 端到端测试（不需要 API Key）
+# 全量 125 项测试：建议一次装齐 extras（与 CI 一致）
+#   uv sync --extra dev --extra llm --extra server --extra mcp --extra openapi
 ```
 
 **第一次读代码**：[`docs/reading-guide.md`](docs/reading-guide.md) 是学习路线；[`docs/walkthrough/00-index.md`](docs/walkthrough/00-index.md) 是每个源码文件的逐行讲解。
@@ -33,7 +35,7 @@ result = await core.run("搜索本周记录并整理成报告")  # ② 自适应
 print(result.final_text)                   # ③ 可交付结果 + 全程事件可观测
 ```
 
-## 自适应机制（v0.1）
+## 自适应机制（当前能力）
 
 1. **能力自发现**：Python 函数 type hints + docstring 自动生成 JSON Schema 工具规格；外部 MCP Server 的工具经 MCP Client 同构接入注册表（v0.2 已落地，`[mcp]` 可选依赖）
 2. **接入任意 REST API（OpenAPI 发现，可选）**：给一个 OpenAPI 3 描述（URL/文件/dict），自动把 operations 注册为工具（$ref 内联、path/query/body 入参合并、bearer/apiKey 鉴权、只读模式），`[openapi]` extra 懒加载
@@ -53,9 +55,10 @@ src/yai_core/
 ├── tools/               # ToolRegistry + ToolExecutor（Tool Bus）
 ├── kernel/              # AdaptiveRouter + AgentLoop + Context
 ├── llm/                 # OpenAI 兼容模型后端（可选依赖）
-├── memory/ policy/ channels/   # 默认实现（内存记忆 / 白名单权限 / CLI·收集通道）
+├── memory/ policy/ channels/   # 默认实现（内存记忆 + SQLite 持久化 opt-in / 白名单权限 / CLI·收集通道）
 ├── integrations/
-│   └── mcp/             # MCP Client 桥接（可选 [mcp] 依赖，懒加载，v0.2）
+│   ├── mcp/             # MCP Client 桥接（可选 [mcp] 依赖，懒加载，v0.2）
+│   └── openapi/         # OpenAPI 3 发现 → 工具（可选 [openapi] 依赖，懒加载，v0.2）
 └── batteries/
     └── fastapi_server/  # 在线 API + /health + X-Agent 验证端点
 examples/
@@ -71,11 +74,11 @@ docs/                    # 架构设计、代码学习导览、三个比赛的�
 
 ```bash
 uv pip install -e ".[mcp]"          # 或 uv sync --extra mcp
-python examples/host_d_mcp/run.py   # 自带本地 stdio 演示 Server，离线可跑
+uv run python examples/host_d_mcp/run.py   # 自带本地 stdio 演示 Server，离线可跑
 
 # 改接任意公共 MCP Server（HTTP 形态），无需改代码：
 $env:MCP_SERVER_URL="https://mcp.deepwiki.com/mcp"   # PowerShell
-python examples/host_d_mcp/run.py "用 MCP 工具问一下 modelcontextprotocol/python-sdk：Client 怎么初始化？"
+uv run python examples/host_d_mcp/run.py "用 MCP 工具问一下 modelcontextprotocol/python-sdk：Client 怎么初始化？"
 ```
 
 在线 API 同样靠环境变量挂载外部 MCP（`scripts/serve_example.py` 的 lifespan
@@ -119,8 +122,8 @@ YAI_RATE_LIMIT_WINDOW_SECONDS=60
 ## 版本路线
 
 - **v0.1（已完成）**：函数内省、规则路由、Agent Loop、SPI 默认实现、FastAPI Battery、三宿主 demo、容器化与 PaaS 部署
-- **v0.2（进行中）**：MCP Client（已落地）、LLM 路由器（已落地，规则兜底）、SQLite 持久化记忆（已落地，opt-in，`YAI_DB_PATH`）、OpenAPI 发现（已落地，opt-in，`OPENAPI_SPEC_URL/PATH`）
-- v0.3（进行中）：历史保留策略（条数裁剪/TTL，opt-in，轮边界对齐）、限流 Battery、检查点与失败恢复、Flutter Channel
+- **v0.2（已完成）**：MCP Client、LLM 路由器（规则兜底）、SQLite 持久化记忆（opt-in，`YAI_DB_PATH`）、OpenAPI 发现（opt-in，`OPENAPI_SPEC_URL/PATH`）
+- **v0.3（部分完成）**：历史保留策略（条数裁剪/TTL，opt-in，轮边界对齐，已落地）、限流 Battery（已落地）；检查点与失败恢复、Flutter Channel（后续）
 - v1.0：作为 AMBRACE 的 Agent 内核回流嵌入
 
 ## 许可证

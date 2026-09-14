@@ -76,8 +76,8 @@ curl -sS -X POST https://yai-agent-core.onrender.com/v1/agent/run \
   --max-time 180
 ```
 
-期望：`strategy` 为 `react`；`events` 中出现对 `ask_question`（source=mcp）的
-`tool_call` / `tool_result(ok=true)`；`final_text` 是基于远程 MCP 返回内容的中文回答。
+期望：`strategy` 为 `react`；`events` 中出现对 `ask_question` 的
+`tool_call` / `tool_result(ok=true)`（该工具的来源标注 `source: "mcp"` 在第 3 节 `/v1/tools` 清单中查看，事件体本身不带 source 字段）；`final_text` 是基于远程 MCP 返回内容的中文回答。
 该调用链为：本服务 → DeepSeek 规划工具调用 → Streamable HTTP 调远程 MCP Server → 结果回灌 → 模型总结。
 
 ## 5. 本地/隔离环境复现
@@ -86,10 +86,11 @@ curl -sS -X POST https://yai-agent-core.onrender.com/v1/agent/run \
 git clone https://github.com/Gi-Tuu/yai-agent-core
 cd yai-agent-core
 git checkout <reviewCommit>
-uv sync --extra dev --extra llm --extra server --extra mcp
+uv sync --extra dev --extra llm --extra server --extra mcp --extra openapi
 uv run pytest                      # 125 项离线测试全绿（截至 v0.3，以 pytest -q 实跑为准），不需要 API Key
+                                   # 注：extras 组合与 CI 一致（dev/llm/server/mcp/openapi），实跑 125 passed，无 skip
 uv run ruff check src tests examples scripts
-python scripts/smoke_test.py       # 三宿主自适应冒烟（离线）
+uv run python scripts/smoke_test.py  # 三宿主自适应冒烟（离线）
 docker compose up --build          # 容器化：容器内 8000，宿主 127.0.0.1:8001
 # 本地容器验证：curl http://127.0.0.1:8001/health
 ```

@@ -35,7 +35,7 @@ YAI Agent Core 类比"Agent 世界的 SQLite"：以库的形式运行在宿主�
 |---|---|---|
 | `/health` | GET | 健康检查，返回 `status` 与本次部署的 40 位 commit |
 | `/.well-known/xagent-verification.json` | GET | 部署证明：`schemaVersion=1` + `slug` + `commit` |
-| `/v1/tools` | GET | 当前宿主注册的全部工具（含 `source: native/mcp` 来源标注；线上实例同时挂载本地笔记工具与公共 DeepWiki MCP Server 的 3 个远程工具） |
+| `/v1/tools` | GET | 当前宿主注册的全部工具（含 `source: native/mcp/openapi` 来源标注；线上实例同时挂载本地笔记工具与公共 DeepWiki MCP Server 的 3 个远程工具） |
 | `/v1/agent/run` | POST | 入参 `{"task": "..."}`，返回策略、最终结果与**全过程事件流**；任务涉及外部仓库问答时会真实发起 MCP 工具调用 |
 
 可复现的 curl 命令与期望输出见 `verification/README.md`。
@@ -52,14 +52,16 @@ src/yai_core/
 ├── tools/               # ToolRegistry（统一花名册）+ ToolExecutor（权限→执行→事件）
 ├── kernel/              # AdaptiveRouter（策略路由）+ Context + AgentLoop（主循环）
 ├── llm/                 # OpenAI 兼容模型后端（DeepSeek 等，可选依赖、懒加载）
-├── memory/ policy/ channels/   # 默认实现：内存记忆 / 白名单权限 / CLI·收集通道
-├── integrations/mcp/    # MCP Client 桥接（可选 [mcp] 依赖、懒加载）
-└── batteries/fastapi_server/   # 在线 API Battery（可选 [server] 依赖）
+├── memory/ policy/ channels/   # 默认实现：内存记忆 + SQLite 持久化（opt-in）/ 白名单权限 / CLI·收集通道
+├── integrations/
+│   ├── mcp/             # MCP Client 桥接（可选 [mcp] 依赖、懒加载）
+│   └── openapi/         # OpenAPI 3 发现 → 工具（可选 [openapi] 依赖、懒加载）
+└── batteries/fastapi_server/   # 在线 API Battery（可选 [server] 依赖，含限流与历史保留）
 ```
 
 关键工程原则：
 
-- **内核本体零第三方硬依赖**：`pyproject.toml` 的 `dependencies` 为空；openai / fastapi / mcp 全部是可选 extras 并在模块内懒加载，有 AST 测试防止顶层误引入。
+- **内核本体零第三方硬依赖**：`pyproject.toml` 的 `dependencies` 为空；openai / fastapi / mcp / httpx 全部归入可选 extras（llm / server / mcp / openapi）并在模块内懒加载，有 AST 测试防止顶层误引入。
 - **工具同构**：本地函数与外部 MCP 工具在 ToolRegistry 中都是 ToolSpec，Router/Loop/Executor 对工具位置零感知。
 - **错误回灌而非崩溃**：工具（含 MCP 工具）异常被捕获为失败结果回灌模型，事件流照常完整。
 - **可复现**：`uv.lock` 锁定全部依赖；Dockerfile 多阶段构建、`docker compose` 一键起；Render Blueprint（`render.yaml`）即点即部署。
@@ -92,18 +94,18 @@ src/yai_core/
 
 ```bash
 git clone https://github.com/Gi-Tuu/yai-agent-core && cd yai-agent-core
-uv venv && uv sync --extra dev --extra llm --extra server --extra mcp
-uv run pytest                     # 23 passed，离线
+uv venv && uv sync --extra dev --extra llm --extra server --extra mcp --extra openapi
+uv run pytest                     # 125 passed，离线
 uv run ruff check src tests examples scripts
-python scripts/smoke_test.py      # 同一内核自适应三个不同宿主（离线）
+uv run python scripts/smoke_test.py  # 同一内核自适应三个不同宿主（离线）
 docker compose up --build         # 容器化（容器内 8000，宿主 127.0.0.1:8001）
 ```
 
 接真实模型：复制 `.env.example` 为 `.env` 填入 OpenAI 兼容 Key（DeepSeek 等），运行
-`python examples/host_d_mcp/run.py` 可看到本地工具与 MCP 工具在同一注册表里协同。
+`uv run python examples/host_d_mcp/run.py` 可看到本地工具与 MCP 工具在同一注册表里协同。
 
 ## 8. 已知限制（诚实声明）
 
 - 免费层部署会休眠、冷启动约 1 分钟；正式评审期将迁移常驻 VPS（手册见仓库 `docs/competitions/deployment.md`）。
-- 当前模型路由为确定性规则（LLM 路由器在 v0.2 路线上，规则兜底）；记忆为内存态（SQLite 在路线图）。
-- 不做 MCP Server、Multi-Agent、向量记忆、内置 UI（明确的 v0.1 红线，避免过度设计）。
+- 路由为"单次轻量 LLM 分类 + 确定性规则兜底"，不做多层反思/多智能体编排；持久化记忆为 SQLite（opt-in），免费层临时盘随实例重建清空、且不支持多进程共享，长期留存需挂盘或迁移常驻 VPS；限流按 IP 滑动窗口，不防御伪造 XFF，无账号体系与鉴权（v0.4 计划）。
+- 不做 MCP Server、Multi-Agent、自进化写工具、向量记忆、内置 UI、coding agent（明确的 v0.1 红线，避免过度设计）。

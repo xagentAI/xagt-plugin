@@ -3,7 +3,7 @@
   "name": "YAI Agent Core",
   "slug": "yai-agent-core",
   "sourceRepository": "https://github.com/Gi-Tuu/yai-agent-core",
-  "reviewCommit": "fc7d3d6cd3362fcdec85dad195a9cd794e5b4616",
+  "reviewCommit": "0a2634f3b13d690398c77d9119c3beecd4881929",
   "apiBaseUrl": "https://yai-agent-core.onrender.com",
   "healthCheckUrl": "https://yai-agent-core.onrender.com/health",
   "deploymentProofUrl": "https://yai-agent-core.onrender.com/.well-known/xagent-verification.json"
