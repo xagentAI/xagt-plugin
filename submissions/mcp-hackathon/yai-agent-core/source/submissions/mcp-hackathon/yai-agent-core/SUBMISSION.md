@@ -56,7 +56,7 @@ src/yai_core/
 ├── integrations/
 │   ├── mcp/             # MCP Client 桥接（可选 [mcp] 依赖、懒加载）
 │   └── openapi/         # OpenAPI 3 发现 → 工具（可选 [openapi] 依赖、懒加载）
-└── batteries/fastapi_server/   # 在线 API Battery（可选 [server] 依赖，含限流与历史保留）
+└── batteries/fastapi_server/   # 在线 API Battery（可选 [server] 依赖，含限流中间件；历史保留由宿主按 env 注入）
 ```
 
 关键工程原则：
@@ -106,6 +106,6 @@ docker compose up --build         # 容器化（容器内 8000，宿主 127.0.0.
 
 ## 8. 已知限制（诚实声明）
 
-- 免费层部署会休眠、冷启动约 1 分钟；正式评审期将迁移常驻 VPS（手册见仓库 `docs/competitions/deployment.md`）。
-- 路由为"单次轻量 LLM 分类 + 确定性规则兜底"，不做多层反思/多智能体编排；持久化记忆为 SQLite（opt-in），免费层临时盘随实例重建清空、且不支持多进程共享，长期留存需挂盘或迁移常驻 VPS；限流按 IP 滑动窗口，不防御伪造 XFF，无账号体系与鉴权（v0.4 计划）。
+- 免费层部署会休眠、冷启动约 30–90 秒（波动较大，建议先请求 `/health` 预热）；正式评审期将迁移常驻 VPS（手册见仓库 `docs/competitions/deployment.md`）。
+- 路由为"单次轻量 LLM 分类 + 确定性规则兜底"，不做多层反思/多智能体编排；持久化记忆为 SQLite（opt-in），免费层临时盘随实例重建清空、且不支持多进程共享，长期留存需挂盘或迁移常驻 VPS；限流按 IP 滑动窗口，不防御伪造 XFF，当前无账号体系与鉴权（列入后续版本计划）。
 - 不做 MCP Server、Multi-Agent、自进化写工具、向量记忆、内置 UI、coding agent（明确的 v0.1 红线，避免过度设计）。

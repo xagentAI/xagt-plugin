@@ -19,7 +19,7 @@
 |---|---|---|---|---|
 | **Oracle Cloud Always Free** | 永久免费：2 台 AMD micro（1/8 OCPU、1GB）+ ARM Ampere A1（总量最多 4 OCPU/24GB，可开 1-2 台）、200GB 块存储、约 10TB/月出站流量 | 常驻不休眠 | 自备域名（免费 DuckDNS 即可），Caddy 自动签证书 | **正式部署首选** |
 | Google Cloud e2-micro | 永久免费 1 台（限定美国 3 个区，1GB） | 常驻 | 同上 | 备选，注册同样要卡 |
-| Render Free Web Service | 免费 | **15 分钟无流量休眠，冷启动约 1 分钟**；750 实例小时/月 | 自带 `*.onrender.com` 证书 | **今天做演练用**，评审期有被休眠打到的风险 |
+| Render Free Web Service | 免费 | **15 分钟无流量休眠，冷启动约 30–90 秒（波动大）**；750 实例小时/月 | 自带 `*.onrender.com` 证书 | **今天做演练用**，评审期有被休眠打到的风险 |
 | Fly.io | 无免费层，shared-cpu-1x 256MB 约 $3.14/月起 | 常驻 | 自带 `*.fly.dev` 证书 | 不想折腾 Oracle 时的便宜替代 |
 | Koyeb | 免费实例已取消（官网只剩付费计划） | — | — | 排除 |
 | Hugging Face Spaces | Docker/Gradio Space 创建已需付费计划；免费硬件会休眠 | 休眠 | 自带 | 排除 |
@@ -47,7 +47,7 @@
      注意解析时只接受完整 40 位小写哈希——镜像里烤的默认值 `dev` 不是合法哈希会被跳过
      （首部署实测：若不跳过，非空的 `dev` 会遮蔽平台注入的真实 SHA）。
 6. 部署完成后得到 `https://yai-agent-core.onrender.com`（名字以实际为准），按第 4 节验证四个端点。
-7. 风险：15 分钟无流量会休眠，评审机第一次访问可能撞上约 1 分钟冷启动页（不是我们的 JSON）。
+7. 风险：15 分钟无流量会休眠，评审机第一次访问可能撞上约 30–90 秒冷启动页（不是我们的 JSON）。
    **正式评审前必须换到常驻 VPS。**
 
 > 若不用 Blueprint、手动 New → Web Service：Language 选 Docker、Dockerfile Path 留空（根目录）、

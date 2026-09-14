@@ -35,3 +35,6 @@ Thumbs.db
 
 # 由 scripts/build_walkthrough_docx.py 生成的讲义产物（需要时本地构建）
 docs/exports/
+
+# 杭州参赛材料截图（含个人信息，永不入库；目录由用户录材料时本地创建）
+docs/competitions/hangzhou/evidence/
