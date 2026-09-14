@@ -1,0 +1,23 @@
+# 正式部署叠加文件：在基础 compose 之上增加 Caddy 反代（自动 HTTPS）
+# 启动：
+#   YAI_GIT_COMMIT=$(git rev-parse HEAD) \
+#   docker compose -f docker-compose.yml -f docker-compose.deploy.yml up -d --build
+# 前置：deploy/Caddyfile 里的域名已解析到本机公网 IP，安全组/防火墙放行 80、443
+services:
+  caddy:
+    image: caddy:2
+    container_name: yai-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - yai-agent-core
+
+volumes:
+  caddy-data:
+  caddy-config:
