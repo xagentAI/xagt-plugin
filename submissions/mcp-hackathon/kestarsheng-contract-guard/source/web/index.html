@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contract Guard — API Breaking Change Detector</title>
+<meta name="description" content="Deterministic API compatibility checker for AI agents. Detect breaking changes in OpenAPI, GraphQL, and JSON Schema contracts.">
+<style>
+:root{
+  --bg:#0a0e14;--surface:#11161d;--surface-2:#161c24;--surface-3:#1c2330;
+  --border:#232b36;--border-hi:#3d4754;
+  --text:#e6edf3;--dim:#8b949e;--faint:#6e7681;
+  --brand:#10b981;--brand-dim:#059669;--brand-glow:rgba(16,185,129,.18);
+  --critical:#f85149;--major:#d29922;--minor:#58a6ff;--info:#7d8590;
+  --radius:10px;--radius-sm:6px;
+  --mono:"JetBrains Mono","Fira Code",ui-monospace,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none}
+code,pre{font-family:var(--mono)}
+button{font-family:var(--sans)}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--border);background:rgba(10,14,20,.7);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.logo .mark{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--brand),var(--brand-dim));display:grid;place-items:center;color:#04130c;font-size:13px;font-weight:800}
+nav{display:flex;align-items:center;gap:22px}
+nav a,nav button{color:var(--dim);font-size:14px;transition:color .15s;cursor:pointer;background:none;border:none}
+nav a:hover,nav button:hover{color:var(--text)}
+#lang-toggle{padding:4px 10px;border:1px solid var(--border);border-radius:999px}
+#lang-toggle:hover{border-color:var(--border-hi)}
+
+.hero{padding:52px 32px 28px;max-width:1220px;margin:0 auto;text-align:center;width:100%}
+.hero h1{font-size:clamp(28px,4.4vw,46px);font-weight:800;letter-spacing:-.025em;line-height:1.12;background:linear-gradient(180deg,#fff,#c9d1d9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin:16px auto 0;max-width:700px;color:var(--dim);font-size:16px;line-height:1.65}
+.hero-stats{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 22px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);min-width:120px}
+.stat b{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat b[data-c="brand"]{color:var(--brand)}
+.stat b[data-c="minor"]{color:var(--minor)}
+.stat b[data-c="major"]{color:var(--major)}
+.stat span{font-size:12px;color:var(--faint)}
+.badges{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid var(--border);border-radius:999px;font-size:12.5px;color:var(--dim);background:var(--surface)}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.badge.b2 .dot{background:var(--minor)}
+.badge.b3 .dot{background:var(--major)}
+
+.workbench{max-width:1220px;margin:0 auto;padding:8px 32px 48px;width:100%;flex:1}
+.main-tabs{display:flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:fit-content;margin-bottom:18px;flex-wrap:wrap}
+.main-tabs button{padding:9px 18px;border:none;background:none;color:var(--dim);font-size:13.5px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;font-weight:500;display:flex;gap:8px;align-items:center}
+.main-tabs button .idx{font-size:10.5px;font-family:var(--mono);color:var(--faint);border:1px solid var(--border);border-radius:4px;padding:0 6px}
+.main-tabs button.active{background:var(--surface-3);color:var(--text);box-shadow:var(--shadow)}
+.main-tabs button.active .idx{color:var(--brand);border-color:rgba(16,185,129,.4)}
+.main-tabs button:hover:not(.active){color:var(--text)}
+
+.panel{display:none}
+.panel.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.panel-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.panel-head h2{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.panel-head p{color:var(--dim);font-size:13.5px}
+
+.format-row{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.format-row .lbl{font-size:13px;color:var(--dim);font-weight:600}
+.pill-group{display:flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:999px}
+.pill-group button{padding:6px 14px;border:none;background:none;color:var(--dim);font-size:13px;border-radius:999px;cursor:pointer;transition:all .15s;font-weight:500}
+.pill-group button.active{background:var(--surface-3);color:var(--text)}
+.pill-group button:hover:not(.active){color:var(--text)}
+
+.contract-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:760px){.contract-grid{grid-template-columns:1fr}}
+.contract-cell{display:flex;flex-direction:column;gap:8px}
+.contract-cell label{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--dim);font-weight:600}
+.contract-cell label .ver{padding:2px 8px;border-radius:4px;font-size:11px;font-family:var(--mono);background:var(--surface-2);color:var(--faint)}
+.contract-cell label .ver.v1{color:var(--minor)}
+.contract-cell label .ver.v2{color:var(--brand)}
+textarea{width:100%;height:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:12.5px;line-height:1.55;padding:14px;resize:vertical;transition:border-color .15s,box-shadow .15s;tab-size:2}
+textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-glow)}
+textarea::placeholder{color:var(--faint)}
+
+.actions{display:flex;gap:12px;align-items:center;margin-bottom:26px;flex-wrap:wrap}
+.btn-primary{padding:12px 24px;background:linear-gradient(180deg,var(--brand),var(--brand-dim));color:#04130c;border:none;border-radius:var(--radius);font-weight:700;font-size:14px;cursor:pointer;transition:transform .12s,box-shadow .15s,opacity .15s;box-shadow:0 1px 0 rgba(255,255,255,.2) inset,0 6px 16px var(--brand-glow);display:inline-flex;gap:9px;align-items:center}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.2) inset,0 10px 22px var(--brand-glow)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.7;cursor:wait}
+.btn-ghost{padding:12px 18px;background:var(--surface);border:1px solid var(--border);color:var(--dim);border-radius:var(--radius);font-size:13.5px;cursor:pointer;transition:all .15s}
+.btn-ghost:hover{color:var(--text);border-color:var(--border-hi)}
+.spinner{width:14px;height:14px;border:2px solid rgba(4,19,12,.3);border-top-color:#04130c;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.result{animation:fade .35s ease}
+.summary-card{display:flex;align-items:center;gap:18px;padding:18px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;flex-wrap:wrap}
+.summary-card.breaking{border-color:rgba(248,81,73,.4);background:linear-gradient(90deg,rgba(248,81,73,.06),var(--surface) 30%)}
+.summary-card.clean{border-color:rgba(16,185,129,.4)}
+.break-status{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+.break-status .bdot{width:10px;height:10px;border-radius:50%}
+.break-status.bad .bdot{background:var(--critical);box-shadow:0 0 0 4px rgba(248,81,73,.15)}
+.break-status.good .bdot{background:var(--brand);box-shadow:0 0 0 4px var(--brand-glow)}
+.counts{display:flex;gap:8px;flex-wrap:wrap}
+.count-chip{padding:4px 11px;border-radius:999px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);background:var(--surface-2)}
+.count-chip[data-s="critical"]{color:var(--critical);border-color:rgba(248,81,73,.3)}
+.count-chip[data-s="major"]{color:var(--major);border-color:rgba(210,153,34,.3)}
+.count-chip[data-s="minor"]{color:var(--minor);border-color:rgba(88,166,255,.3)}
+.count-chip[data-s="info"]{color:var(--info)}
+.summary-text{color:var(--dim);font-size:13.5px;flex-basis:100%;margin-top:4px}
+.copy-row{display:flex;gap:8px;margin-left:auto}
+.copy-row button{font-size:11.5px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--faint);cursor:pointer;transition:all .15s}
+.copy-row button:hover{color:var(--text);border-color:var(--border-hi)}
+
+.findings{display:flex;flex-direction:column;gap:10px}
+.finding{padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:border-color .15s;animation:fade .3s ease both}
+.finding:hover{border-color:var(--border-hi)}
+.finding[data-break="true"]{border-left:3px solid var(--critical)}
+.finding[data-break="false"]{border-left:3px solid var(--info)}
+.f-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.f-head .sev{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.f-head .sev[data-s="critical"]{background:var(--critical)}
+.f-head .sev[data-s="major"]{background:var(--major)}
+.f-head .sev[data-s="minor"]{background:var(--minor)}
+.f-head .sev[data-s="info"]{background:var(--info)}
+.f-head .ctype{font-family:var(--mono);font-size:12.5px;color:var(--text);background:var(--surface-2);padding:2px 8px;border-radius:4px}
+.f-head .src{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:4px;font-family:var(--mono)}
+.f-head .src.confirmed{color:var(--minor);background:rgba(88,166,255,.1)}
+.f-head .src.advisory{color:var(--major);background:rgba(210,153,34,.1)}
+.f-loc{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:8px}
+.f-sum{font-size:14px;margin-top:4px}
+.f-diff{margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.f-diff .prev{color:var(--critical);text-decoration:line-through;text-decoration-color:rgba(248,81,73,.5)}
+.f-diff .curr{color:var(--brand)}
+.f-diff .arrow{color:var(--faint)}
+.f-sug{margin-top:8px;font-size:12.5px;color:var(--dim);padding:8px 10px;background:var(--surface-2);border-radius:var(--radius-sm);border-left:2px solid var(--brand-dim)}
+
+.mig-card{padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px}
+.mig-card .mig-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.mig-card .mig-head .sev{width:8px;height:8px;border-radius:50%}
+.mig-card .mig-head .sev[data-s="critical"]{background:var(--critical)}
+.mig-card .mig-head .sev[data-s="major"]{background:var(--major)}
+.mig-card .mig-head .sev[data-s="minor"]{background:var(--minor)}
+.mig-card .mig-head .mig-loc{font-family:var(--mono);font-size:12px;color:var(--faint)}
+.mig-card .mig-body{font-size:13.5px;color:var(--text)}
+.mig-card .mig-body .mig-prev{color:var(--dim);font-size:12.5px;font-family:var(--mono);margin-top:6px}
+.mig-card .mig-body .mig-fix{color:var(--brand);font-size:12.5px;font-family:var(--mono);background:rgba(16,185,129,.08);border-left:2px solid var(--brand-dim);padding:8px 10px;border-radius:var(--radius-sm);margin-top:8px;white-space:pre-wrap;word-break:break-word}
+
+.semver-card{display:flex;gap:20px;align-items:center;padding:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;flex-wrap:wrap}
+.semver-card .bump-badge{font-size:30px;font-weight:800;letter-spacing:-.02em;padding:14px 26px;border-radius:var(--radius)}
+.semver-card .bump-badge.major{color:var(--critical);background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.35)}
+.semver-card .bump-badge.minor{color:var(--minor);background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.35)}
+.semver-card .bump-badge.patch{color:var(--brand);background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.35)}
+.semver-card .semver-meta{display:flex;flex-direction:column;gap:4px}
+.semver-card .semver-meta .reason{color:var(--dim);font-size:14px}
+.semver-card .semver-versions{display:flex;gap:14px;align-items:center;color:var(--text);font-family:var(--mono);font-size:15px}
+.semver-card .semver-versions .arrow{color:var(--faint)}
+.semver-card .semver-versions .old{color:var(--faint)}
+.semver-card .semver-versions .new{color:var(--brand);font-weight:700}
+
+.changelog-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:520px;overflow:auto}
+.sarif-box{position:relative}
+.sarif-box pre{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:11.5px;line-height:1.5;color:#9ecbff;overflow:auto;max-height:480px}
+.copy-btn-top{position:absolute;top:12px;right:12px;font-size:11.5px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--faint);cursor:pointer}
+.copy-btn-top:hover{color:var(--text);border-color:var(--border-hi)}
+
+.empty-state{padding:48px 24px;text-align:center;color:var(--faint);border:1px dashed var(--border);border-radius:var(--radius);background:var(--surface)}
+.empty-state .icon{font-size:28px;margin-bottom:10px;opacity:.5}
+.empty-state h3{color:var(--dim);font-size:15px;margin-bottom:6px}
+.empty-state p{font-size:13px}
+.error-state{padding:18px 22px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);border-radius:var(--radius);color:var(--critical);font-size:13.5px;margin-bottom:16px}
+
+.mcp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.impact-ops{margin-top:10px;font-size:12.5px;color:var(--dim);font-family:var(--mono)}
+.impact-group{margin-bottom:14px}
+.misses{margin-top:12px;border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;background:var(--surface)}
+.misses summary{cursor:pointer;padding:12px 0;font-size:13px;color:var(--dim);font-weight:600}
+.misses .findings{padding-bottom:12px}
+.bench-card{border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface);margin-top:14px}
+.bench-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px;font-family:var(--mono)}
+.bench-table th,.bench-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+.bench-table th{color:var(--dim);font-weight:600}
+.bench-table td.ok{color:var(--brand)}
+.bench-table td.err{color:var(--major)}
+.conf{font-size:12.5px;color:var(--dim);margin-top:8px;font-family:var(--mono)}
+.mcp-card{padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:border-color .15s,transform .1s}
+.mcp-card:hover{border-color:var(--border-hi);transform:translateY(-2px)}
+.mcp-card .mcp-name{font-family:var(--mono);font-size:13.5px;color:var(--brand);font-weight:700}
+.mcp-card .mcp-desc{font-size:13px;color:var(--dim);margin-top:8px;line-height:1.55}
+.mcp-card .mcp-args{font-size:11.5px;font-family:var(--mono);color:var(--faint);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+
+footer{padding:24px 32px;border-top:1px solid var(--border);color:var(--faint);font-size:12.5px;text-align:center}
+footer a{color:var(--dim)}
+footer a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle"><path d="M6 3h12l4 6-10 13L2 9Z"/></svg></span> Contract Guard</div>
+  <nav>
+    <a href="/docs">API</a>
+    <a href="/v1/formats">Formats</a>
+    <button id="lang-toggle" type="button">中文</button>
+    <a href="https://github.com/kestarsheng/contract-guard" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle"><path d="M7 17L17 7M7 7H17V17"/></svg></a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1 data-i18n="hero.h1">Catch API breaking changes before they ship</h1>
+  <p data-i18n="hero.p">A deterministic compatibility checker built for AI agents. Compare two OpenAPI, GraphQL, or JSON Schema contracts and get structured, reproducible findings — the core diff runs without any LLM.</p>
+  <div class="hero-stats">
+    <div class="stat"><b data-c="brand" data-i18n-dyn="stat.rules">35+</b><span data-i18n="stat.rulesL">detection rules</span></div>
+    <div class="stat"><b data-c="minor" data-i18n-dyn="stat.formats">3</b><span data-i18n="stat.formatsL">contract formats</span></div>
+    <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">8</b><span data-i18n="stat.toolsL">MCP tools</span></div>
+    <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">8</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
+    <div class="stat"><b data-c="minor" data-i18n-dyn="stat.f1">1.0</b><span data-i18n="stat.f1L">benchmark F1</span></div>
+  </div>
+  <div class="badges">
+    <span class="badge"><span class="dot"></span><span data-i18n="badge.det">Deterministic</span></span>
+    <span class="badge b2"><span class="dot"></span><span data-i18n="badge.mcp">MCP-ready</span></span>
+    <span class="badge b3"><span class="dot"></span><span data-i18n="badge.rep">100% reproducible</span></span>
+  </div>
+</section>
+
+<section class="workbench">
+  <div class="main-tabs" role="tablist">
+    <button data-tab="diff" class="active"><span class="idx">01</span><span data-i18n="tab.diff">Breaking diff</span></button>
+    <button data-tab="chain"><span class="idx">02</span><span data-i18n="tab.chain">Chain diff</span></button>
+    <button data-tab="semver"><span class="idx">03</span><span data-i18n="tab.semver">SemVer</span></button>
+    <button data-tab="migration"><span class="idx">04</span><span data-i18n="tab.migration">Migration</span></button>
+    <button data-tab="sarif"><span class="idx">05</span><span data-i18n="tab.sarif">SARIF</span></button>
+    <button data-tab="changelog"><span class="idx">06</span><span data-i18n="tab.changelog">Changelog</span></button>
+    <button data-tab="impact"><span class="idx">07</span><span data-i18n="tab.impact">Impact scan</span></button>
+    <button data-tab="mcp"><span class="idx">08</span><span data-i18n="tab.mcp">MCP tools</span></button>
+  </div>
+
+  <div id="panel-diff" class="panel active">
+    <div class="panel-head"><h2 data-i18n="diff.title">Breaking change diff</h2><p data-i18n="diff.sub">Compare two contract versions and get a structured, reproducible finding set.</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="d-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="d-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="d-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.run">Check breaking changes</span></button>
+      <button id="d-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+    </div>
+    <div class="result" id="d-result"></div>
+  </div>
+
+  <div id="panel-chain" class="panel">
+    <div class="panel-head"><h2 data-i18n="chain.title">Multi-version chain diff</h2><p data-i18n="chain.sub">Analyze v1 → v2 → … → vN transitions across three contract versions.</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.v1">Version 1</span> <span class="ver v1">v1</span></label>
+        <textarea id="c-1" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.v2">Version 2</span> <span class="ver v1">v2</span></label>
+        <textarea id="c-2" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="contract-cell" style="margin-bottom:16px">
+      <label><span data-i18n="label.v3">Version 3</span> <span class="ver v2">v3</span></label>
+      <textarea id="c-3" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+    </div>
+    <div class="actions">
+      <button id="c-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.chain">Run chain analysis</span></button>
+      <button id="c-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+    </div>
+    <div class="result" id="c-result"></div>
+  </div>
+
+  <div id="panel-semver" class="panel">
+    <div class="panel-head"><h2 data-i18n="semver.title">SemVer version suggestion</h2><p data-i18n="semver.sub">Derive the required major / minor / patch bump from a diff result.</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="s-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="s-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="s-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.semver">Suggest version bump</span></button>
+      <button id="s-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+    </div>
+    <div class="result" id="s-result"></div>
+  </div>
+
+  <div id="panel-migration" class="panel">
+    <div class="panel-head"><h2 data-i18n="migration.title">Compatibility migrations</h2><p data-i18n="migration.sub">Get step-by-step migration suggestions for every breaking change.</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="m-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="m-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="m-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.migration">Generate migrations</span></button>
+      <button id="m-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+    </div>
+    <div class="result" id="m-result"></div>
+  </div>
+
+  <div id="panel-sarif" class="panel">
+    <div class="panel-head"><h2 data-i18n="sarif.title">SARIF 2.1.0 export</h2><p data-i18n="sarif.sub">Export diff results as SARIF for GitHub Code Scanning and other static-analysis tooling.</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="r-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="r-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="r-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.sarif">Export SARIF</span></button>
+      <button id="r-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+    </div>
+    <div class="result" id="r-result"></div>
+  </div>
+
+  <div id="panel-changelog" class="panel">
+    <div class="panel-head"><h2 data-i18n="changelog.title">Release changelog</h2><p data-i18n="changelog.sub">Generate markdown release notes directly from contract changes.</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="g-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="g-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="g-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.changelog">Generate changelog</span></button>
+      <button id="g-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+    </div>
+    <div class="result" id="g-result"></div>
+  </div>
+
+  <div id="panel-impact" class="panel">
+    <div class="panel-head"><h2 data-i18n="impact.title">Consumer-aware impact scan</h2><p data-i18n="impact.sub">Which changes actually affect the paths / schemas / fields your agent uses? Classic diff tools answer "is it breaking for everyone" — this answers "is it breaking for me".</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="i-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="i-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="contract-cell" style="margin-bottom:16px">
+      <label><span data-i18n="impact.profileL">Consumer profile (JSON)</span> <span class="ver v2" data-i18n="impact.profileHint">what you use</span></label>
+      <textarea id="i-profile" spellcheck="false" style="height:64px" placeholder='{"paths": ["/users"], "schemas": ["User"]}'></textarea>
+    </div>
+    <div class="actions">
+      <button id="i-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.impact">Scan my impact</span></button>
+      <button id="i-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+      <button id="b-run" class="btn-ghost" type="button" style="margin-left:auto"><span class="spinner"></span><span data-i18n="btn.bench">Run benchmark</span></button>
+    </div>
+    <div class="result" id="i-result"></div>
+    <div class="result" id="b-result"></div>
+  </div>
+
+  <div id="panel-mcp" class="panel">
+    <div class="panel-head"><h2 data-i18n="mcp.title">MCP tools for AI agents</h2><p data-i18n="mcp.sub">Point any MCP-compatible agent at the /mcp endpoint and it gains six tools out of the box.</p></div>
+    <div class="mcp-grid" id="mcp-grid"></div>
+  </div>
+</section>
+
+<footer>
+  <span data-i18n="footer">Built for the X-Agent MCP Hackathon 2026 · Deterministic diff engine · </span><a href="https://github.com/kestarsheng/contract-guard">kestarsheng/contract-guard</a>
+</footer>
+
+<script>
+function icon(n){const P={diamond:'<path d="M6 3h12l4 6-10 13L2 9Z"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6L6 18M6 6L18 18"/>','arrow-right':'<path d="M5 12H19M12 5L19 12L12 19"/>','arrow-up-right':'<path d="M7 17L17 7M7 7H17V17"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle">${P[n]||''}</svg>`}
+const I18N={
+  en:{
+    "hero.h1":"Catch API breaking changes before they ship",
+    "hero.p":"A deterministic compatibility checker built for AI agents. Compare two OpenAPI, GraphQL, or JSON Schema contracts and get structured, reproducible findings — the core diff runs without any LLM.",
+    "stat.rules":"35+","stat.rulesL":"detection rules","stat.formats":"3","stat.formatsL":"contract formats","stat.tools":"8","stat.toolsL":"MCP tools","stat.endpoints":"8","stat.endpointsL":"REST endpoints","stat.f1":"1.0","stat.f1L":"benchmark F1",
+    "badge.det":"Deterministic","badge.mcp":"MCP-ready","badge.rep":"100% reproducible",
+    "tab.diff":"Breaking diff","tab.chain":"Chain diff","tab.semver":"SemVer","tab.migration":"Migration","tab.sarif":"SARIF","tab.changelog":"Changelog","tab.impact":"Impact scan","tab.mcp":"MCP tools",
+    "diff.title":"Breaking change diff","diff.sub":"Compare two contract versions and get a structured, reproducible finding set.",
+    "chain.title":"Multi-version chain diff","chain.sub":"Analyze v1 → v2 → … → vN transitions across three contract versions.",
+    "semver.title":"SemVer version suggestion","semver.sub":"Derive the required major / minor / patch bump from a diff result.",
+    "migration.title":"Compatibility migrations","migration.sub":"Get step-by-step migration suggestions for every breaking change.",
+    "sarif.title":"SARIF 2.1.0 export","sarif.sub":"Export diff results as SARIF for GitHub Code Scanning and other static-analysis tooling.",
+    "changelog.title":"Release changelog","changelog.sub":"Generate markdown release notes directly from contract changes.",
+    "impact.title":"Consumer-aware impact scan","impact.sub":"Which changes actually affect the paths / schemas / fields your agent uses? Classic diff tools answer 'is it breaking for everyone' — this answers 'is it breaking for me'.",
+    "impact.profileL":"Consumer profile (JSON)","impact.profileHint":"what you use",
+    "impact.affected":"affect you","impact.clean":"No changes affect your consumer subset","impact.hits":"hit","impact.misses":"ignorable","impact.ops":"Affected operations","impact.noHits":"No changes hit your consumer subset","impact.missesTitle":"Ignorable changes (not in your subset)",
+    "bench.title":"Regression benchmark","bench.sub":"16 labelled samples replayed through the deterministic engines","bench.samples":"samples","bench.correct":"correct","bench.ok":"pass",
+    "mcp.title":"MCP tools for AI agents","mcp.sub":"Point any MCP-compatible agent at the /mcp endpoint and it gains eight tools out of the box.",
+    "common.format":"Format",
+    "label.old":"Previous contract","label.new":"New contract","label.v1":"Version 1","label.v2":"Version 2","label.v3":"Version 3",
+    "btn.run":"Check breaking changes","btn.running":"Analyzing…","btn.example":"Load example",
+    "btn.chain":"Run chain analysis","btn.semver":"Suggest version bump","btn.migration":"Generate migrations","btn.sarif":"Export SARIF","btn.changelog":"Generate changelog","btn.impact":"Scan my impact","btn.bench":"Run benchmark",
+    "empty.title":"No analysis yet","empty.desc":"Paste two contract versions and run the check, or load an example to see it in action.",
+    "breaking":"breaking changes","clean":"No breaking changes","nochanges":"No changes detected — the contracts are equivalent.",
+    "findings":"findings","copy":"Copy JSON","copied":"Copied!","download":"Download","step":"Step",
+    "bump.major":"MAJOR","bump.minor":"MINOR","bump.patch":"PATCH","bump.reason":"Required bump","bump.versions":"Suggested version",
+    "migration.empty":"No breaking changes found — nothing to migrate.","migration.total":"breaking change(s) with migration paths",
+    "sarif.download":"Download SARIF","sarif.note":"SARIF report generated.",
+    "emptyM":{"migration":"No breaking changes found — nothing to migrate.","sarif":"Generate a SARIF report first.","changelog":"Generate a changelog first.","semver":"Run a version analysis first.","chain":"Run a chain analysis first.","diff":"No analysis yet.","impact":"Run an impact scan or the benchmark first."},
+    "mcp.t1":"Core diff — returns full finding report as JSON string",
+    "mcp.t1a":"old_spec, new_spec, format, use_llm?",
+    "mcp.t2":"Instant, free — lists accepted contract formats",
+    "mcp.t2a":"",
+    "mcp.t3":"Instant, free — explains what a change_type means",
+    "mcp.t3a":"change_type",
+    "mcp.t4":"Suggests a SemVer bump level (major/minor/patch)",
+    "mcp.t4a":"old_spec, new_spec, format, current_version",
+    "mcp.t5":"Generates markdown changelog for release notes",
+    "mcp.t5a":"old_spec, new_spec, format, old_version, new_version",
+"mcp.t6":"Generates compatibility migration suggestions for breaking changes",
+    "mcp.t6a":"old_spec, new_spec, format",
+    "mcp.t7":"Consumer-aware impact scan — which changes affect YOUR paths/schemas, plus transitive blast radius",
+    "mcp.t7a":"old_spec, new_spec, format, consumer_profile",
+    "mcp.t8":"Replays the 16-sample regression corpus; reports precision/recall/F1",
+    "mcp.t8a":""
+  },
+  zh:{
+    "hero.h1":"在发布前拦截 API 破坏性变更",
+    "hero.p":"面向 AI Agent 的确定性兼容性检查器。对比两份 OpenAPI、GraphQL 或 JSON Schema 契约，返回结构化、可复现的结果——核心检测无需任何 LLM。",
+    "stat.rules":"35+","stat.rulesL":"条检测规则","stat.formats":"3","stat.formatsL":"种契约格式","stat.tools":"8","stat.toolsL":"个 MCP 工具","stat.endpoints":"8","stat.endpointsL":"个 REST 端点","stat.f1":"1.0","stat.f1L":"基准 F1",
+    "badge.det":"确定性","badge.mcp":"可 Agent 化","badge.rep":"100% 可复现",
+    "tab.diff":"破坏性 diff","tab.chain":"链式 diff","tab.semver":"语义化版本","tab.migration":"迁移建议","tab.sarif":"SARIF","tab.changelog":"更新日志","tab.impact":"影响扫描","tab.mcp":"MCP 工具",
+    "diff.title":"破坏性变更检测","diff.sub":"对比两份契约版本，返回结构化、可复现的检测结果。",
+    "chain.title":"多版本链式分析","chain.sub":"跨三个契约版本分析 v1 → v2 → … → vN 的逐段变更。",
+    "semver.title":"SemVer 版本建议","semver.sub":"根据 diff 结果推导需要的 major / minor / patch 版本升级。",
+    "migration.title":"兼容性迁移建议","migration.sub":"为每一条破坏性变更生成逐步迁移建议。",
+    "sarif.title":"SARIF 2.1.0 导出","sarif.sub":"将 diff 结果导出为 SARIF，可直接接入 GitHub Code Scanning 等静态分析工具。",
+    "changelog.title":"发布更新日志","changelog.sub":"直接根据契约变更生成 markdown 发布说明。",
+    "impact.title":"消费者感知影响扫描","impact.sub":"哪条变更真正影响你的 Agent 使用的 path / schema / 字段？传统 diff 工具回答"它对所有人是否破坏性"——这里回答"它对我是否破坏性"。",
+    "impact.profileL":"消费者画像（JSON）","impact.profileHint":"你使用的内容",
+    "impact.affected":"影响你","impact.clean":"无变更命中你的消费者子集","impact.hits":"命中","impact.misses":"可忽略","impact.ops":"受影响操作","impact.noHits":"无变更命中你的消费者子集","impact.missesTitle":"可忽略的变更（不在你的子集内）",
+    "bench.title":"回归基准","bench.sub":"16 组带标注样本回放确定性引擎","bench.samples":"组样本","bench.correct":"正确","bench.ok":"通过",
+    "mcp.title":"面向 AI Agent 的 MCP 工具","mcp.sub":"让任意 MCP 兼容 Agent 指向 /mcp 端点，即可开箱获得八个工具。",
+    "common.format":"格式",
+    "label.old":"旧版契约","label.new":"新版契约","label.v1":"版本 1","label.v2":"版本 2","label.v3":"版本 3",
+    "btn.run":"检测破坏性变更","btn.running":"分析中…","btn.example":"载入示例",
+    "btn.chain":"运行链式分析","btn.semver":"建议版本升级","btn.migration":"生成迁移方案","btn.sarif":"导出 SARIF","btn.changelog":"生成更新日志","btn.impact":"扫描我的影响","btn.bench":"运行基准",
+    "empty.title":"尚未分析","empty.desc":"粘贴两版契约并运行检测，或载入示例查看效果。",
+    "breaking":"处破坏性变更","clean":"无破坏性变更","nochanges":"未检测到变更——两份契约等价。",
+    "findings":"条变更","copy":"复制 JSON","copied":"已复制！","download":"下载","step":"步骤",
+    "bump.major":"MAJOR","bump.minor":"MINOR","bump.patch":"PATCH","bump.reason":"建议升级","bump.versions":"建议版本",
+    "migration.empty":"未发现破坏性变更——无需迁移。","migration.total":"条破坏性变更含迁移路径",
+    "sarif.download":"下载 SARIF","sarif.note":"SARIF 报告已生成。",
+    "emptyM":{"migration":"未发现破坏性变更——无需迁移。","sarif":"先生成 SARIF 报告。","changelog":"先生成更新日志。","semver":"先运行版本分析。","chain":"先运行链式分析。","diff":"尚未分析。","impact":"先运行影响扫描或基准。"},
+    "mcp.t1":"核心 diff — 返回完整检测报告 JSON 字符串",
+    "mcp.t1a":"old_spec, new_spec, format, use_llm?",
+    "mcp.t2":"即时、免费 — 列出支持的契约格式",
+    "mcp.t2a":"",
+    "mcp.t3":"即时、免费 — 解释 change_type 的含义",
+    "mcp.t3a":"change_type",
+    "mcp.t4":"建议 SemVer 版本升级级别（major/minor/patch）",
+    "mcp.t4a":"old_spec, new_spec, format, current_version",
+    "mcp.t5":"为发布说明生成 markdown 更新日志",
+    "mcp.t5a":"old_spec, new_spec, format, old_version, new_version",
+"mcp.t6":"为破坏性变更生成兼容性迁移建议",
+    "mcp.t6a":"old_spec, new_spec, format",
+    "mcp.t7":"消费者感知影响扫描——哪些变更影响你的 path/schema，含传递爆炸半径",
+    "mcp.t7a":"old_spec, new_spec, format, consumer_profile",
+    "mcp.t8":"回放 16 组回归语料库，报告 precision/recall/F1",
+    "mcp.t8a":""
+  }
+};
+let lang="en";
+function t(k){return I18N[lang][k]||k}
+function applyI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(I18N[lang][k])el.textContent=I18N[lang][k]});
+  document.documentElement.lang=lang;
+  document.getElementById("lang-toggle").textContent=lang==="en"?"中文":"English";
+  renderMcpCards();
+}
+document.getElementById("lang-toggle").addEventListener("click",()=>{lang=lang==="en"?"zh":"en";applyI18n()});
+
+const MCP_TOOLS=[
+  {name:"check_breaking_changes",descKey:"mcp.t1",argsKey:"mcp.t1a"},
+  {name:"list_supported_formats",descKey:"mcp.t2",argsKey:"mcp.t2a"},
+  {name:"explain_change_type",descKey:"mcp.t3",argsKey:"mcp.t3a"},
+  {name:"suggest_version_bump",descKey:"mcp.t4",argsKey:"mcp.t4a"},
+  {name:"generate_changelog",descKey:"mcp.t5",argsKey:"mcp.t5a"},
+  {name:"suggest_migration",descKey:"mcp.t6",argsKey:"mcp.t6a"},
+  {name:"scan_consumer_impact",descKey:"mcp.t7",argsKey:"mcp.t7a"},
+  {name:"run_benchmark",descKey:"mcp.t8",argsKey:"mcp.t8a"}
+];
+function renderMcpCards(){
+  const grid=document.getElementById("mcp-grid");
+  grid.innerHTML=MCP_TOOLS.map(x=>`<div class="mcp-card"><div class="mcp-name">${x.name}</div><div class="mcp-desc">${t(x.descKey)}</div><div class="mcp-args">${x.argsKey?t(x.argsKey):""}</div></div>`).join("");
+}
+
+const EXAMPLES={
+openapi:{
+old:`{
+  "openapi": "3.0.3",
+  "info": {"title": "Users API", "version": "1.0.0"},
+  "paths": {
+    "/users": {
+      "get": {
+        "parameters": [{"name": "limit", "in": "query", "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "ok", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserList"}}}}}
+      }
+    },
+    "/users/{id}": {
+      "delete": {"responses": {"204": {"description": "deleted"}}}
+    }
+  },
+  "components": {"schemas": {
+    "User": {"type": "object", "properties": {"id": {"type": "integer"}, "email": {"type": "string"}, "role": {"type": "string", "enum": ["admin", "user", "guest"]}}, "required": ["id", "email"]},
+    "UserList": {"type": "array", "items": {"$ref": "#/components/schemas/User"}}
+  }}
+}`,
+new:`{
+  "openapi": "3.0.3",
+  "info": {"title": "Users API", "version": "2.0.0"},
+  "paths": {
+    "/users": {
+      "get": {
+        "parameters": [
+          {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+          {"name": "page", "in": "query", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {"200": {"description": "ok", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserList"}}}}}
+      }
+    }
+  },
+  "components": {"schemas": {
+    "User": {"type": "object", "properties": {"id": {"type": "integer"}, "email": {"type": "integer"}, "role": {"type": "string", "enum": ["admin", "user"]}}, "required": ["id", "email", "name"]},
+    "UserList": {"type": "array", "items": {"$ref": "#/components/schemas/User"}}
+  }}
+}`,
+v3:`{
+  "openapi": "3.0.3",
+  "info": {"title": "Users API", "version": "3.0.0"},
+  "paths": {
+    "/users": {
+      "get": {
+        "parameters": [
+          {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+          {"name": "page", "in": "query", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {"200": {"description": "ok", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserList"}}}}}
+      }
+    },
+    "/users/{id}": {
+      "get": {"responses": {"200": {"description": "ok", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/User"}}}}}}
+    }
+  },
+  "components": {"schemas": {
+    "User": {"type": "object", "properties": {"id": {"type": "integer"}, "email": {"type": "string"}, "role": {"type": "string", "enum": ["admin", "user"]}}, "required": ["id", "email"]},
+    "UserList": {"type": "array", "items": {"$ref": "#/components/schemas/User"}}
+  }}
+}`
+},
+graphql:{
+old:`type Query {
+  users(limit: Int): [User!]!
+  user(id: ID!): User
+}
+
+type User {
+  id: ID!
+  name: String
+  email: String
+  role: Role!
+}
+
+enum Role { ADMIN USER GUEST }`,
+new:`type Query {
+  users(limit: Int): [User!]!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String
+  role: Role!
+}
+
+enum Role { ADMIN USER }`,
+v3:`type Query {
+  users(limit: Int): [User!]!
+  user(id: ID!): User
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: Role!
+}
+
+enum Role { ADMIN USER }`
+},
+"json-schema":{
+old:`{
+  "type": "object",
+  "properties": {
+    "id": {"type": "integer"},
+    "name": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 10}
+  },
+  "required": ["id"]
+}`,
+new:`{
+  "type": "object",
+  "properties": {
+    "id": {"type": "integer"},
+    "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 5}
+  },
+  "required": ["id", "tags"]
+}`,
+v3:`{
+  "type": "object",
+  "properties": {
+    "id": {"type": "integer"},
+    "name": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["id"]
+}`
+}
+};
+
+function fmtFor(panel){const group=document.getElementById("panel-"+panel).querySelector("[data-fmt-group]");return group.querySelector("button.active").dataset.fmt}
+function setExamples(panel,onlyTwo){
+  const ex=EXAMPLES[fmtFor(panel)];
+  const ids={diff:["d-old","d-new"],chain:["c-1","c-2","c-3"],semver:["s-old","s-new"],migration:["m-old","m-new"],sarif:["r-old","r-new"],changelog:["g-old","g-new"],impact:["i-old","i-new"]};
+  const list=ids[panel]||[];
+  const vals=[ex.old,ex.new,ex.v3];
+  list.forEach((id,i)=>{if(onlyTwo&&i===2)return;document.getElementById(id).value=vals[i]||""});
+}
+document.querySelectorAll(".main-tabs button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".main-tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    document.getElementById("panel-"+b.dataset.tab).classList.add("active");
+  });
+});
+document.querySelectorAll("[data-fmt-group]").forEach(group=>{
+  group.querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      group.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+    });
+  });
+});
+["d-example","s-example","m-example","r-example","g-example"].forEach(id=>{
+  document.getElementById(id).addEventListener("click",()=>{
+    const panel=id[0];if(panel==="d")setExamples("diff",true);else setExamples(panel==="s"?"semver":panel==="m"?"migration":panel==="r"?"sarif":"changelog",true);
+    document.getElementById(panel+"-result").innerHTML="";
+  });
+});
+document.getElementById("c-example").addEventListener("click",()=>{setExamples("chain",false);document.getElementById("c-result").innerHTML=""});
+document.getElementById("i-example").addEventListener("click",()=>{
+  setExamples("impact",true);
+  const fmt=fmtFor("impact");
+  const prof=fmt==="openapi"?'{"paths": ["/users"], "schemas": ["User"]}'
+    :fmt==="graphql"?'{"schemas": ["User"]}'
+    :'{"fields": ["$.properties.id"]}';
+  document.getElementById("i-profile").value=prof;
+  document.getElementById("i-result").innerHTML="";
+  document.getElementById("b-result").innerHTML="";
+});
+
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function renderError(el,msg){el.innerHTML=`<div class="error-state">${escapeHtml(msg)}</div>`}
+function busy(btn,on){btn.disabled=on;btn.querySelector(".spinner").style.display=on?"inline-block":"none";btn.querySelector("span:not(.spinner)").textContent=on?t("btn.running"):btn.dataset.label}
+async function post(path,payload){const resp=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await resp.json();if(!resp.ok)throw new Error(data.error||("HTTP "+resp.status));return data}
+function findingHtml(f){
+  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">${icon("arrow-right")}</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
+  const sug=f.suggestion?`<div class="f-sug">${escapeHtml(f.suggestion)}</div>`:"";
+  return `<div class="finding" data-break="${f.breaking}">
+    <div class="f-head"><span class="sev" data-s="${f.severity}"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src ${f.source}">${f.source}</span></div>
+    <div class="f-loc">${escapeHtml(f.location)}</div>
+    <div class="f-sum">${escapeHtml(f.summary)}</div>
+    ${diff}${sug}
+  </div>`;
+}
+function copyJson(obj){navigator.clipboard.writeText(JSON.stringify(obj,null,2));}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-copy]")){
+    const btn=e.target.closest("[data-copy]");
+    const obj=JSON.parse(btn.dataset.copy);
+    copyJson(obj);
+    const old=btn.textContent;btn.textContent=t("copied");
+    setTimeout(()=>{btn.textContent=old},1200);
+  }
+  if(e.target.closest("[data-download]")){
+    const btn=e.target.closest("[data-download]");
+    const obj=JSON.parse(btn.dataset.download);
+    const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=btn.dataset.fn||"report.json";a.click();URL.revokeObjectURL(a.href);
+  }
+});
+
+document.getElementById("d-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("d-run");const res=document.getElementById("d-result");
+  const oldS=document.getElementById("d-old").value,newS=document.getElementById("d-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  busy(btn,true);const label=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=label;
+  try{
+    const data=await post("/v1/diff",{old_spec:oldS,new_spec:newS,format:fmtFor("diff"),use_llm:false});
+    renderDiff(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{busy(btn,false)}
+});
+function renderDiff(res,data){
+  if(data.total_changes===0){
+    res.innerHTML=`<div class="summary-card clean"><div class="break-status good"><span class="bdot"></span>${t("clean")}</div><div class="summary-text">${t("nochanges")}</div></div>`;
+    return;
+  }
+  const sevOrder=["critical","major","minor","info"];
+  const chips=sevOrder.filter(s=>data.counts[s]>0).map(s=>`<span class="count-chip" data-s="${s}">${data.counts[s]} ${s}</span>`).join("");
+  const status=data.breaking?`<div class="break-status bad"><span class="bdot"></span>${data.breaking_count} ${t("breaking")}</div>`:`<div class="break-status good"><span class="bdot"></span>${t("clean")}</div>`;
+  const copy=`<div class="copy-row"><button data-copy='${escapeHtml(JSON.stringify(data))}'></button></div>`;
+  const findings=data.findings.map(findingHtml).join("");
+  res.innerHTML=`<div class="summary-card ${data.breaking?"breaking":"clean"}">${status}<div class="counts">${chips}</div>${copy}<div class="summary-text">${escapeHtml(data.summary)}</div></div><div class="findings">${findings}</div>`;
+  res.querySelector("[data-copy]").textContent=t("copy");
+}
+
+document.getElementById("c-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("c-run");const res=document.getElementById("c-result");
+  const specs=["c-1","c-2","c-3"].map(id=>document.getElementById(id).value);
+  const label=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=label;
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/chain-diff",{specs,format:fmtFor("chain"),use_llm:false});
+    renderChain(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function renderChain(res,data){
+  const cum=data.cumulative_breaking?"<span class='break-status bad'><span class='bdot'></span>"+data.cumulative_breaking_count+" "+t("breaking")+"</span>":"<span class='break-status good'><span class='bdot'></span>"+t("clean")+"</span>";
+  let html=`<div class="summary-card ${data.cumulative_breaking?"breaking":"clean"}">${cum}<div class="summary-text">${escapeHtml(data.summary)}</div></div>`;
+  data.steps.forEach((s,i)=>{
+    const chips=["critical","major","minor","info"].filter(x=>s.findings.filter(f=>f.severity===x).length>0).map(x=>`<span class="count-chip" data-s="${x}">${s.findings.filter(f=>f.severity===x).length} ${x}</span>`).join("");
+    html+=`<div class="finding" data-break="${s.breaking}" style="margin-bottom:12px"><div class="f-head"><span class="sev" data-s="${s.breaking?"critical":"info"}"></span><span class="ctype">${t("step")} ${i+1}: ${s.from_version} → ${s.to_version}</span></div><div class="counts" style="margin-top:8px;margin-bottom:4px">${chips}</div><div class="summary-text">${escapeHtml(s.summary)}</div><div class="findings" style="margin-top:10px">${s.findings.map(findingHtml).join("")}</div></div>`;
+  });
+  res.innerHTML=html;
+}
+
+document.getElementById("s-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("s-run");const res=document.getElementById("s-result");
+  const oldS=document.getElementById("s-old").value,newS=document.getElementById("s-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/semver",{old_spec:oldS,new_spec:newS,format:fmtFor("semver"),use_llm:false});
+    renderSemver(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function renderSemver(res,data){
+  const bump=data.bump||"patch";
+  const versions=data.current_version&&data.suggested_version?`<div class="semver-versions"><span class="old">${escapeHtml(data.current_version)}</span><span class="arrow">${icon("arrow-right")}</span><span class="new">${escapeHtml(data.suggested_version)}</span></div>`:"";
+  res.innerHTML=`<div class="semver-card"><div class="bump-badge ${bump}">${t("bump."+bump)}</div><div class="semver-meta"><div class="reason">${t("bump.reason")}: ${escapeHtml(data.reason||"")} (${data.breaking_count} ${t("breaking")}, ${data.total_changes} ${t("findings")})</div>${versions}</div></div>`;
+}
+
+document.getElementById("m-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("m-run");const res=document.getElementById("m-result");
+  const oldS=document.getElementById("m-old").value,newS=document.getElementById("m-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/migration",{old_spec:oldS,new_spec:newS,format:fmtFor("migration"),use_llm:false});
+    renderMigration(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function renderMigration(res,data){
+  if(data.total_breaking===0||data.suggestions.length===0){res.innerHTML=`<div class="empty-state"><div class="icon">${icon("check")}</div><h3>${t("migration.empty")}</h3></div>`;return}
+  let html=`<div class="summary-card clean" style="margin-bottom:14px"><span class="count-chip" data-s="critical">${data.total_breaking} ${t("migration.total")}</span>${data.has_migration_path?'':''}</div>`;
+  html+=data.suggestions.map(s=>`<div class="mig-card"><div class="mig-head"><span class="sev" data-s="${s.severity}"></span><span class="ctype">${escapeHtml(s.change_type)}</span><span class="mig-loc">${escapeHtml(s.location)}</span></div><div class="mig-body"><div>${escapeHtml(s.summary)}</div>${s.migration?`<div class="mig-fix">${escapeHtml(s.migration)}</div>`:""}</div></div>`).join("");
+  res.innerHTML=html;
+}
+
+document.getElementById("r-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("r-run");const res=document.getElementById("r-result");
+  const oldS=document.getElementById("r-old").value,newS=document.getElementById("r-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/sarif",{old_spec:oldS,new_spec:newS,format:fmtFor("sarif"),use_llm:false});
+    renderSarif(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function renderSarif(res,data){
+  const pretty=JSON.stringify(data,null,2);
+  const esc=escapeHtml(pretty);
+  res.innerHTML=`<div class="sarif-box"><button class="copy-btn-top" data-copy='${escapeHtml(JSON.stringify(data))}'>${t("copy")}</button><button class="copy-btn-top" data-download='${escapeHtml(JSON.stringify(data))}' data-fn="contract-guard.sarif" style="right:96px">${t("sarif.download")}</button><pre>${esc}</pre></div>`;
+  res.querySelectorAll("[data-copy],[data-download]").forEach(b=>{if(b.textContent===t("copy")||b.textContent===t("sarif.download"))return});
+}
+document.addEventListener("click",e=>{
+  const tgt=e.target.closest("[data-download]");
+  if(tgt){const obj=JSON.parse(tgt.dataset.download);const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=tgt.dataset.fn||"report.json";a.click();URL.revokeObjectURL(a.href)}
+});
+
+document.getElementById("g-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("g-run");const res=document.getElementById("g-result");
+  const oldS=document.getElementById("g-old").value,newS=document.getElementById("g-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/changelog",{old_spec:oldS,new_spec:newS,format:fmtFor("changelog"),use_llm:false});
+    res.innerHTML=`<div class="copy-row" style="margin-bottom:10px"><button data-copy='${escapeHtml(JSON.stringify(data))}'>${t("copy")}</button></div><div class="changelog-box">${escapeHtml(data.changelog||"")}</div>`;
+    const cb=res.querySelector("[data-copy]");cb.setAttribute("data-copy-text",data.changelog||"");
+    cb.addEventListener("click",async()=>{await navigator.clipboard.writeText(data.changelog||"");const o=cb.textContent;cb.textContent=t("copied");setTimeout(()=>cb.textContent=o,1200)});
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+
+const EMPTY_PANELS={diff:"diff",chain:"chain",semver:"semver",migration:"migration",sarif:"sarif",changelog:"changelog",impact:"impact"};
+
+document.getElementById("i-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("i-run"),res=document.getElementById("i-result");
+  const oldS=document.getElementById("i-old").value,newS=document.getElementById("i-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  let profile={};
+  const raw=document.getElementById("i-profile").value.trim();
+  if(raw){try{profile=JSON.parse(raw)}catch(e){renderError(res,lang==="zh"?("消费者画像不是合法 JSON："+e.message):("consumer_profile is not valid JSON: "+e.message));return}}
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/consumer-scan",{old_spec:oldS,new_spec:newS,format:fmtFor("impact"),consumer_profile:profile,use_llm:false});
+    renderImpact(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function impactHitHtml(f){
+  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">${icon("arrow-right")}</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
+  const sug=f.suggestion?`<div class="f-sug">${escapeHtml(f.suggestion)}</div>`:"";
+  const ops=f.affected_operations&&f.affected_operations.length?`<div class="impact-ops"><b>${t("impact.ops")}:</b> ${f.affected_operations.map(escapeHtml).join(" · ")}</div>`:"";
+  return `<div class="finding" data-break="${f.breaking}">
+    <div class="f-head"><span class="sev" data-s="${f.severity}"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src ${f.source||"confirmed"}">${f.source||"confirmed"}</span></div>
+    <div class="f-loc">${escapeHtml(f.location)}</div>
+    <div class="f-sum">${escapeHtml(f.summary)}</div>
+    ${diff}${sug}${ops}
+  </div>`;
+}
+function renderImpact(res,data){
+  const isBad=data.consumer_aware?data.consumer_affected:data.breaking;
+  const status=data.consumer_aware
+    ? (data.consumer_affected?`<div class="break-status bad"><span class="bdot"></span>${data.consumer_breaking_count} ${t("breaking")} ${t("impact.affected")}</div>`:`<div class="break-status good"><span class="bdot"></span>${t("impact.clean")}</div>`)
+    : (data.breaking?`<div class="break-status bad"><span class="bdot"></span>${data.breaking_count} ${t("breaking")}</div>`:`<div class="break-status good"><span class="bdot"></span>${t("clean")}</div>`);
+  const chips=`<span class="count-chip" data-s="critical">${data.hit_count} ${t("impact.hits")}</span><span class="count-chip" data-s="minor">${data.miss_count} ${t("impact.misses")}</span>`;
+  const ops=data.impact&&data.impact.affected_operations&&data.impact.affected_operations.length?`<div class="impact-ops"><b>${t("impact.ops")}:</b> ${data.impact.affected_operations.map(escapeHtml).join(" · ")}</div>`:"";
+  const copy=`<div class="copy-row"><button data-copy='${escapeHtml(JSON.stringify(data))}'></button></div>`;
+  const hits=(data.hits||[]).map(impactHitHtml).join("");
+  const missHtml=(data.misses||[]).map(f=>`<div class="finding" data-break="false" style="opacity:.55"><div class="f-head"><span class="sev" data-s="info"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src confirmed">ignored</span></div><div class="f-loc">${escapeHtml(f.location)}</div><div class="f-sum">${escapeHtml(f.summary)}</div></div>`).join("");
+  let html=`<div class="summary-card ${isBad?"breaking":"clean"}">${status}<div class="counts">${chips}</div>${copy}<div class="summary-text">${escapeHtml(data.summary)}</div>${ops}</div>`;
+  html+=`<div class="findings"><div class="impact-group">${hits||`<div class="empty-state"><div class="icon">${icon("check")}</div><h3>${t("impact.noHits")}</h3></div>`}</div></div>`;
+  if(missHtml)html+=`<details class="misses"><summary>${t("impact.missesTitle")} (${data.miss_count})</summary><div class="findings">${missHtml}</div></details>`;
+  res.innerHTML=html;
+  const cb=res.querySelector("[data-copy]");if(cb)cb.textContent=t("copy");
+}
+
+document.getElementById("b-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("b-run"),res=document.getElementById("b-result");
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const resp=await fetch("/v1/benchmark");const data=await resp.json();
+    renderBench(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function renderBench(res,data){
+  const score=[["accuracy",data.accuracy],["precision",data.precision],["recall",data.recall],["F1",data.f1]];
+  const cards=score.map(([k,v])=>`<div class="stat" style="min-width:110px"><b data-c="${v>=0.99?"minor":"major"}">${v}</b><span>${k}</span></div>`).join("");
+  const rows=data.results.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.format}</td><td class="${r.correct?"ok":"err"}">${r.correct?icon("check"):icon("x")}</td></tr>`).join("");
+  res.innerHTML=`<div class="bench-card"><div class="panel-head"><h2>${t("bench.title")}</h2><p>${t("bench.sub")} — ${data.total_samples} ${t("bench.samples")}, ${data.correct}/${data.total_samples} ${t("bench.correct")}</p></div><div class="hero-stats" style="margin:14px 0">${cards}</div><div class="conf">TP ${data.confusion.tp} · FP ${data.confusion.fp} · FN ${data.confusion.fn} · TN ${data.confusion.tn}</div><table class="bench-table"><thead><tr><th>sample</th><th>format</th><th>${t("bench.ok")}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+document.querySelectorAll(".panel").forEach(p=>{if(p.id!=="panel-mcp"){const key=p.id.replace("panel-","");p.querySelector(".result").innerHTML=`<div class="empty-state"><div class="icon">${icon("diamond")}</div><h3>${t("empty.title")}</h3><p>${t("empty.desc")}</p></div>`}});
+applyI18n();
+</script>
+</body>
+</html>

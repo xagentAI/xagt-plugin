@@ -1,0 +1,70 @@
+name: Contract Guard - API Breaking Change Check
+
+on:
+  pull_request:
+    paths:
+      - '**/openapi*'
+      - '**/swagger*'
+      - '**/*.graphql'
+      - '**/*.gql'
+      - '**/schema*.json'
+
+jobs:
+  contract-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect API breaking changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+
+            const baseUrl = 'https://contract-guard-eta.vercel.app';
+
+            const changedFiles = execSync('git diff --name-only origin/${{ github.base_ref }}...HEAD', { encoding: 'utf-8' })
+              .trim().split('\n');
+
+            const specFiles = changedFiles.filter(f =>
+              f.match(/openapi|swagger|\.graphql$|\.gql$|schema.*\.json$/i)
+            );
+
+            if (specFiles.length === 0) {
+              core.info('No contract spec files changed.');
+              return;
+            }
+
+            for (const file of specFiles) {
+              const oldContent = execSync(`git show origin/${{ github.base_ref }}:${file}`, { encoding: 'utf-8' }).catch(() => null);
+              const newContent = fs.readFileSync(file, 'utf-8');
+
+              if (!oldContent) {
+                core.info(`New file ${file} — no diff needed.`);
+                continue;
+              }
+
+              const format = file.match(/\.graphql$|\.gql$/) ? 'graphql' :
+                             file.match(/\.json$/) ? 'json-schema' : 'openapi';
+
+              const response = await fetch(`${baseUrl}/v1/diff`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ format, old_spec: oldContent, new_spec: newContent })
+              });
+
+              const result = await response.json();
+
+              if (result.breaking) {
+                core.error(`Breaking changes detected in ${file}: ${result.summary}`);
+                for (const f of result.findings.filter(f => f.breaking)) {
+                  core.error(`  - [${f.severity}] ${f.change_type}: ${f.summary} at ${f.location}`);
+                }
+                core.setFailed(`Breaking API changes detected in ${file}`);
+              } else {
+                core.info(`No breaking changes in ${file}: ${result.summary}`);
+              }
+            }
