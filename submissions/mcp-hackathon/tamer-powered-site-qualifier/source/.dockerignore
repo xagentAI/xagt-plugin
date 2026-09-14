@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.secrets
+*.env
+*.key
+*.pem
+*.log
+logs
+evidence
+agent/node_modules
