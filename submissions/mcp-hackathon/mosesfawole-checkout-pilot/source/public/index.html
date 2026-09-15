@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f3">
+    <meta name="description" content="A demo-first agentic checkout pilot for Moove Receive payments.">
+    <title>Checkout Pilot</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Checkout Pilot home">
+          <span class="brand-mark">CP</span>
+          <span class="brand-name">Checkout Pilot</span>
+        </a>
+        <div class="topbar-right">
+          <span class="quiet-label">MOOVE RECEIVE</span>
+          <span id="mode-pill" class="mode-pill mode-demo"><span class="status-dot"></span><span id="mode-label">DEMO MODE</span></span>
+        </div>
+      </header>
+
+      <main id="dashboard-view" class="page-content">
+        <section class="intro-row">
+          <div>
+            <p class="eyebrow">PAYMENT OPERATIONS / 01</p>
+            <h1>Turn a request into a paid link.</h1>
+            <p class="intro-copy">A focused checkout layer for agents, communities, and small teams.</p>
+          </div>
+          <div class="intro-note">
+            <span class="note-number">01</span>
+            <span>One link. One reference. A clean settlement trail.</span>
+          </div>
+        </section>
+
+        <section class="workspace-grid">
+          <form id="link-form" class="panel composer-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="section-kicker">CREATE</p>
+                <h2>New payment request</h2>
+              </div>
+              <span class="step-chip">01 / 02</span>
+            </div>
+
+            <div class="field-stack">
+              <label class="field">
+                <span class="field-label">Amount <span class="required">*</span></span>
+                <span class="input-with-suffix">
+                  <input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" value="49.00" required>
+                  <span class="input-suffix">USD</span>
+                </span>
+                <span class="field-hint">Use a decimal amount, up to two places.</span>
+              </label>
+
+              <label class="field">
+                <span class="field-label">What is this for?</span>
+                <input id="item" name="item" type="text" autocomplete="off" maxlength="80" value="Pilot onboarding">
+                <span class="field-hint">Shown to the payer and included in the reference.</span>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Reference</span>
+                <input id="reference" name="reference" type="text" autocomplete="off" maxlength="48" value="PILOT-001">
+                <span class="field-hint">A short identifier for reconciliation.</span>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Expires <span class="optional">optional</span></span>
+                <input id="expiration" name="expirationDate" type="datetime-local">
+              </label>
+            </div>
+
+            <div class="form-footer">
+              <div class="security-note"><span class="shield-mark">+</span><span>Your API key stays on the server.</span></div>
+              <button id="create-button" class="primary-button" type="submit"><span>Create link</span><span class="button-arrow">-&gt;</span></button>
+            </div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+          </form>
+
+          <section class="panel preview-panel" aria-live="polite">
+            <div class="panel-heading">
+              <div>
+                <p class="section-kicker">OUTPUT</p>
+                <h2>Link preview</h2>
+              </div>
+              <span id="preview-status" class="status-badge status-idle">WAITING</span>
+            </div>
+            <div id="preview-content" class="preview-content empty-preview">
+              <div class="empty-icon">+</div>
+              <h3>Your link will appear here</h3>
+              <p>Create a request to get a hosted checkout URL.</p>
+            </div>
+          </section>
+        </section>
+
+        <section class="lower-grid">
+          <section class="panel recent-panel">
+            <div class="panel-heading compact-heading">
+              <div>
+                <p class="section-kicker">LEDGER</p>
+                <h2>Recent requests</h2>
+              </div>
+              <button id="refresh-button" class="subtle-button" type="button"><span class="refresh-glyph">R</span><span>Refresh</span></button>
+            </div>
+            <div id="recent-list" class="recent-list">
+              <div class="list-empty">No requests in this session.</div>
+            </div>
+          </section>
+
+          <aside class="panel lane-panel">
+            <div class="panel-heading compact-heading">
+              <div>
+                <p class="section-kicker">SUBMISSION LANE</p>
+                <h2>Where this can travel</h2>
+              </div>
+            </div>
+            <div class="lane-list">
+              <a class="lane-row" href="https://www.moove.xyz/blog/everything-you-need-to-know-about-moove-developer-program" target="_blank" rel="noreferrer">
+                <span class="lane-index">A</span><span class="lane-copy"><strong>Moove Developer Fund</strong><small>Up to $10k / milestone-based</small></span><span class="lane-arrow">-&gt;</span>
+              </a>
+              <a class="lane-row" href="https://decentralizeai.tech/" target="_blank" rel="noreferrer">
+                <span class="lane-index">B</span><span class="lane-copy"><strong>Decentralize AI</strong><small>Open submissions / article + build</small></span><span class="lane-arrow">-&gt;</span>
+              </a>
+              <a class="lane-row" href="https://xagt.ai/hackathon?lang=en" target="_blank" rel="noreferrer">
+                <span class="lane-index">C</span><span class="lane-copy"><strong>X-Agent Open Innovation</strong><small>Build, validate, submit a PR</small></span><span class="lane-arrow">-&gt;</span>
+              </a>
+            </div>
+            <p class="lane-footnote">Prize pools are competitive, not guaranteed income. Keep volume genuine.</p>
+          </aside>
+        </section>
+      </main>
+
+      <main id="payer-view" class="payer-view" hidden aria-hidden="true">
+        <section class="payer-shell">
+          <div class="payer-brand"><span class="brand-mark">CP</span><span>Checkout Pilot</span></div>
+          <div id="payer-card" class="payer-card">
+            <p class="eyebrow">SECURE PAYMENT REQUEST</p>
+            <div id="payer-content" class="payer-content"><p>Loading request...</p></div>
+          </div>
+          <p class="payer-footnote">Hosted payment request powered by Moove Receive.</p>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

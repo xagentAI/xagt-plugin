@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: checkout-pilot
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: SOURCE_COMMIT
+        sync: false
+      - key: XAGENT_SUBMISSION_SLUG
+        value: mosesfawole-checkout-pilot
+      - key: MOOVE_API_BASE_URL
+        sync: false
+      - key: MOOVE_API_KEY
+        sync: false
