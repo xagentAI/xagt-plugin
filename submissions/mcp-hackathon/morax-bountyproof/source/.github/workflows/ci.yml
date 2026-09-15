@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Test and compile
+        run: npm run check
+      - name: Audit dependencies
+        run: npm audit --audit-level=low
+      - name: Build container
+        run: docker build --build-arg VCS_REF="$GITHUB_SHA" --tag bountyproof:test .
+      - name: Smoke-test version proof
+        run: |
+          docker run --detach --rm --name bountyproof-test \
+            --publish 127.0.0.1:18787:8787 \
+            --env REVIEW_COMMIT="$GITHUB_SHA" \
+            bountyproof:test
+          trap 'docker stop bountyproof-test >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:18787/health > health.json; then break; fi
+            sleep 1
+          done
+          node --input-type=module --eval '
+            import fs from "node:fs";
+            const health = JSON.parse(fs.readFileSync("health.json", "utf8"));
+            if (health.status !== "ok" || health.commit !== process.env.GITHUB_SHA) process.exit(1);
+          '
+          curl --fail --silent http://127.0.0.1:18787/.well-known/xagent-verification.json > proof.json
+          node --input-type=module --eval '
+            import fs from "node:fs";
+            const proof = JSON.parse(fs.readFileSync("proof.json", "utf8"));
+            if (proof.slug !== "morax-bountyproof" || proof.commit !== process.env.GITHUB_SHA) process.exit(1);
+          '
