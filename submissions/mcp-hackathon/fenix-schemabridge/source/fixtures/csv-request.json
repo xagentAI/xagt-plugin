@@ -1,0 +1,10 @@
+{
+  "format": "csv",
+  "data": "sku,name,stock,active\r\nA1,\"Tea, green\",7,true\r\nB2,Coffee,0,false\r\n",
+  "schema": [
+    { "source": "sku", "target": "id", "type": "string" },
+    { "source": "name", "target": "name", "type": "string" },
+    { "source": "stock", "target": "quantity", "type": "integer" },
+    { "source": "active", "target": "available", "type": "boolean" }
+  ]
+}

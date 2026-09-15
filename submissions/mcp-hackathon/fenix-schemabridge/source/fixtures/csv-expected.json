@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "data": [
+    { "id": "A1", "name": "Tea, green", "quantity": 7, "available": true },
+    { "id": "B2", "name": "Coffee", "quantity": 0, "available": false }
+  ],
+  "summary": { "inputRows": 2, "outputRows": 2, "mappedFields": 4, "convertedCells": 4 }
+}

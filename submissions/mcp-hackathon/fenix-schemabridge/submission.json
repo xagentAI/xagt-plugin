@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "SchemaBridge",
+  "slug": "fenix-schemabridge",
+  "sourceRepository": "https://github.com/wiaikit/fenix-schemabridge",
+  "reviewCommit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "apiBaseUrl": "https://schemabridge.wiaikit.com/v1",
+  "healthCheckUrl": "https://schemabridge.wiaikit.com/health",
+  "deploymentProofUrl": "https://schemabridge.wiaikit.com/.well-known/xagent-verification.json"
+}

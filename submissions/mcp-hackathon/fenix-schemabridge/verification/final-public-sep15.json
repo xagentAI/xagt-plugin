@@ -1,0 +1,130 @@
+{
+  "sourceCommit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "startedAt": "2026-09-15T07:57:18.740Z",
+  "finishedAt": "2026-09-15T07:57:26.842Z",
+  "purpose": "Final approved entry: four mandatory URLs, public source SHA, actual success and safe-error capability calls",
+  "authenticated": false,
+  "requests": [
+    {
+      "url": "https://github.com/wiaikit/fenix-schemabridge",
+      "method": "GET",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1",
+      "method": "GET",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "name": "SchemaBridge",
+        "version": "0.1.0",
+        "description": "Map small CSV or JSON record sets to explicit field names and types.",
+        "capability": {
+          "method": "POST",
+          "path": "/v1/transform",
+          "contentType": "application/json"
+        },
+        "documentation": "/openapi.json",
+        "health": "/health",
+        "deploymentProof": "/.well-known/xagent-verification.json",
+        "limits": {
+          "requestBytes": 32768,
+          "records": 100
+        }
+      }
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/health",
+      "method": "GET",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "status": "ok",
+        "commit": "18d0eac794d0075df3f763bd2a442370e03f02fd"
+      }
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/.well-known/xagent-verification.json",
+      "method": "GET",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "schemaVersion": 1,
+        "slug": "fenix-schemabridge",
+        "commit": "18d0eac794d0075df3f763bd2a442370e03f02fd"
+      }
+    },
+    {
+      "url": "https://api.github.com/repos/wiaikit/fenix-schemabridge/commits/18d0eac794d0075df3f763bd2a442370e03f02fd",
+      "method": "GET",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "commit": "18d0eac794d0075df3f763bd2a442370e03f02fd"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1/transform",
+      "method": "POST",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "ok": true,
+        "data": [
+          {
+            "id": "A1",
+            "name": "Tea, green",
+            "quantity": 7,
+            "available": true
+          },
+          {
+            "id": "B2",
+            "name": "Coffee",
+            "quantity": 0,
+            "available": false
+          }
+        ],
+        "summary": {
+          "inputRows": 2,
+          "outputRows": 2,
+          "mappedFields": 4,
+          "convertedCells": 4
+        }
+      }
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1/transform",
+      "method": "POST",
+      "status": 422,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "ok": false,
+        "error": {
+          "code": "VALIDATION_FAILED",
+          "message": "Some fields could not be converted. No records were returned.",
+          "details": {
+            "totalErrors": 2,
+            "truncated": false,
+            "fields": [
+              {
+                "row": 0,
+                "source": "quantity",
+                "target": "quantity",
+                "expected": "integer",
+                "code": "TYPE_MISMATCH"
+              },
+              {
+                "row": 0,
+                "source": "active",
+                "target": "active",
+                "expected": "boolean",
+                "code": "TYPE_MISMATCH"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "result": "PASS",
+  "limitations": "Point-in-time checks; no future uptime guarantee, load test or cryptographic build attestation."
+}
