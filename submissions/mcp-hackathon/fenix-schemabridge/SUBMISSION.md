@@ -1,6 +1,6 @@
-# DRAFT — SchemaBridge
+# SchemaBridge
 
-Track: **Open Innovation**. The reviewed English source and API are published on Cloudflare with the owner-approved editorial interface. This is a draft package; the official entry has not been submitted.
+Track: **Open Innovation**. The reviewed English source and API are published on Cloudflare with the owner-approved editorial interface. The official entry was submitted on 15 September 2026 in [PR #59](https://github.com/xagentAI/xagt-plugin/pull/59); organizer review remains pending.
 
 ## Capability
 
@@ -54,7 +54,7 @@ Run from source/ with Node.js 22 or newer. npm run build is a dry-run, not publi
 
 Cloudflare Worker fenix-schemabridge: version d181e389-117e-45f0-9516-56e9a96c0eb0, deployment 5e9f28ff-e340-457d-8154-65388ef55f50, 100% traffic, deployed 2026-09-14T08:51:20.584213Z. See verification/current-deployment.json. Operator control-plane observations and public byte comparisons are separate evidence; configured source metadata is not signed build attestation.
 
-The organizer confirmed on 15 September 2026 at 06:23 UTC that public endpoints must identify the source commit used for the submitted and deployed service; it does not need to match the final PR head in the X-Agent submission repository. The published sourceRepository/reviewCommit values therefore remain bound to the source SHA above. Submit the corresponding source/ snapshot and source-manifest.json, and compare the submitted source files with that manifest. The organizer reviews and merges entries individually. The official PR has not been created; its eventual head is a separate submission identifier, not a replacement for the service source SHA. This version-mapping clarification is resolved.
+The organizer confirmed on 15 September 2026 at 06:23 UTC that public endpoints must identify the source commit used for the submitted and deployed service; it does not need to match the final PR head in the X-Agent submission repository. The published sourceRepository/reviewCommit values therefore remain bound to the source SHA above. The corresponding source/ snapshot and source-manifest.json are included in [PR #59](https://github.com/xagentAI/xagt-plugin/pull/59); compare the submitted source files with that manifest. The organizer reviews and merges entries individually. The PR head is a separate submission identifier, not a replacement for the service source SHA. This version-mapping clarification is resolved.
 
 These checks do not establish continuous review-period availability, load capacity, provider retention or a hosting CPU guarantee. No future award or payment is assumed. Use synthetic or non-sensitive data. The visual release changes presentation and static-asset delivery; its scope and any untested scenarios are recorded in the current local/public/browser evidence.
 
@@ -68,4 +68,4 @@ Runtime code has no external packages, model calls, database, payment integratio
 
 Working name: Fenix. Support: wiaikit@proton.me.
 
-Aleksandr Parkhomenko approved the completed RIGHTS.md declaration on 2026-09-15, including the disclosed third-party conditions. This approval is explicit and is not inferred from public source access; no additional unrestricted open-source license is granted. Registration, official community membership and official PR submission remain pending; see HUMAN_REQUIREMENTS.md.
+Aleksandr Parkhomenko approved the completed RIGHTS.md declaration on 2026-09-15, including the disclosed third-party conditions. This approval is explicit and is not inferred from public source access; no additional unrestricted open-source license is granted. Luma registration was accepted and confirmed by email on 15 September, and PR #59 is open. Official Telegram community membership remains pending the owner's QR login; see HUMAN_REQUIREMENTS.md. Registration and submission do not establish eligibility, an award or payment.

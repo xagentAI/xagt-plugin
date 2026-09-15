@@ -1,4 +1,4 @@
-# DRAFT — current editorial release verification
+# Current editorial release verification
 
 The reviewed source is 18d0eac794d0075df3f763bd2a442370e03f02fd. All 27 tracked files are included in source/, copied and compared byte-for-byte with exact Git blobs (2,217,942 bytes). source-manifest.json records paths, Git blobs, SHA-256 values and sizes. The editorial interface includes the original selected illustration and three locally served font files, with their notices and provenance; THIRD_PARTY.md inventories the additions.
 
@@ -69,7 +69,7 @@ npm start
 
 Cloudflare Worker fenix-schemabridge: version d181e389-117e-45f0-9516-56e9a96c0eb0, deployment 5e9f28ff-e340-457d-8154-65388ef55f50, 100% traffic, deployed 2026-09-14T08:51:20.584213Z. See verification/current-deployment.json. Operator control-plane observations and public byte comparisons are separate evidence; configured source metadata is not signed build attestation.
 
-The organizer confirmed on 15 September 2026 at 06:23 UTC that public endpoints must identify the source commit used for the submitted and deployed service; it does not need to match the final PR head in the X-Agent submission repository. The published sourceRepository/reviewCommit values therefore remain bound to the source SHA above. Submit the corresponding source/ snapshot and source-manifest.json, and compare the submitted source files with that manifest. The organizer reviews and merges entries individually. The official PR has not been created; its eventual head is a separate submission identifier, not a replacement for the service source SHA. This version-mapping clarification is resolved.
+The organizer confirmed on 15 September 2026 at 06:23 UTC that public endpoints must identify the source commit used for the submitted and deployed service; it does not need to match the final PR head in the X-Agent submission repository. The published sourceRepository/reviewCommit values therefore remain bound to the source SHA above. The corresponding source/ snapshot and source-manifest.json are included in [PR #59](https://github.com/xagentAI/xagt-plugin/pull/59); compare the submitted source files with that manifest. The organizer reviews and merges entries individually. The PR head is a separate submission identifier, not a replacement for the service source SHA. This version-mapping clarification is resolved.
 
 ## Official validator
 
@@ -86,4 +86,6 @@ The organizer replied on 14 September that SchemaBridge appears suitable for Ope
 
 These checks do not establish continuous review-period availability, load capacity, provider retention or a hosting CPU guarantee. No future award or payment is assumed. Use synthetic or non-sensitive data. The visual release changes presentation and static-asset delivery; its scope and any untested scenarios are recorded in the current local/public/browser evidence.
 
-Aleksandr Parkhomenko expressly approved the completed RIGHTS.md declaration on 2026-09-15, including the disclosed third-party conditions. Registration, official community membership and the official contest PR remain incomplete. No award, paid assignment or payment is established by this packet.
+Aleksandr Parkhomenko expressly approved the completed RIGHTS.md declaration on 2026-09-15, including the disclosed third-party conditions. Luma registration was accepted and confirmed by email on 15 September, and the official contest entry is submitted in [PR #59](https://github.com/xagentAI/xagt-plugin/pull/59). Official Telegram community membership remains pending the owner's QR login. No final eligibility decision, award, paid assignment or payment is established by this packet.
+
+The 15 September submission-status correction changes only SUBMISSION.md, HUMAN_REQUIREMENTS.md and this README. Source files, RIGHTS and captured test/build/public evidence are unchanged. The earlier checks retain their original dates; exact package digests and any subsequent official validator runs are recorded outside the entry in READINESS.md and the validation records.
