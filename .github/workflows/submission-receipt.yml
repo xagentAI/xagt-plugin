@@ -1,0 +1,45 @@
+name: Acknowledge current hackathon submission
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "submissions/mcp-hackathon/**"
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: Existing current-event PR to acknowledge without duplicating a receipt
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: submission-receipt-${{ github.event.pull_request.number || inputs.pull_request_number }}
+  cancel-in-progress: false
+
+jobs:
+  receipt:
+    if: github.repository == 'xagentAI/xagt-plugin' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out official code only
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Use Node 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Post one English receipt using PR metadata only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pull_request_number }}
+        run: node scripts/submission-lifecycle.mjs receipt

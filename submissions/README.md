@@ -32,6 +32,14 @@ Copy [`TEMPLATE.md`](./TEMPLATE.md) to `SUBMISSION.md`, [`submission.example.jso
 | `source/` | Complete source code for the reviewed version, including dependency lock files and configuration examples. Exclude generated dependency folders, build output, secrets, and private data. |
 | `verification/README.md` | A reviewer can follow these steps to call the health check and one real capability endpoint. Include expected success and safe error behavior. |
 
+### Included source components
+
+Include first-party components required to build and run the submitted capability in `source/`. They may use a descriptive component directory or a `vendor/` directory; the directory name alone does not disqualify actual source. Do not remove required first-party implementation from the archive and replace it with a download after validation.
+
+Retain full applicable license text, copyright notices, source repository and commit references, and any supplied integrity metadata. Declare ownership and third-party licenses in `RIGHTS.md`. If files or paths change, update imports, provenance records, and affected hashes, then verify the final package and match the deployed health/proof responses to its declared review commit.
+
+Generated dependency directories and build output remain excluded. Ordinary third-party dependencies should use documented, pinned manifests and applicable lockfiles for an isolated build; these do not replace the submitted implementation. All included files, including those inside `vendor/`, remain subject to the same secret, size, link, and source-package checks. Passing those checks does not establish ownership, licensing compliance, completeness, or eligibility; these require review of the final submission.
+
 ## Validation before opening a PR
 
 Run the project from a clean checkout, verify the deployed endpoints, and check that the commit in `SUBMISSION.md` is the version behind the running API. The PR should contain no tokens, private keys, production credentials, personal data, or intentionally harmful code.
