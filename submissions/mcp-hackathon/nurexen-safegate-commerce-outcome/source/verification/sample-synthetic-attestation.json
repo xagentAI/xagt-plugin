@@ -1,0 +1,20 @@
+{
+  "payload": {
+    "schema": "SAFEGATE_COMMERCE_ATTESTATION_V1",
+    "requestId": "SG-EVM-REQ-DEMO123456789ABC",
+    "orderReference": "SG-ORDER-AAAAAAAAAAAAAAAAAAAA",
+    "transactionReference": "SG-TX-BBBBBBBBBBBBBBBBBBBBBBBB",
+    "transactionHash": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "paymentSender": "0x1111111111111111111111111111111111111111",
+    "merchantReceiver": "0x2222222222222222222222222222222222222222",
+    "chainId": 8453,
+    "asset": "USDC",
+    "amountBaseUnits": "100000",
+    "fulfillmentStatus": "FULFILLMENT_COMPLETED",
+    "evidenceStatus": "EVIDENCE_CREATED",
+    "receiptReference": "SG-TX-BBBBBBBBBBBBBBBBBBBBBBBB-RCPT",
+    "evidenceReference": "SG-TX-BBBBBBBBBBBBBBBBBBBBBBBB-EVID",
+    "proofReference": "SG-TX-BBBBBBBBBBBBBBBBBBBBBBBB-PROOF"
+  },
+  "signature": "NcaHRsZuXs96oGzf2NzjlliV3KltZ3tO4QVp407wwxk1AbsdacyklQYBbvDr29Q_2YhiJu4i8AFbgwi06eSJAg"
+}

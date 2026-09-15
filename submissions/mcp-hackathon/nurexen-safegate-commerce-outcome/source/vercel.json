@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/.well-known/xagent-verification.json", "destination": "/api/xagent-verification" },
+    { "source": "/v1/commerce-outcome", "destination": "/api/commerce-outcome" }
+  ]
+}

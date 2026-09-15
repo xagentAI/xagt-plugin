@@ -1,0 +1,29 @@
+﻿SAFEGATE X-AGENT MCP HACKATHON
+
+Capability: SafeGate Commerce Outcome API
+
+PURPOSE
+Agent-callable post-payment commerce outcome verification.
+
+CORE OUTPUT
+- payment_status
+- request_binding
+- fulfillment_status
+- evidence_status
+- evidence_reference
+- proof_reference
+- outcome
+
+BOUNDARY
+- Does not custody funds
+- Does not move funds
+- Does not score wallet risk
+- Does not audit smart contracts
+- Does not detect scams
+- Does not provide escrow
+
+TARGET FLOW
+Agent -> Commerce Outcome API -> deterministic commerce state -> evidence/proof
+
+FUTURE DISTRIBUTION
+X-Agent MCP -> OKX Agent ecosystem -> optional x402 paid calls
