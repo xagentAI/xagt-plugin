@@ -1,0 +1,17 @@
+{
+  "schema": "bhrigu_temporal_evidence_v0_1",
+  "id": "SEP_10_2026__2026-09-10T04:49:49.136Z",
+  "window_id": "SEP_10_2026",
+  "kind": "post_boundary_reality_observation",
+  "observed_at_utc": "2026-09-10T04:49:49.136Z",
+  "boundary_utc": "2026-09-10T00:00:00Z",
+  "baseline_btcusdt": 78474,
+  "observed_btcusdt": 78348.09,
+  "current_vs_baseline_pct": -0.1604,
+  "runtime_commit": "05a455ba1407f7b07de226f6c78eefda15b24880",
+  "market_crosscheck_btcusdt": 78348.10,
+  "protocol_tip_height": 966302,
+  "protocol_crosscheck": "runtime_source_status_live; independent ORION probe timed out",
+  "retroactive_rewrite": "forbidden",
+  "trading_signal": false
+}
