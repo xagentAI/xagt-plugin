@@ -1,0 +1,395 @@
+{
+  "checked_at": "2026-09-12T02:46:25.014721+00:00",
+  "review_commit": "9102fa95b06ec90b43d7c8dc397e2a03fbd0bf35",
+  "hf_commit": "7fac9d7a378342a06c6a8c4ec9914f5efd6f35ea",
+  "calls": [
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/health",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "status": "ok",
+        "commit": "9102fa95b06ec90b43d7c8dc397e2a03fbd0bf35"
+      }
+    },
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/.well-known/xagent-verification.json",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "schemaVersion": 1,
+        "slug": "solonsky-grid-witness",
+        "commit": "9102fa95b06ec90b43d7c8dc397e2a03fbd0bf35"
+      }
+    },
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/v1/inspect-plan",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "bits": [
+          1,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cost": 18,
+        "A_accepted": true,
+        "B_accepted": false,
+        "B_unresolved": false,
+        "scenarios": [
+          {
+            "scale": "3/5",
+            "A": {
+              "accepted": true,
+              "minimum_v_squared_exact": "61447/62500",
+              "minimum_v_squared": 0.983152,
+              "maximum_current_proxy_squared": 0.10368
+            },
+            "B": {
+              "status": "accepted",
+              "min_voltage_pu": 0.9915170169220751,
+              "max_voltage_pu": 1.0,
+              "max_current_pu": 0.32377504403434093,
+              "max_power_residual_pu": 1.5267755731507756e-14,
+              "max_current_residual_pu": 1.5319476493813164e-14,
+              "slack_voltage_residual_pu": 0.0,
+              "slack_power_pu": [
+                0.2895319011733442,
+                0.1449191407040087
+              ],
+              "max_voltage_violation_pu": 0,
+              "max_thermal_violation_pu": 0
+            },
+            "iterations": 6
+          },
+          {
+            "scale": "1",
+            "A": {
+              "accepted": true,
+              "minimum_v_squared_exact": "12149/12500",
+              "minimum_v_squared": 0.97192,
+              "maximum_current_proxy_squared": 0.288
+            },
+            "B": {
+              "status": "accepted",
+              "min_voltage_pu": 0.9857945689280877,
+              "max_voltage_pu": 1.0,
+              "max_current_pu": 0.5416484131544493,
+              "max_power_residual_pu": 5.641849884401372e-15,
+              "max_current_residual_pu": 5.7144308540806496e-15,
+              "slack_voltage_residual_pu": 0.0,
+              "slack_power_pu": [
+                0.484293218213111,
+                0.24257593092786658
+              ],
+              "max_voltage_violation_pu": 0,
+              "max_thermal_violation_pu": 0
+            },
+            "iterations": 7
+          },
+          {
+            "scale": "6/5",
+            "A": {
+              "accepted": true,
+              "minimum_v_squared_exact": "30197/31250",
+              "minimum_v_squared": 0.966304,
+              "maximum_current_proxy_squared": 0.41472
+            },
+            "B": {
+              "status": "returned_operating_point_violates_limits",
+              "min_voltage_pu": 0.982912613830394,
+              "max_voltage_pu": 1.0,
+              "max_current_pu": 0.6512085669619282,
+              "max_power_residual_pu": 1.61617921804418e-14,
+              "max_current_residual_pu": 1.6227235033496425e-14,
+              "slack_voltage_residual_pu": 0.0,
+              "slack_power_pu": [
+                0.5822100359913654,
+                0.29172602159481936
+              ],
+              "max_voltage_violation_pu": 9.501584498150528e-05,
+              "max_thermal_violation_pu": 0
+            },
+            "iterations": 7
+          }
+        ],
+        "decision": "returned_operating_point_violates_limits",
+        "linear_false_positive": true,
+        "scope": "Fixed synthetic six-line single-phase example; not a real-grid design or global AC feasibility certificate.",
+        "cost_units": "arbitrary synthetic units",
+        "quantum_computation_performed": false,
+        "witnesses": [
+          {
+            "scale": "6/5",
+            "min_voltage_pu": 0.982912613830394,
+            "voltage_limit_pu": 0.9830076296753755,
+            "violation_pu": 9.501584498150528e-05,
+            "status": "returned_operating_point_violates_limits"
+          }
+        ]
+      },
+      "request": {
+        "bits": [
+          1,
+          1,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/v1/compare-budget",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "budget": 19,
+        "cost_units": "arbitrary synthetic units",
+        "enumerated_plans": 64,
+        "plans_within_budget": 53,
+        "ac_accepted_within_budget": 0,
+        "cheapest_accepted_cost": null,
+        "cheapest_accepted_plans": [],
+        "linear_false_positives": [
+          {
+            "bits": [
+              1,
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            "cost": 19
+          },
+          {
+            "bits": [
+              1,
+              1,
+              0,
+              1,
+              0,
+              1
+            ],
+            "cost": 19
+          },
+          {
+            "bits": [
+              1,
+              1,
+              1,
+              0,
+              0,
+              0
+            ],
+            "cost": 18
+          }
+        ],
+        "verdict": "no_accepted_operating_point_found_within_budget",
+        "global_ac_optimum_certified": false,
+        "scope": "Fixed synthetic six-line single-phase example; not a real-grid design or global AC feasibility certificate."
+      },
+      "request": {
+        "budget": 19
+      }
+    },
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/v1/compare-budget",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "budget": 20,
+        "cost_units": "arbitrary synthetic units",
+        "enumerated_plans": 64,
+        "plans_within_budget": 56,
+        "ac_accepted_within_budget": 2,
+        "cheapest_accepted_cost": 20,
+        "cheapest_accepted_plans": [
+          [
+            1,
+            1,
+            0,
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            1,
+            0,
+            0,
+            1
+          ]
+        ],
+        "linear_false_positives": [
+          {
+            "bits": [
+              0,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "cost": 20
+          },
+          {
+            "bits": [
+              1,
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            "cost": 19
+          },
+          {
+            "bits": [
+              1,
+              1,
+              0,
+              1,
+              0,
+              1
+            ],
+            "cost": 19
+          },
+          {
+            "bits": [
+              1,
+              1,
+              1,
+              0,
+              0,
+              0
+            ],
+            "cost": 18
+          }
+        ],
+        "verdict": "accepted_operating_points_found",
+        "global_ac_optimum_certified": false,
+        "scope": "Fixed synthetic six-line single-phase example; not a real-grid design or global AC feasibility certificate."
+      },
+      "request": {
+        "budget": 20
+      }
+    },
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/v1/inspect-plan",
+      "status": 400,
+      "content_type": "application/json",
+      "body": {
+        "error": "invalid_request",
+        "message": "Use application/json with exactly {\"bits\":[0,0,0,0,0,0]}; six integer binary values; max 2048 bytes."
+      },
+      "request": {
+        "bits": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    },
+    {
+      "url": "https://bestdeeplearning-grid-witness.hf.space/v1/benchmark",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "scope": "Fixed synthetic six-line single-phase example; not a real-grid design or global AC feasibility certificate.",
+        "plans": 64,
+        "scenarios_per_plan": 3,
+        "linear_accepted": 14,
+        "ac_accepted": 10,
+        "linear_min_cost": 18,
+        "ac_best_accepted_cost": 20,
+        "linear_false_positives": [
+          [
+            0,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "specification": {
+          "topology": "chain 0-1-2-3-4-5-6; bus 0 slack at 1+0j",
+          "units": "per unit; arbitrary synthetic capital cost units",
+          "base_line_impedance_pu": [
+            0.01,
+            0.006
+          ],
+          "upgraded_line_impedance_pu": [
+            0.005,
+            0.003
+          ],
+          "ampacity_pu": 1,
+          "base_bus_PQ_pu": [
+            0.08,
+            0.04
+          ],
+          "scenario_scales": [
+            "3/5",
+            "1",
+            "6/5"
+          ],
+          "voltage_min_squared_exact": "30197/31250",
+          "voltage_max_squared_exact": "441/400",
+          "costs": [
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "pf_voltage_tolerance_pu": 1e-12,
+          "residual_absolute_tolerance_pu": 1e-09,
+          "floating_limit_tolerance_pu": 1e-10,
+          "initialization": "flat 1+0j; no fallback",
+          "max_pf_iterations": 500
+        },
+        "limitations": [
+          "Synthetic single-phase equivalent with scaled positive PQ demand only.",
+          "No renewable scenarios, held-out evaluation, contingencies, topology changes or flexible controls.",
+          "No independent external power-flow package or certified AC uniqueness/global solver.",
+          "No QAOA, quantum hardware, speedup, heuristic comparison or industrial-scale evidence."
+        ],
+        "quantum_computation_performed": false
+      }
+    }
+  ]
+}

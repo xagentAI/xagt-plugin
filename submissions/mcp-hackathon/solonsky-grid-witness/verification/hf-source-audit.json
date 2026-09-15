@@ -1,0 +1,71 @@
+{
+  "hf_commit": "7fac9d7a378342a06c6a8c4ec9914f5efd6f35ea",
+  "github_commit": "9102fa95b06ec90b43d7c8dc397e2a03fbd0bf35",
+  "files": [
+    {
+      "file": "benchmark.py",
+      "sha256": "5b6d5f4f88ecd95ea42ec5b0633598f559c74adf553ec67ccff7a4dad83a66fc",
+      "matches_local": true
+    },
+    {
+      "file": "LICENSE",
+      "sha256": "b3bfece0ce5e42178ca95cd4f8d38ac73c979e00c451baa6da5485c781ed7c54",
+      "matches_local": true
+    },
+    {
+      "file": "requirements.txt",
+      "sha256": "2d6d8eb8662c42125d522e1e4abf5448a481cfd4d53c9751246263f4be9985a5",
+      "matches_local": true
+    },
+    {
+      "file": "requirements-test.txt",
+      "sha256": "934fbb549ab3209320a68f549631f92ffa7dcd1372d15620c148eb5f55bd7735",
+      "matches_local": true
+    },
+    {
+      "file": "core.py",
+      "sha256": "abe3a8c9afa2f53f7d48a2d6fe02f0e9cdadb5a2e62c62c2303c915dd474145e",
+      "matches_local": true
+    },
+    {
+      "file": "requirements-test.lock",
+      "sha256": "0edfaf823fab428fd8cc512e013abdb9f4f9702f14c9ded9838588e53473540c",
+      "matches_local": true
+    },
+    {
+      "file": "BENCHMARK.md",
+      "sha256": "a6491547fd5d179e9ee31f5a9e87653df3ecd32ca4fdf51e01e3fdb551a09932",
+      "matches_local": true
+    },
+    {
+      "file": "README.md",
+      "sha256": "af8ac3b070fbb0fa8651147a003cca55e705af03f37ec5f2952a05b7bcf99cc9",
+      "matches_local": true
+    },
+    {
+      "file": "api.py",
+      "sha256": "f05e113d5e7b9190611e7ffafeb3a0447c9be105dbf0107e5ae55c0087a882ad",
+      "matches_local": true
+    },
+    {
+      "file": "test_benchmark.py",
+      "sha256": "a0564faf5606eb6c7e00c2e93a886710dd9136f44181478c8be1c7e98f432e30",
+      "matches_local": true
+    },
+    {
+      "file": ".gitignore",
+      "sha256": "0a74a5198013d4d0d605b5071b54abc20797995995acca67472e655bbcd8d576",
+      "matches_local": true
+    },
+    {
+      "file": "app.py",
+      "sha256": "ccb0cd97bda2d3ffca9d315c124238af059b2b54925f0edd1ed4cb0ce1af6725",
+      "matches_local": true
+    },
+    {
+      "file": "test_api.py",
+      "sha256": "5c25dc69c394525b0d293fefdbe4acac5e0edafc097ae8bfacead8db8d8bb0ba",
+      "matches_local": true
+    }
+  ]
+}
