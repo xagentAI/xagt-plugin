@@ -1,0 +1,40 @@
+✔ CSV fixture transforms exactly, including zero and false (17.05ms)
+✔ JSON fixture distinguishes null, missing optional and explicit trim (2.2354ms)
+✔ conversion rules accept each documented primitive type (4.8478ms)
+✔ integer conversion rejects unsafe numbers and noncanonical integer strings (3.896ms)
+✔ raw JSON numbers are validated after IEEE-754 parsing; strings retain exact spelling (2.5397ms)
+✔ number conversion rejects non-decimal and non-finite forms (3.2882ms)
+✔ boolean conversion is exact and trim is opt-in (1.7412ms)
+✔ missing required, null and empty string remain distinct (1.0086ms)
+✔ validation is atomic and reports bounded locations without cell values (0.9901ms)
+✔ CSV supports BOM, escaped quotes, quoted LF/CRLF and a trailing line ending (0.7693ms)
+✔ CSV rejects broken quoting and bare CR, rather than silently repairing it (1.5991ms)
+✔ CSV rejects duplicate, empty and unsafe headers plus ragged rows (1.4186ms)
+✔ empty record sets and header-only CSV are valid; empty CSV is not (0.8593ms)
+✔ CSV blank records and trailing empty cells are not silently dropped (0.5132ms)
+✔ schema rejects unknown options, duplicate targets and unsafe names (2.8571ms)
+✔ unknown envelope fields, wrong data format and nested cells are rejected (1.3875ms)
+✔ row limit is inclusive for JSON and CSV (1.722ms)
+✔ field limits are inclusive for input rows, CSV and schema (2.4714ms)
+✔ cell and name length limits accept boundary and reject the next unit (2.1668ms)
+✔ UTF-8 body byte budget is inclusive and counts bytes rather than string length (1.3005ms)
+✔ streamed bodies enforce limit without a Content-Length header (1.1328ms)
+✔ content type, compression and invalid UTF-8/JSON produce clear errors (1.7866ms)
+✔ invalid UTF-8 cancels the remaining body stream (0.458ms)
+✔ output amplification has a byte limit even when the input is small (1.7837ms)
+✔ proof routes refuse absent, malformed or zero commit and missing slug (1.8999ms)
+✔ configured proof routes preserve the supplied SHA and exact X-Agent shapes (0.6071ms)
+✔ methods, unknown routes and OpenAPI are explicit (1.9844ms)
+✔ homepage and its local assets are served as a restricted browser interface (23.6302ms)
+✔ independent requests do not retain record state (0.6885ms)
+✔ all local page links and fragments resolve to available resources (10.4564ms)
+✔ documentation CSV and JSON requests are executable examples (2.7736ms)
+✔ local HTTP adapter exposes the real handler and body limit on loopback (80.3891ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 361.2851

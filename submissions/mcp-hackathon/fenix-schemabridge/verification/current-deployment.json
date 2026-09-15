@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "commit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "provider": "Cloudflare Workers",
+  "worker": "fenix-schemabridge",
+  "url": "https://schemabridge.wiaikit.com/",
+  "versionId": "d181e389-117e-45f0-9516-56e9a96c0eb0",
+  "deploymentId": "5e9f28ff-e340-457d-8154-65388ef55f50",
+  "createdAt": "2026-09-14T08:51:20.584213Z",
+  "trafficPercentage": 100,
+  "sourcePublished": "https://github.com/wiaikit/fenix-schemabridge/commit/18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "observedVia": "Successful Wrangler deploy and deployments list --json",
+  "bundleSha256": "e6baa0532e4c3a8708b9b818dce84fc8f87c0555f9c19f118fc1d11b9f53951b",
+  "recordedAt": "2026-09-14T08:54:55.776Z"
+}

@@ -1,0 +1,14 @@
+
+> fenix-schemabridge-prototype@0.1.0 build
+> wrangler deploy --dry-run --outdir dist/cloudflare
+
+
+ ⛅️ wrangler 4.131.1
+────────────────────
+✨ Read 9 files from the assets directory C:\Users\Administrator\Documents\Codex\2026-09-11\new-chat\work\schemabridge\public
+Total Upload: 72.39 KiB / gzip: 20.94 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.

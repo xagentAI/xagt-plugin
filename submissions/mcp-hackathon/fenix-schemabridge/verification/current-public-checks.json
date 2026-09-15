@@ -1,0 +1,418 @@
+{
+  "sourceCommit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "commit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "baseUrl": "https://schemabridge.wiaikit.com",
+  "startedAt": "2026-09-14T08:53:23.696Z",
+  "completedAt": "2026-09-14T08:53:40.328Z",
+  "authentication": "No login, cookies, API key or GitHub token used.",
+  "summary": {
+    "httpRequests": 24,
+    "assertions": 52,
+    "passed": 52,
+    "failed": 0
+  },
+  "requests": [
+    {
+      "url": "https://schemabridge.wiaikit.com/",
+      "method": "GET",
+      "status": 200,
+      "bytes": 6142,
+      "sha256": "d4f23bdb58e76af78808c159f162cc8805b975be9c6a3d5b7b7c434c4327560b",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/app.css",
+      "method": "GET",
+      "status": 200,
+      "bytes": 12270,
+      "sha256": "9b167d89305ae03134b5bd83c0d467b986298300ea071f0884c3163a668e85ff",
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/app.js",
+      "method": "GET",
+      "status": 200,
+      "bytes": 10130,
+      "sha256": "fc1eb3266d7c1c9541d2222bbb1fbcdac98b8847ad3b7495f564de919bfd7aeb",
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/docs",
+      "method": "GET",
+      "status": 200,
+      "bytes": 13807,
+      "sha256": "ce686623eef433daa1ee735aef884fa816df9c7282540daad9f512edcc5f44ce",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/status",
+      "method": "GET",
+      "status": 200,
+      "bytes": 2589,
+      "sha256": "b4fb2ed58f1763084fea0197c8d99ba7c9e6987c70b2930096dfb113ab479be5",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/docs.css",
+      "method": "GET",
+      "status": 200,
+      "bytes": 4908,
+      "sha256": "409434cda86c972f1f3b56ce27bceaa45427cd68641ea2c391a6c507a8b8b914",
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/status.js",
+      "method": "GET",
+      "status": 200,
+      "bytes": 3746,
+      "sha256": "d98f1e7d1aeb7f58e0d31ed1d910815a8d1e958cbcdeb0f28a917bd5bf0b79b0",
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/schema-sculpture.png",
+      "method": "GET",
+      "status": 200,
+      "bytes": 1946423,
+      "sha256": "09b3cc0120ec2b1262af2f38494c21b567bf1a30a279da3372f09be6899517e9",
+      "contentType": "image/png"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/fonts/instrument-sans-latin.woff2",
+      "method": "GET",
+      "status": 200,
+      "bytes": 30092,
+      "sha256": "2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971",
+      "contentType": "font/woff2"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/fonts/instrument-serif-latin.woff2",
+      "method": "GET",
+      "status": 200,
+      "bytes": 21032,
+      "sha256": "5eb09b5ac0e28b67c2f041c8ba6d244604ca0c0980d65912ab2d47fed84ddc31",
+      "contentType": "font/woff2"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/fonts/instrument-serif-italic-latin.woff2",
+      "method": "GET",
+      "status": 200,
+      "bytes": 22128,
+      "sha256": "5a51946dfffa82972bc98745359c46761515641fda557c25116459a9f83da4a7",
+      "contentType": "font/woff2"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/schema-sculpture.png",
+      "method": "HEAD",
+      "status": 200,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": "image/png"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/health",
+      "method": "GET",
+      "status": 200,
+      "bytes": 67,
+      "sha256": "add68bc0e328cdd5c3649f7e8d2fca4e293ac392216abdcc619b72e7ff5308d9",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/.well-known/xagent-verification.json",
+      "method": "GET",
+      "status": 200,
+      "bytes": 99,
+      "sha256": "bb6dcbbd71879d72067e10764d4996094ad41e27a36c7acef77c176036ad0cb6",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/openapi.json",
+      "method": "GET",
+      "status": 200,
+      "bytes": 5872,
+      "sha256": "b872e5a6192b78c60c2f1df51d67aeb9d8cce645c69d7079b7f637377b9bbde1",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1",
+      "method": "GET",
+      "status": 200,
+      "bytes": 368,
+      "sha256": "899499609ef4f0f991b0ff13ffdb8d0aeec913a691a6d8eb8bf84d6409b04b1a",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1/transform",
+      "method": "POST",
+      "status": 200,
+      "bytes": 218,
+      "sha256": "a89f21850005af000bad740ce973adce42e1b165c1688156e16ba344d198d5f4",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1/transform",
+      "method": "POST",
+      "status": 200,
+      "bytes": 191,
+      "sha256": "ce382b68727b4d8ccb3ed0d300a10625fef69f3e29ece9517be07404ee7d4191",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/v1/transform",
+      "method": "POST",
+      "status": 422,
+      "bytes": 364,
+      "sha256": "3a06c3c94c7ed5532ffeedc96ec3ef494576a1bc4af8507debeadcc0bc1f3a3d",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/package.json",
+      "method": "GET",
+      "status": 404,
+      "bytes": 72,
+      "sha256": "2b87308f7e911e4f7a21e187b64f99919606416af61fea638b1a8213e6ea1f05",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/src/worker.mjs",
+      "method": "GET",
+      "status": 404,
+      "bytes": 72,
+      "sha256": "2b87308f7e911e4f7a21e187b64f99919606416af61fea638b1a8213e6ea1f05",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://schemabridge.wiaikit.com/assets/fonts/sources.json",
+      "method": "GET",
+      "status": 404,
+      "bytes": 72,
+      "sha256": "2b87308f7e911e4f7a21e187b64f99919606416af61fea638b1a8213e6ea1f05",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://api.github.com/repos/wiaikit/fenix-schemabridge/commits/18d0eac794d0075df3f763bd2a442370e03f02fd",
+      "method": "GET",
+      "status": 200,
+      "bytes": 69015,
+      "sha256": "6602de43164ce88a764c467bb3cf870ff7c0378dc99c7de1ab0aee7ec4a1bfdd",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://github.com/wiaikit/fenix-schemabridge",
+      "method": "GET",
+      "status": 200,
+      "bytes": 344207,
+      "sha256": "2ce8d0f3f1be46b97734dfda938243493ad22874bbb1cedd108a6eb7638a244f",
+      "contentType": "text/html; charset=utf-8"
+    }
+  ],
+  "checks": [
+    {
+      "name": "/ HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/ correct content type",
+      "passed": true
+    },
+    {
+      "name": "/ equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "homepage permits same-origin webfonts",
+      "passed": true
+    },
+    {
+      "name": "homepage English with original illustration",
+      "passed": true
+    },
+    {
+      "name": "/assets/app.css HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/app.css correct content type",
+      "passed": true
+    },
+    {
+      "name": "/assets/app.css equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "/assets/app.js HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/app.js correct content type",
+      "passed": true
+    },
+    {
+      "name": "/assets/app.js equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "/docs HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/docs correct content type",
+      "passed": true
+    },
+    {
+      "name": "/docs equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "/status HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/status correct content type",
+      "passed": true
+    },
+    {
+      "name": "/status equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "/assets/docs.css HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/docs.css correct content type",
+      "passed": true
+    },
+    {
+      "name": "/assets/docs.css equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "/assets/status.js HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/status.js correct content type",
+      "passed": true
+    },
+    {
+      "name": "/assets/status.js equals reviewed export",
+      "passed": true
+    },
+    {
+      "name": "/assets/schema-sculpture.png HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/schema-sculpture.png correct MIME",
+      "passed": true
+    },
+    {
+      "name": "/assets/schema-sculpture.png exact reviewed bytes",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-sans-latin.woff2 HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-sans-latin.woff2 correct MIME",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-sans-latin.woff2 exact reviewed bytes",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-serif-latin.woff2 HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-serif-latin.woff2 correct MIME",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-serif-latin.woff2 exact reviewed bytes",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-serif-italic-latin.woff2 HTTP200",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-serif-italic-latin.woff2 correct MIME",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/instrument-serif-italic-latin.woff2 exact reviewed bytes",
+      "passed": true
+    },
+    {
+      "name": "image HEAD returns no body",
+      "passed": true
+    },
+    {
+      "name": "health matches reviewed commit",
+      "passed": true
+    },
+    {
+      "name": "deployment proof matches commit and slug",
+      "passed": true
+    },
+    {
+      "name": "OpenAPI equals reviewed document",
+      "passed": true
+    },
+    {
+      "name": "API index identifies transform",
+      "passed": true
+    },
+    {
+      "name": "csv-request.json expected HTTP status",
+      "passed": true
+    },
+    {
+      "name": "csv-request.json exact reviewed response",
+      "passed": true
+    },
+    {
+      "name": "json-request.json expected HTTP status",
+      "passed": true
+    },
+    {
+      "name": "json-request.json exact reviewed response",
+      "passed": true
+    },
+    {
+      "name": "invalid-request.json expected HTTP status",
+      "passed": true
+    },
+    {
+      "name": "invalid-request.json exact reviewed response",
+      "passed": true
+    },
+    {
+      "name": "/package.json not exposed as a page asset",
+      "passed": true
+    },
+    {
+      "name": "/src/worker.mjs not exposed as a page asset",
+      "passed": true
+    },
+    {
+      "name": "/assets/fonts/sources.json not exposed as a page asset",
+      "passed": true
+    },
+    {
+      "name": "source commit publicly readable without authentication",
+      "passed": true
+    },
+    {
+      "name": "public source tree matches local reviewed tree",
+      "passed": true
+    },
+    {
+      "name": "required source link publicly reachable",
+      "passed": true
+    }
+  ]
+}

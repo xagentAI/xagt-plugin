@@ -1,0 +1,8 @@
+{
+  "format": "json",
+  "data": [{ "quantity": "seven", "active": "yes" }],
+  "schema": [
+    { "source": "quantity", "target": "quantity", "type": "integer" },
+    { "source": "active", "target": "active", "type": "boolean" }
+  ]
+}

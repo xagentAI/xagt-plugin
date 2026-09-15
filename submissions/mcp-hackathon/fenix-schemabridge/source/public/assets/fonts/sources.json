@@ -1,0 +1,25 @@
+{
+  "fonts": [
+    {
+      "family": "Instrument Sans",
+      "italic": false,
+      "file": "instrument-sans-latin.woff2",
+      "source": "https://fonts.gstatic.com/s/instrumentsans/v4/pxiTypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr0SZe1Q.woff2",
+      "bytes": 30092
+    },
+    {
+      "family": "Instrument Serif",
+      "italic": true,
+      "file": "instrument-serif-italic-latin.woff2",
+      "source": "https://fonts.gstatic.com/s/instrumentserif/v5/jizHRFtNs2ka5fXjeivQ4LroWlx-6zAjjH7M.woff2",
+      "bytes": 22128
+    },
+    {
+      "family": "Instrument Serif",
+      "italic": false,
+      "file": "instrument-serif-latin.woff2",
+      "source": "https://fonts.gstatic.com/s/instrumentserif/v5/jizBRFtNs2ka5fXjeivQ4LroWlx-6zUTjg.woff2",
+      "bytes": 21032
+    }
+  ]
+}
