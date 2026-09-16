@@ -12,7 +12,7 @@ const MAX_FILES = 2_000;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 const MAX_RESPONSE_BYTES = 64 * 1024;
-const REQUEST_TIMEOUT_MS = 10_000;
+const REQUEST_TIMEOUT_MS = 60_000;
 
 export async function validateSubmissionDirectory(directory, options = {}) {
   const submissionDirectory = resolve(directory);
