@@ -22,18 +22,30 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
+
+concurrency:
+  group: submission-seal-${{ inputs.submission_slug }}
+  cancel-in-progress: false
 
 jobs:
   seal:
+    if: github.repository == 'xagentAI/xagt-plugin' && github.ref == 'refs/heads/main'
     name: Validate, archive, hash, and publish immutable release
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check out the accepted main-branch source
-        uses: actions/checkout@v4
+      - name: Check out the exact official release commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: main
-          fetch-depth: 0
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Use Node 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
 
       - name: Require repository release immutability
         env:
@@ -43,45 +55,26 @@ jobs:
           enabled="$(gh api "repos/${REPOSITORY}/immutable-releases" --jq '.enabled')"
           test "$enabled" = "true"
 
-      - name: Validate inputs and merged submission
+      - name: Verify merged source against the official archive and live service
         env:
           SLUG: ${{ inputs.submission_slug }}
           PR_NUMBER: ${{ inputs.pull_request_number }}
-          XAGT_GITHUB_TOKEN: ${{ github.token }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          [[ "$SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]
-          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
-          test -d "submissions/mcp-hackathon/$SLUG"
-          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state,mergedAt --jq 'select(.state == "MERGED" and .mergedAt != null)'
-          npm run validate:submission -- --dir "submissions/mcp-hackathon/$SLUG" --online
-
-      - name: Build acceptance receipt and source archive without executing submission code
-        env:
-          SLUG: ${{ inputs.submission_slug }}
-          PR_NUMBER: ${{ inputs.pull_request_number }}
+          GITHUB_TOKEN: ${{ github.token }}
           REVIEWER: ${{ inputs.reviewer }}
           REVIEW_RECORD_URL: ${{ inputs.review_record_url }}
+        run: node scripts/submission-lifecycle.mjs seal
+
+      - name: Build source archive without executing submission code
+        env:
+          SLUG: ${{ inputs.submission_slug }}
         run: |
           directory="submissions/mcp-hackathon/$SLUG"
-          review_commit="$(jq -r '.reviewCommit' "$directory/submission.json")"
-          source_tree="$(git rev-parse "HEAD:$directory")"
+          review_commit="$(jq -r '.reviewCommit' "$RUNNER_TEMP/xagt-acceptance.json")"
           archive="$RUNNER_TEMP/${SLUG}-source.tar.gz"
           receipt="$RUNNER_TEMP/${SLUG}-acceptance.json"
           tar --create --gzip --file "$archive" "$directory"
           archive_sha256="$(sha256sum "$archive" | cut -d ' ' -f 1)"
-          jq -n \
-            --arg slug "$SLUG" \
-            --argjson pullRequest "$PR_NUMBER" \
-            --arg officialMergeCommit "$GITHUB_SHA" \
-            --arg reviewCommit "$review_commit" \
-            --arg sourceTree "$source_tree" \
-            --arg sourceArchiveSha256 "$archive_sha256" \
-            --arg reviewer "$REVIEWER" \
-            --arg reviewRecordUrl "$REVIEW_RECORD_URL" \
-            --arg sealedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{schemaVersion:1, slug:$slug, pullRequest:$pullRequest, officialMergeCommit:$officialMergeCommit, reviewCommit:$reviewCommit, sourceTree:$sourceTree, sourceArchiveSha256:$sourceArchiveSha256, reviewer:$reviewer, reviewRecordUrl:$reviewRecordUrl, sealedAt:$sealedAt, rewardGate:"sealed-before-payment"}' \
-            > "$receipt"
+          jq --arg hash "$archive_sha256" '. + {sourceArchiveSha256: $hash}' "$RUNNER_TEMP/xagt-acceptance.json" > "$receipt"
           echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
           echo "RECEIPT=$receipt" >> "$GITHUB_ENV"
           echo "REVIEW_COMMIT=$review_commit" >> "$GITHUB_ENV"
@@ -98,4 +91,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Accepted submission: $SLUG" \
-            --notes "Sealed by X-Agent before reward payment. The attached source archive and receipt are protected by GitHub immutable releases. Corrections require a new additive release; this release is never replaced."
+            --notes "Manually sealed by X-Agent after a recorded review decision. Sealing does not issue a reward. Corrections require a new additive release; this release is never replaced."
