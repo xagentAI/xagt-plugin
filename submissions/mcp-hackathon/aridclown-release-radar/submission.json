@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Release Radar API",
+  "slug": "aridclown-release-radar",
+  "sourceRepository": "https://github.com/aridclown/release-radar-api",
+  "reviewCommit": "ce5429415671e1af0f3d8cc9418f2ea7d69bd9f6",
+  "apiBaseUrl": "https://release-radar-api.diogosouzac.workers.dev/v1",
+  "healthCheckUrl": "https://release-radar-api.diogosouzac.workers.dev/health",
+  "deploymentProofUrl": "https://release-radar-api.diogosouzac.workers.dev/.well-known/xagent-verification.json"
+}
