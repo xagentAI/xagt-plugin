@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Review commit: `ce5429415671e1af0f3d8cc9418f2ea7d69bd9f6`
+- Review commit: `4bbef0e2c7d08e6e4d1140c18fdb5d2507ec7810`
 - API base URL: `https://release-radar-api.diogosouzac.workers.dev/v1`
 - Authentication: none
 
@@ -15,7 +15,7 @@ curl --fail --silent --show-error https://release-radar-api.diogosouzac.workers.
 Expected response:
 
 ```json
-{"status":"ok","version":"0.1.0","commit":"ce5429415671e1af0f3d8cc9418f2ea7d69bd9f6"}
+{"status":"ok","version":"0.1.0","commit":"4bbef0e2c7d08e6e4d1140c18fdb5d2507ec7810"}
 ```
 
 ## 2. Deployment proof
@@ -27,14 +27,14 @@ curl --fail --silent --show-error https://release-radar-api.diogosouzac.workers.
 Expected response:
 
 ```json
-{"schemaVersion":1,"slug":"aridclown-release-radar","commit":"ce5429415671e1af0f3d8cc9418f2ea7d69bd9f6"}
+{"schemaVersion":1,"slug":"aridclown-release-radar","commit":"4bbef0e2c7d08e6e4d1140c18fdb5d2507ec7810"}
 ```
 
 ## 3. Capability call
 
 ```sh
 curl --fail --silent --show-error \
-  'https://release-radar-api.diogosouzac.workers.dev/v1/releases?repo=vercel%2Fnext.js&limit=1'
+  'https://release-radar-api.diogosouzac.workers.dev/v1/compare?repo=vercel%2Fnext.js&base=v16.4.0-canary.33&head=v16.4.0-canary.34'
 ```
 
 Expected response shape:
@@ -42,8 +42,9 @@ Expected response shape:
 ```json
 {
   "repo": "vercel/next.js",
-  "count": 1,
-  "releases": [{"tag":"v16.4.0-canary.34","highlights":["Misc Changes"],"breakingSignals":[]}]
+  "commitCount": 11,
+  "changedFileCount": 140,
+  "changedFilesByArea": {"dependencies":24,"configuration":3,"documentation":2,"tests":50,"source":59,"other":2}
 }
 ```
 

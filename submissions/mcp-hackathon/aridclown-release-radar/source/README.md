@@ -12,6 +12,8 @@ Examples:
 
 ```sh
 curl 'http://localhost:8787/v1/releases?repo=cloudflare/workers-sdk&limit=3'
+curl 'http://localhost:8787/v1/compare?repo=vercel/next.js&base=v16.4.0-canary.33&head=v16.4.0-canary.34'
+curl 'http://localhost:8787/openapi.json'
 curl 'http://localhost:8787/health'
 ```
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handle, summarizeRelease, validateRepo } from "../src/index";
+import { fileArea, handle, summarizeCompare, summarizeRelease, validateRepo } from "../src/index";
 
 describe("release radar", () => {
   it("accepts only owner/repository inputs", () => {
@@ -19,5 +19,12 @@ describe("release radar", () => {
     const response = await handle(new Request("https://example.test/v1/releases?repo=o/r"), fetcher);
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ repo: "o/r", count: 1, releases: [{ tag: "v1", highlights: ["Added endpoint"] }] });
+  });
+
+  it("creates an upgrade plan from public compare data", async () => {
+    const result = summarizeCompare({ status: "ahead", ahead_by: 2, behind_by: 0, total_commits: 2, html_url: "https://github.com/o/r/compare/a...b", commits: [{ sha: "123456789012345", commit: { message: "Upgrade dependency\n\nDetails" } }], files: [{ filename: "package.json", status: "modified", additions: 1, deletions: 1 }, { filename: "src/main.ts", status: "modified", additions: 3, deletions: 1 }] });
+    expect(result.changedFilesByArea).toMatchObject({ dependencies: 1, source: 1 });
+    expect(result.commits).toEqual([{ sha: "123456789012", subject: "Upgrade dependency" }]);
+    expect(fileArea("docs/guide.md")).toBe("documentation");
   });
 });
