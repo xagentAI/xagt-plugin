@@ -1,0 +1,12 @@
+{
+  "max_signal_age_s": 1800,
+  "require_qualified": true,
+  "max_funding_rate": 0.0005,
+  "max_oi_delta_pct": 15,
+  "max_drawdown_pct": 5,
+  "max_cluster_size": 2,
+  "max_symbol_pct": 20,
+  "max_loss_streak": 3,
+  "min_notional": 10,
+  "max_notional": 50000
+}

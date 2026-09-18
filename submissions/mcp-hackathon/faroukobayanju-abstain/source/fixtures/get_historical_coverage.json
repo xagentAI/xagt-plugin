@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "name": "get_historical_coverage",
+  "strategy_id": "str_515920d047ca",
+  "content": {
+    "start": "2025-01-01",
+    "end": "2026-09-17"
+  }
+}

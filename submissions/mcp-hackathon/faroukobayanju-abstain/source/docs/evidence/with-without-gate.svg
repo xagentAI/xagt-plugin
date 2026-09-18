@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="Abstain — same strategy, with and without the gate">
+  <style>
+    .bg{fill:#0b0d12}
+    .grid{stroke:#1e2430;stroke-width:1}
+    .axis{fill:#6b7688;font:11px ui-monospace,SFMono-Regular,Menlo,monospace}
+    .title{fill:#e6e9ef;font:600 15px ui-sans-serif,system-ui,sans-serif}
+    .sub{fill:#8b95a7;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+    .without{fill:none;stroke:#e5484d;stroke-width:2}
+    .with{fill:none;stroke:#46a758;stroke-width:2.5}
+    .refusal{stroke:#7c6aef;stroke-width:1;stroke-dasharray:3 3;opacity:.55}
+    .legend{font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+  </style>
+  <rect class="bg" width="900" height="380"/>
+  <text x="72" y="24" class="title">Abstain — same strategy, with and without the gate</text>
+  <text x="72" y="366" class="sub">19 trades · 18 refused · max drawdown 5.4% → 1.56%</text>
+    <line x1="72" y1="334.0" x2="876" y2="334.0" class="grid"/>
+    <text x="62" y="338" class="axis" text-anchor="end">93,344</text>
+    <line x1="72" y1="261.5" x2="876" y2="261.5" class="grid"/>
+    <text x="62" y="265.5" class="axis" text-anchor="end">96,183</text>
+    <line x1="72" y1="189.0" x2="876" y2="189.0" class="grid"/>
+    <text x="62" y="193" class="axis" text-anchor="end">99,022</text>
+    <line x1="72" y1="116.5" x2="876" y2="116.5" class="grid"/>
+    <text x="62" y="120.5" class="axis" text-anchor="end">101,861</text>
+    <line x1="72" y1="44.0" x2="876" y2="44.0" class="grid"/>
+    <text x="62" y="48" class="axis" text-anchor="end">104,700</text>
+    <line x1="72.0" y1="44" x2="72.0" y2="334" class="refusal"/>
+    <line x1="72.0" y1="44" x2="72.0" y2="334" class="refusal"/>
+    <line x1="72.0" y1="44" x2="72.0" y2="334" class="refusal"/>
+    <line x1="125.6" y1="44" x2="125.6" y2="334" class="refusal"/>
+    <line x1="134.5" y1="44" x2="134.5" y2="334" class="refusal"/>
+    <line x1="134.5" y1="44" x2="134.5" y2="334" class="refusal"/>
+    <line x1="179.2" y1="44" x2="179.2" y2="334" class="refusal"/>
+    <line x1="206.0" y1="44" x2="206.0" y2="334" class="refusal"/>
+    <line x1="223.9" y1="44" x2="223.9" y2="334" class="refusal"/>
+    <line x1="232.8" y1="44" x2="232.8" y2="334" class="refusal"/>
+    <line x1="527.6" y1="44" x2="527.6" y2="334" class="refusal"/>
+    <line x1="599.1" y1="44" x2="599.1" y2="334" class="refusal"/>
+    <line x1="599.1" y1="44" x2="599.1" y2="334" class="refusal"/>
+    <line x1="625.9" y1="44" x2="625.9" y2="334" class="refusal"/>
+    <line x1="643.7" y1="44" x2="643.7" y2="334" class="refusal"/>
+    <line x1="643.7" y1="44" x2="643.7" y2="334" class="refusal"/>
+    <line x1="661.6" y1="44" x2="661.6" y2="334" class="refusal"/>
+    <line x1="670.5" y1="44" x2="670.5" y2="334" class="refusal"/>
+  <path class="without" d="M72.0,168.2 L116.7,215.1 L125.6,258.5 L125.6,305.9 L223.9,253.2 L161.3,201.8 L599.1,183.1 L197.1,123.8 L616.9,101.2 L286.4,147.9 L599.1,128.1 L616.9,72.1 L616.9,91.2 L616.9,132.3 L625.9,172.1 L643.7,117.8 L876.0,132.3 L876.0,148.3 L876.0,128.9 L876.0,121.0"/>
+  <path class="with" d="M72.0,168.2 L116.7,168.2 L125.6,168.2 L125.6,168.2 L223.9,168.2 L161.3,168.2 L599.1,168.2 L197.1,168.2 L616.9,168.2 L286.4,168.2 L599.1,168.2 L616.9,168.2 L616.9,168.2 L616.9,168.2 L625.9,207.9 L643.7,207.9 L876.0,207.9 L876.0,207.9 L876.0,207.9 L876.0,207.9"/>
+  <g class="legend" transform="translate(626,28)">
+    <line x1="0" y1="-4" x2="22" y2="-4" class="without"/>
+    <text x="30" y="0" fill="#e5484d">without gate  +1845.52</text>
+    <line x1="0" y1="14" x2="22" y2="14" class="with"/>
+    <text x="30" y="18" fill="#46a758">with gate     -1556.98</text>
+  </g>
+</svg>
