@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "openagent.email — Email API for AI Agents",
+  "slug": "openagent-email",
+  "sourceRepository": "https://github.com/openagentemail/openagentemail",
+  "reviewCommit": "5f432e4bd4019bda1f04ae5d6863975cff7721eb",
+  "apiBaseUrl": "https://demo.openagent.email/v1",
+  "healthCheckUrl": "https://demo.openagent.email/healthz",
+  "deploymentProofUrl": "https://demo.openagent.email/.well-known/xagent-verification.json"
+}
