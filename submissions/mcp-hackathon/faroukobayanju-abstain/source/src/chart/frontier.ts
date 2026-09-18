@@ -14,6 +14,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { NexusClient } from '../nexus/client.js';
+import { previousIso } from '../nexus/fetch-all.js';
 import { loadBasePolicy } from '../deps.js';
 import { mergePolicy } from '../policy/index.js';
 import { replay, isoDate, type ReplayInputs } from './replay.js';
@@ -47,6 +48,9 @@ export function variants(base: Policy): { label: string; knob: string; value: nu
         max_oi_delta_pct: OFF,
         max_signal_age_s: OFF,
         max_symbol_pct: OFF,
+        require_qualified: false,
+        require_signal_support: false,
+        require_data_complete: false,
       },
     },
   ];
@@ -86,11 +90,13 @@ export async function buildFrontier(fixtureDir = 'fixtures'): Promise<FrontierRo
     const asOf = isoDate(t.entry_ts_ms);
     const key = `${t.symbol}|${asOf}`;
     if (market.has(key)) continue;
-    const [funding, oi] = await Promise.all([
+    const prev = previousIso(asOf);
+    const [funding, oi, oiPrev] = await Promise.all([
       client.call<Funding>('get_historical_funding', { symbol: t.symbol, as_of: asOf }),
       client.call<OpenInterest>('get_open_interest', { symbol: t.symbol, as_of: asOf }),
+      client.call<OpenInterest>('get_open_interest', { symbol: t.symbol, as_of: prev }),
     ]);
-    market.set(key, { funding, openInterest: oi });
+    market.set(key, { funding, openInterest: oi, openInterestPrev: oiPrev });
   }
 
   const base = mergePolicy(loadBasePolicy(), 'permissive');

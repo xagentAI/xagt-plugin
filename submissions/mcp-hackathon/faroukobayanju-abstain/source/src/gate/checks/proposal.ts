@@ -75,3 +75,75 @@ export function duplicate(input: GateInput): CheckResult {
     ...(seen ? { reason: 'signal_id already present in the receipt chain' } : {}),
   };
 }
+
+/**
+ * #11 SIGNAL_SUPPORT — does the strategy's current signal back this proposal?
+ *
+ * Until 2026-09-18 a HOLD signal short-circuited the whole gate to NO_TRADE.
+ * That was wrong twice over. Abstain gates what an agent PROPOSES, not what
+ * the strategy happens to be emitting, and an agent proposing a BUY into a
+ * HOLD is exactly the case most worth refusing. It also meant that in
+ * production, where this strategy sits at HOLD nearly always, the gate never
+ * actually ran: 70 consecutive receipts contained zero checks.
+ *
+ *   signal BUY  + proposal BUY   ⇒ PASS
+ *   signal BUY  + proposal SELL  ⇒ FAIL  (proposal contradicts the strategy)
+ *   signal HOLD + any proposal   ⇒ FAIL  (no directional signal backs it)
+ *   signal unavailable           ⇒ SKIPPED (DATA_GAP carries the refusal)
+ */
+export function signalSupport(input: GateInput, policy: Policy): CheckResult {
+  const { signal } = input.data;
+  const side = input.proposal.side;
+
+  if (!policy.require_signal_support) {
+    return {
+      id: 'SIGNAL_SUPPORT',
+      verdict: 'SKIPPED',
+      observed: signal.ok ? signal.value.trade_intent : null,
+      threshold: side,
+      unit: null,
+      source: null,
+      reason: 'require_signal_support is false in this policy',
+    };
+  }
+
+  if (!signal.ok) {
+    return {
+      id: 'SIGNAL_SUPPORT',
+      verdict: 'SKIPPED',
+      observed: null,
+      threshold: side,
+      unit: null,
+      source: {
+        call: 'get_strategy_signal',
+        outcome: signal.outcome,
+        ...(signal.error ? { error: signal.error } : {}),
+      },
+      reason: `signal ${signal.outcome}; DATA_GAP carries the refusal`,
+    };
+  }
+
+  const intent = signal.value.trade_intent;
+  const supported = intent === side;
+  return {
+    id: 'SIGNAL_SUPPORT',
+    verdict: supported ? 'PASS' : 'FAIL',
+    observed: intent,
+    threshold: side,
+    unit: null,
+    source: { call: 'get_strategy_signal', outcome: 'ok' },
+    ...(supported
+      ? {}
+      : {
+          reason:
+            intent === 'HOLD'
+              ? `strategy signals HOLD; no directional signal backs a ${side}`
+              : `strategy signals ${intent}; proposal is ${side}`,
+        }),
+    detail: {
+      trade_intent: intent,
+      proposed_side: side,
+      ...(signal.value.confidence !== undefined ? { confidence: signal.value.confidence } : {}),
+    },
+  };
+}

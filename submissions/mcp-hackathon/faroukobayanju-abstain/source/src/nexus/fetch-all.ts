@@ -112,13 +112,22 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 export function resolveAsOf(coverage: Datum<Coverage>, fallbackIso: string): string {
   if (!coverage.ok) return fallbackIso;
   const v = coverage.value as unknown as Record<string, unknown>;
-  for (const key of ['end', 'end_date', 'latest', 'to', 'max_date', 'last']) {
+  // The live gateway uses {first, last}. Guessing spellings was the bug;
+  // these are now ordered with the observed one first.
+  for (const key of ['last', 'end', 'end_date', 'latest', 'to', 'max_date']) {
     const candidate = v[key];
     if (typeof candidate === 'string' && ISO_DATE.test(candidate.slice(0, 10))) {
       return candidate.slice(0, 10);
     }
   }
   return fallbackIso;
+}
+
+/** The UTC day before an ISO date. get_open_interest serves daily snapshots. */
+export function previousIso(iso: string): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
 }
 
 export function todayIso(now: number): string {
@@ -141,14 +150,23 @@ export async function fetchAll(
   );
   const asOf = resolveAsOf(coverage, todayIso(now));
 
-  const [signal, metrics, equity, trades, funding, openInterest] = await Promise.all([
+  const prevIso = previousIso(asOf);
+
+  const [signal, metrics, equity, trades, funding, openInterest, openInterestPrev] = await Promise.all([
     settle(client.call<Signal>('get_strategy_signal', { symbol })),
     settle(cached<Metrics>(cache, 'metrics', () => client.call<Metrics>('get_strategy_metrics'))),
     settle(cached<Equity>(cache, 'equity', () => client.call<Equity>('get_strategy_equity'))),
     settle(cached<Trades>(cache, 'trades', () => client.call<Trades>('get_strategy_trades'))),
     settle(client.call<Funding>('get_historical_funding', { as_of: asOf, symbol })),
     settle(client.call<OpenInterest>('get_open_interest', { as_of: asOf, symbol })),
+    // The gateway does not return a baseline, so fetch one. Cached like the
+    // rest: yesterday's snapshot never changes.
+    settle(
+      cached<OpenInterest>(cache, `oi:${symbol}:${prevIso}`, () =>
+        client.call<OpenInterest>('get_open_interest', { as_of: prevIso, symbol }),
+      ),
+    ),
   ]);
 
-  return { asOf, data: { signal, metrics, equity, trades, funding, openInterest, coverage } };
+  return { asOf, data: { signal, metrics, equity, trades, funding, openInterest, openInterestPrev, coverage } };
 }

@@ -51,7 +51,7 @@ The gate receives all inputs explicitly: evidence, policy, proposal, account equ
 
 This design gives the live API and offline replay the same decision path. It also makes threshold, replay, and no-lookahead tests exact instead of probabilistic.
 
-A `HOLD` signal returns `NO_TRADE` before the ten checks. Abstain still writes a receipt because omitting non-actions would leave unexplained holes in the evidence timeline.
+A `HOLD` signal does not bypass the gate. Abstain evaluates what an agent **proposes**, not what the strategy happens to be emitting, so a proposal with no directional signal behind it fails the `SIGNAL_SUPPORT` check and the verdict is `ABSTAIN` with all eleven checks recorded. Earlier receipts in the live chain carry the legacy `NO_TRADE` verdict from before this change; they remain valid links and verify normally.
 
 ## Hash-linked receipts
 

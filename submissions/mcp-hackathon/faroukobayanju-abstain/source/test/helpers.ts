@@ -123,6 +123,9 @@ export function makeInput(o: Overrides = {}): GateInput {
     trades: present(TRADES_WINNER),
     funding: present(goodFunding),
     openInterest: present(calmOi),
+    // A real baseline one day back, so OI_SHOCK genuinely PASSes here
+    // rather than skipping for want of something to diff against.
+    openInterestPrev: present({ ...calmOi, as_of_date: '2026-09-16', open_interest: calmOi.open_interest }),
     coverage: present(COVERAGE),
     ...o.data,
   };

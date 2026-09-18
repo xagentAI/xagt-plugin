@@ -146,7 +146,7 @@ Response:
 }
 ```
 
-`NO_TRADE` contains no checks because a `HOLD` signal proposes no trade. `EXECUTE` and `ABSTAIN` contain all ten checks.
+`EXECUTE` and `ABSTAIN` contain all eleven checks. `NO_TRADE` is a legacy verdict held by receipts written before 2026-09-18, when a `HOLD` signal bypassed the gate entirely; those receipts carry an empty `checks` array and still verify as chain links.
 
 ## Gate checks
 

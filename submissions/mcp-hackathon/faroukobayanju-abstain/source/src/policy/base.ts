@@ -17,6 +17,8 @@ export const BASE_POLICY: Policy = {
   max_signal_age_s: 1800,
   /** The one key that differs between the strict and permissive policies. */
   require_qualified: true,
+  require_signal_support: true,
+  require_data_complete: true,
   max_funding_rate: 0.0005,
   /** Starting value, NOT calibrated against observed OI. Declared as such. */
   max_oi_delta_pct: 15,

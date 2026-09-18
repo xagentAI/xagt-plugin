@@ -8,5 +8,7 @@
   "max_symbol_pct": 20,
   "max_loss_streak": 3,
   "min_notional": 10,
-  "max_notional": 50000
+  "max_notional": 50000,
+  "require_signal_support": true,
+  "require_data_complete": true
 }

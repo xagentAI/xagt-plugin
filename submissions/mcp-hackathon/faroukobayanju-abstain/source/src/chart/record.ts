@@ -11,8 +11,9 @@
  * Writes one cassette per pair, so the chart a reviewer regenerates is built
  * from the same recorded bytes we used.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { NexusClient, cassetteName } from '../nexus/client.js';
+import { previousIso } from '../nexus/fetch-all.js';
 import { isoDate } from './replay.js';
 import type { Trades } from '../types.js';
 
@@ -33,15 +34,23 @@ async function main(): Promise<void> {
   let ok = 0;
   let missing = 0;
   for (const { symbol, asOf } of pairs.values()) {
-    for (const tool of ['get_historical_funding', 'get_open_interest'] as const) {
-      const args = { symbol, as_of: asOf };
-      const res = await client.call<unknown>(tool, args);
+    // OI_SHOCK diffs against the previous UTC day, so record that snapshot too
+    // or the offline replay cannot reproduce the check.
+    const prev = previousIso(asOf);
+    for (const [tool, date] of [
+      ['get_historical_funding', asOf],
+      ['get_open_interest', asOf],
+      ['get_open_interest', prev],
+    ] as const) {
+      const args = { symbol, as_of: date };
       const file = `fixtures/${cassetteName(tool, args)}`;
+      if (existsSync(file)) continue; // already recorded by an earlier pair
+      const res = await client.call<unknown>(tool, args);
       if (res.ok) {
         writeFileSync(file, JSON.stringify({ ok: true, name: tool, content: res.value }, null, 2));
         ok++;
       } else {
-        console.warn(`  ${res.outcome.padEnd(7)} ${tool} ${symbol} ${asOf}`);
+        console.warn(`  ${res.outcome.padEnd(7)} ${tool} ${symbol} ${date}`);
         missing++;
       }
     }

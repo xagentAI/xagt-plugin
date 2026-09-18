@@ -5,7 +5,7 @@ every refusal, becomes a hash-chained receipt that a stranger can replay.
 
 ## Capability
 
-- **One-line description:** An agent submits a proposed trade against a Nexus strategy signal; Abstain runs ten deterministic pre-trade checks and returns `EXECUTE`, `ABSTAIN`, or `NO_TRADE` with a hash-chained receipt naming every check, its observed value, and its threshold.
+- **One-line description:** An agent submits a proposed trade against a Nexus strategy signal; Abstain runs eleven deterministic pre-trade checks and returns `EXECUTE`, `ABSTAIN`, or `NO_TRADE` with a hash-chained receipt naming every check, its observed value, and its threshold.
 - **Who it helps:** Any agent or desk that can place orders from a strategy signal but cannot currently prove *why* a given order was allowed, what conditions would have stopped it, or that the track record it advertises was not assembled after the fact.
 - **Capability boundary:** Abstain **authorizes and refuses**. It never places an order, never holds custody, never moves funds, and never signs a transaction. It reads a Nexus strategy's published record and public market series, applies a versioned policy, and writes an append-only receipt. It is pre-trade execution control and settlement evidence for a trading strategy — not wallet risk scoring, not security monitoring, not compliance analysis.
 
@@ -43,32 +43,39 @@ Nexus's, so Abstain refuses and records evidence before Nexus silently halts.
 | GET | `/v1/policy?policy=strict\|permissive` | none | active thresholds + policy hash |
 | GET | `/v1/ready` | none | dependency probe (no gate reads this) |
 
-### The ten checks
+### The eleven checks
 
 | # | Check | Refuses when | Source |
 | --- | --- | --- | --- |
 | 1 | `SIGNAL_STALE` | signal older than `max_signal_age_s` | `get_strategy_signal` |
-| 2 | `NOT_QUALIFIED` | metrics status ≠ `QUALIFIED_FOR_OKX_LISTING` | `get_strategy_metrics` |
-| 3 | `FUNDING_REGIME` | funding rate beyond threshold **and against** the proposed side | `get_historical_funding` |
-| 4 | `OI_SHOCK` | one-day open-interest move exceeds `max_oi_delta_pct` | `get_open_interest` |
-| 5 | `DRAWDOWN_BUDGET` | equity drawdown from peak exceeds `max_drawdown_pct` | `get_strategy_equity` |
-| 6 | `CORRELATED_CLUSTER` | concurrent same-direction positions reach `max_cluster_size` | `get_strategy_trades` |
-| 7 | `LOSS_STREAK` | trailing consecutive losers reach `max_loss_streak` | `get_strategy_trades` |
-| 8 | `DATA_GAP` | any required datum absent or unfetchable, or `as_of` outside coverage | `get_historical_coverage` |
-| 9 | `SIZE_BOUND` | notional outside `[min_notional, max_notional]` | request |
-| 10 | `DUPLICATE` | `signal_id` already committed to the chain | receipt chain |
+| 2 | `SIGNAL_SUPPORT` | the strategy signal does not back the proposed side (a `HOLD` backs nothing) | `get_strategy_signal` |
+| 3 | `NOT_QUALIFIED` | metrics status ≠ `QUALIFIED_FOR_OKX_LISTING` | `get_strategy_metrics` |
+| 4 | `FUNDING_REGIME` | funding rate beyond threshold **and against** the proposed side | `get_historical_funding` |
+| 5 | `OI_SHOCK` | one-day open-interest move exceeds `max_oi_delta_pct` | `get_open_interest` |
+| 6 | `DRAWDOWN_BUDGET` | equity drawdown from peak exceeds `max_drawdown_pct` | `get_strategy_equity` |
+| 7 | `CORRELATED_CLUSTER` | concurrent same-direction positions reach `max_cluster_size` | `get_strategy_trades` |
+| 8 | `LOSS_STREAK` | trailing consecutive losers reach `max_loss_streak` | `get_strategy_trades` |
+| 9 | `DATA_GAP` | any required datum absent or unfetchable, or `as_of` outside coverage | `get_historical_coverage` |
+| 10 | `SIZE_BOUND` | notional outside `[min_notional, max_notional]` | request |
+| 11 | `DUPLICATE` | `signal_id` already committed to the chain | receipt chain |
 
-For a BUY or SELL proposal, all ten run on every evaluation. A HOLD signal returns
-`NO_TRADE` before gating because there is no proposed execution; that outcome is still
-written to the receipt chain. A receipt that stops at the first failed check would hide
-the remaining limits, so non-HOLD evaluations always record all ten.
+All eleven run on every evaluation. There is no bypass: Abstain gates what an agent
+**proposes**, not what the strategy happens to be emitting, so a proposal with no
+directional signal behind it fails `SIGNAL_SUPPORT` and the verdict is `ABSTAIN` with all
+eleven checks recorded. A receipt that stopped at the first failed check would hide the
+remaining limits, and the limits are the evidence.
+
+Receipts 1-70 in the live chain carry a legacy `NO_TRADE` verdict with an empty `checks`
+array, written before 2026-09-18 when a `HOLD` signal short-circuited the gate. They
+remain valid chain links and verify normally; the change is visible in the record rather
+than erased from it.
 
 ## Source and reproducibility
 
 - **Source repository:** `https://github.com/faroukobayanju/abstain`
-- **Review commit:** `9ee86c95a9b07e0af76eec7ce68f9f8625cc3616`
+- **Review commit:** `4dc1509ba188d3c45c800f2ac98f0b8a62a15311`
 - **Source submitted in this PR:** `source/`
-- **Run tests:** `npm ci && npm test` — 162 tests, no API key and no network required
+- **Run tests:** `npm ci && npm test` — 168 tests, no API key and no network required
 - **Run locally:** `npm run build && COMMIT_SHA=$(git rev-parse HEAD) ABSTAIN_WRITE_KEY=demo-key npm start`
 - **Deploy:** Vercel git integration; `vercel.json` rewrites all paths to `api/index.ts`. Set `ABSTAIN_WRITE_KEY`, `NEXUS_API_KEY` + `NEXUS_MODE=live`, and either `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` or Vercel's `KV_REST_API_URL` + `KV_REST_API_TOKEN`. Production evaluations refuse to run without durable storage.
 - **Version binding:** `/health` reports `VERCEL_GIT_COMMIT_SHA` in the body and in the `x-source-commit` response header. It has **zero external dependencies** by design: coupling a hard gate to Nexus or Redis uptime would let a third party fail a gate already passed.

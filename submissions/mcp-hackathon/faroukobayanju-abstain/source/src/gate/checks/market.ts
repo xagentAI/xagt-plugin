@@ -64,7 +64,11 @@ export function oiShock(input: GateInput, policy: Policy): CheckResult {
   }
 
   const oi = openInterest.value;
-  const prev = oi.open_interest_prev;
+  // Prefer a gateway-supplied baseline; otherwise use the previous UTC day,
+  // which fetch-all now retrieves explicitly. Live responses omit
+  // open_interest_prev entirely, which left this check permanently SKIPPED.
+  const prevDatum = input.data.openInterestPrev;
+  const prev = oi.open_interest_prev ?? (prevDatum.ok ? prevDatum.value.open_interest : undefined);
   if (prev === undefined || prev <= 0) {
     return {
       id: 'OI_SHOCK',
@@ -73,7 +77,7 @@ export function oiShock(input: GateInput, policy: Policy): CheckResult {
       threshold: policy.max_oi_delta_pct,
       unit: '%',
       source: { call: 'get_open_interest', outcome: 'absent' },
-      reason: 'no previous open-interest snapshot to diff against',
+      reason: `no previous open-interest snapshot to diff against (prev day ${prevDatum.ok ? 'present but zero' : prevDatum.outcome})`,
     };
   }
 
@@ -85,6 +89,11 @@ export function oiShock(input: GateInput, policy: Policy): CheckResult {
     threshold: policy.max_oi_delta_pct,
     unit: '%',
     source: { call: 'get_open_interest', outcome: 'ok' },
-    detail: { open_interest: oi.open_interest, previous: prev, as_of: input.asOf },
+    detail: {
+      open_interest: oi.open_interest,
+      previous: prev,
+      as_of: input.asOf,
+      baseline: oi.open_interest_prev !== undefined ? 'gateway' : 'previous_utc_day',
+    },
   };
 }

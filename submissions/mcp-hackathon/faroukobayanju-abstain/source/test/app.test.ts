@@ -156,14 +156,18 @@ describe('input validation', () => {
 });
 
 describe('POST /v1/evaluate — the three demo acts', () => {
-  it('act 3: the recorded signal is HOLD, so the verdict is NO_TRADE with a receipt', async () => {
+  it('act 3: the recorded signal is HOLD, so the proposal is REFUSED with all checks named', async () => {
     const store = new MemoryStore();
     const res = await post(app(store), '/v1/evaluate', VALID, { 'X-ABSTAIN-KEY': KEY });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.verdict).toBe('NO_TRADE');
-    expect(body.checks).toEqual([]);
-    // A chain with holes invites the question of what was left out.
+    // Previously NO_TRADE with an empty checks array, which meant the live API
+    // never demonstrated the gate at all.
+    expect(body.verdict).toBe('ABSTAIN');
+    expect(body.checks).toHaveLength(11);
+    const support = body.checks.find((c: { id: string }) => c.id === 'SIGNAL_SUPPORT');
+    expect(support.verdict).toBe('FAIL');
+    expect(support.observed).toBe('HOLD');
     expect((await store.all())).toHaveLength(1);
   });
 

@@ -18,6 +18,7 @@ export type CheckVerdict = 'PASS' | 'FAIL' | 'SKIPPED';
 
 export const CHECK_IDS = [
   'SIGNAL_STALE',
+  'SIGNAL_SUPPORT',
   'NOT_QUALIFIED',
   'FUNDING_REGIME',
   'OI_SHOCK',
@@ -154,6 +155,9 @@ export interface OpenInterest {
  * probes the plausible spellings.
  */
 export interface Coverage {
+  /** Observed live shape: {first, last}. */
+  first?: string;
+  last?: string;
   start?: string;
   end?: string;
   end_date?: string;
@@ -181,6 +185,8 @@ export interface GateData {
   trades: Datum<Trades>;
   funding: Datum<Funding>;
   openInterest: Datum<OpenInterest>;
+  /** Previous UTC day, so OI_SHOCK can diff without a gateway-supplied baseline. */
+  openInterestPrev: Datum<OpenInterest>;
   coverage: Datum<Coverage>;
 }
 
@@ -200,6 +206,10 @@ export interface GateInput {
 export interface Policy {
   max_signal_age_s: number;
   require_qualified: boolean;
+  /** Refuse when the strategy signal does not back the proposed side. */
+  require_signal_support: boolean;
+  /** Refuse when any required datum is missing or the window is uncovered. */
+  require_data_complete: boolean;
   max_funding_rate: number;
   max_oi_delta_pct: number;
   max_drawdown_pct: number;

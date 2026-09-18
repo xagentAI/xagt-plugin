@@ -130,8 +130,13 @@ export function validateToolPayload<T>(
       matchesArgument(obj, 'symbol', 'symbol', args, tool);
       matchesArgument(obj, 'as_of_date', 'as_of', args, tool);
       finite(obj, 'open_interest', tool);
-      if (finite(obj, 'open_interest_prev', tool) <= 0) {
-        throw new NexusParseError(`${tool}.open_interest_prev must be positive`, tool);
+      // Live responses omit open_interest_prev entirely (2 of 21 recorded
+      // fixtures carried it). Requiring it rejected every real payload as
+      // NexusParseError, which failed DATA_GAP and abstained on everything.
+      // The baseline now comes from an explicit as_of-1 fetch; when the
+      // gateway does supply one it must still be positive to be usable.
+      if (obj['open_interest_prev'] !== undefined && finite(obj, 'open_interest_prev', tool) <= 0) {
+        throw new NexusParseError(`${tool}.open_interest_prev must be positive when present`, tool);
       }
       optionalFinite(obj, 'long_short_ratio', tool);
       break;

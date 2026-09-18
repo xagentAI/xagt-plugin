@@ -1,6 +1,6 @@
 # Abstain
 
-Abstain is a pre-trade execution gate for agentic trading systems. It fetches strategy and market evidence from Nexus, evaluates ten deterministic checks, and returns `EXECUTE`, `ABSTAIN`, or `NO_TRADE`. Every evaluation is written to a publicly verifiable SHA-256 receipt chain before the API responds.
+Abstain is a pre-trade execution gate for agentic trading systems. It fetches strategy and market evidence from Nexus, evaluates eleven deterministic checks, and returns `EXECUTE`, `ABSTAIN`, or `NO_TRADE`. Every evaluation is written to a publicly verifiable SHA-256 receipt chain before the API responds.
 
 Abstain never places orders and never holds funds. Its job is narrower: decide whether a proposed action is allowed, explain the decision, and leave evidence that can be independently checked.
 
@@ -40,7 +40,7 @@ The API separates liveness from readiness. `/health` identifies the exact deploy
 
 ## What makes the proof credible
 
-- All ten checks are deterministic and versioned by `policy_hash`; no LLM sits in the authorization path.
+- All eleven checks are deterministic and versioned by `policy_hash`; no LLM sits in the authorization path.
 - Nexus responses cross a strict trust boundary before any threshold comparison.
 - The server derives signal identity, so callers cannot rename a repeated signal.
 - Redis Lua compare-and-append binds the decision to the exact chain snapshot it evaluated.

@@ -28,7 +28,7 @@ flowchart TB
 2. The API validates request size and shape before consuming rate-limit capacity.
 3. The Nexus client fetches the strategy signal, metrics, equity, trades, historical funding, open interest, and coverage data in parallel.
 4. Every Nexus payload is checked for structure, types, semantic ranges, requested symbol/date agreement, and chronological integrity.
-5. The deterministic gate runs ten checks for freshness, qualification, funding regime, open-interest shock, drawdown, correlated exposure, loss streak, missing data, size, and duplicate use.
+5. The deterministic gate runs eleven checks for freshness, qualification, funding regime, open-interest shock, drawdown, correlated exposure, loss streak, missing data, size, and duplicate use.
 6. The service derives the signal identifier from Nexus data and builds a canonical receipt containing the policy hash, input digest, checks, verdict, reason, and previous chain hash.
 7. Redis executes an atomic Lua compare-and-append. If another writer changed the head, Abstain reloads the chain, recomputes stateful checks, and retries.
 8. Only a durably committed receipt is returned. Store failure or unresolved contention returns a named 503 and no verdict.
