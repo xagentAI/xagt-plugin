@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "APIVouch",
+  "slug": "apivouch",
+  "sourceRepository": "https://github.com/sklabstudio/apivouch",
+  "reviewCommit": "cead54a30bb3b7cc1e4b4e198d9da88cdc184ff9",
+  "apiBaseUrl": "https://apivouch.sklab.cc",
+  "healthCheckUrl": "https://apivouch.sklab.cc/health",
+  "deploymentProofUrl": "https://apivouch.sklab.cc/.well-known/xagent-verification.json"
+}

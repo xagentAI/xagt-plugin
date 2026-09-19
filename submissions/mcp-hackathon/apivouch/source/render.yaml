@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: apivouch
+    runtime: docker
+    plan: free
+    region: singapore
+    autoDeployTrigger: checksPass
+    healthCheckPath: /ready
+    envVars:
+      - key: PROJECT_SLUG
+        value: apivouch
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: REQUIRE_SIGNED_RECEIPTS
+        value: "true"
+      - key: RECEIPT_SIGNING_PRIVATE_KEY_B64
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apivouch-db
+          property: connectionString
+      - key: ALLOW_PRIVATE_NETWORK
+        value: "false"
+      - key: REQUEST_TIMEOUT
+        value: "10"
+      - key: MAX_RETRIES
+        value: "1"
+      - key: MAX_PROOF_PAGES
+        value: "20"
+      - key: MAX_PROOF_RECORDS
+        value: "5000"
+      - key: MAX_OUTCOME_RECEIPTS
+        value: "1000"
+
+databases:
+  - name: apivouch-db
+    plan: free
+    region: singapore
+    databaseName: apivouch
+    user: apivouch
+    ipAllowList: []

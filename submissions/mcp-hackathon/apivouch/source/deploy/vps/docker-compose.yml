@@ -1,0 +1,106 @@
+name: apivouch
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    logging: *logging
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?Set the exact HTTPS public origin}
+      ACME_EMAIL: ${ACME_EMAIL:?Set the TLS contact email}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge]
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  app:
+    image: apivouch:${GIT_COMMIT:?Set the exact reviewed 40-character commit}
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    logging: *logging
+    user: "10001:10001"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+    environment:
+      PORT: "8000"
+      PROJECT_SLUG: apivouch
+      GIT_COMMIT: ${GIT_COMMIT:?Set the exact reviewed 40-character commit}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?Set the exact HTTPS public origin}
+      DATABASE_URL: postgresql://apivouch:${POSTGRES_PASSWORD:?Set a generated hex password}@db:5432/apivouch
+      ALLOW_PRIVATE_NETWORK: "false"
+      REQUIRE_SIGNED_RECEIPTS: "true"
+      RECEIPT_SIGNING_PRIVATE_KEY_B64: ${RECEIPT_SIGNING_PRIVATE_KEY_B64:?Inject the raw32 base64 signing key}
+      REQUEST_TIMEOUT: "10"
+      MAX_RETRIES: "1"
+      MAX_RESPONSE_BYTES: "1048576"
+      MAX_UPLOAD_BYTES: "524288"
+      MAX_MCP_REQUEST_BYTES: "1048576"
+      MAX_ENDPOINTS: "200"
+      MAX_PROJECTS: "250"
+      MAX_OUTCOME_RECEIPTS: "1000"
+      MAX_REDIRECTS: "3"
+      MAX_PROOF_PAGES: "20"
+      MAX_PROOF_RECORDS: "5000"
+      CORS_ORIGINS: ""
+    networks: [edge, database]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  db:
+    image: postgres:17.6-alpine
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_DB: apivouch
+      POSTGRES_USER: apivouch
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a generated hex password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [database]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apivouch -d apivouch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  edge: {}
+  database:
+    internal: true
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
