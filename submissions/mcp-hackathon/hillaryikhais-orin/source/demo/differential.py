@@ -37,7 +37,7 @@ def main():
     proof = api(base, "/capabilities/A/invoice.duplicate_detection/proof")
     s = run["summary"]
     print(f"    verdict   : {run['status']}  ({s['passed']}/{s['total']} public + {s['adv_passed']}/{s['adv_total']} adversarial invoices)")
-    print(f"    proof     : {run['proof']['proof_id']}  (deterministic, HMAC-signed)")
+    print(f"    proof     : {run['proof']['proof_id']}  (HMAC-signed (repeatable))")
     print(f"    status    : {lock['status']}")
     print(f"    expires   : {int(proof.get('expires_at',0) - __import__('time').time())}s TTL\n")
 

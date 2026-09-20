@@ -4,9 +4,9 @@
 
 ## Capability
 
-- **One-line description:** An agent asks "may this exact capability execute right now?" and ORIN answers from deterministic evidence — provable capability admission with materiality-classified drift, constraint intersection for delegation/composition, and escrowed scope.
+- **One-line description:** An agent asks "may this exact capability execute right now?" and ORIN answers from evidence-based — provable capability admission with materiality-classified drift, constraint intersection for delegation/composition, and escrowed scope.
 - **Who it helps:** Any agent runtime (X-Agent is the reference environment) and any downstream system that must know whether a capability is *currently demonstrated* before authorizing its execution.
-- **Capability boundary:** What it does: evaluate an agent's capability against 50 public + 10 hidden adversarial deterministic challenges with no LLM judge; issue a signed, fingerprint-bound, scope-bound proof; bind that proof to an explicit Capability Contract (conditions + materiality); answer `CHECK` calls that classify drift by materiality (`INVALIDATE` blocks, `REVALIDATE` re-gates, `IGNORE` is observed); intersect authority in delegation and composition so scope can never expand; expose an execution gate the Harness consumes.
+- **Capability boundary:** What it does: evaluate an agent's capability against 50 public + 10 hidden fixed challenges with no LLM judge; issue a signed, fingerprint-bound, scope-bound proof; bind that proof to an explicit Capability Contract (conditions + materiality); answer `CHECK` calls that classify drift by materiality (`INVALIDATE` blocks, `REVALIDATE` re-gates, `IGNORE` is observed); intersect authority in delegation and composition so scope can never expand; expose an execution gate the Harness consumes.
 
   What it does **not** do: on-chain security or auditing, vulnerability detection, wallet/transaction risk scoring, phishing/scam/rug-pull detection, benchmarks, certification, or ratings. It is a capability-admission primitive, not a security scanner.
 
@@ -15,7 +15,7 @@
 - **API base URL:** https://orin-md60.onrender.com
 - **Health-check URL:** https://orin-md60.onrender.com/health
 - **Authentication:** none (public read + capability lifecycle is idempotent and evidence-bound)
-- **Rate limits / known limits:** none configured; evaluation is deterministic and CPU-only
+- **Rate limits / known limits:** none configured; evaluation is CPU-only (repeatable)
 - **API contract:** `docs/orin-api.md` in `source/`; interactive OpenAPI at `/docs` on the live origin.
 
 ## Source and reproducibility
@@ -50,9 +50,9 @@ The reproducible call instructions and redacted example responses are in `verifi
 
 ## Security and data handling
 
-- **Data collected:** only the agent fingerprint (deterministic hash of declared execution surface: code, model, prompt, environment) and evaluation results. No raw invoices, no wallet data, no secrets.
+- **Data collected:** only the agent fingerprint (repeatable hash of declared execution surface: code, model, prompt, environment) and evaluation results. No raw invoices, no wallet data, no secrets.
 - **Purpose and retention:** fingerprints are hashed evidence and are never stored raw; in-memory only, cleared on restart.
-- **Third parties / outbound network calls:** none. Evaluation is fully offline and deterministic.
+- **Third parties / outbound network calls:** none. Evaluation is fully offline and repeatable.
 - **Secrets:** No secrets are committed. Review access is supplied only through an approved private channel when required.
 - **Known risks / restrictions:** nothing about ORIN proves that an agent is *safe* — only that it *can* perform a capability it was evaluated on. Do not use it as a security boundary.
 

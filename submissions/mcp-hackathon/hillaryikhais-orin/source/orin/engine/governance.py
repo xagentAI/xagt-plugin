@@ -46,7 +46,7 @@ def _active_constraints(agent_id, capability):
     return cons
 
 def admission(agent_id, capability, requested=None):
-    """Live admission state, derived deterministically from current evidence (I8).
+    """Live admission state, live-derived from current evidence (I8).
     Runtime decision: ADMITTED / CONSTRAINED / STALE / UNPROVEN / REVOKED."""
     st = P.check_status(agent_id, capability)
     if st.get("status") == "NOT_VERIFIED":
