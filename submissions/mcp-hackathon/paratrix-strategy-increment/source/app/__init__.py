@@ -1,0 +1,1 @@
+"""Strategy increment research application."""

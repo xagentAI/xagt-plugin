@@ -1,0 +1,58 @@
+{
+  "dataset_kind": "recorded_local_simulated_backtest",
+  "recorded_on": "2026-09-24",
+  "upstream_repository": "https://github.com/olaxbt/ai-market-maker",
+  "upstream_commit": "dd711507690450e9c4c9b170829b01f1e7d7f1b6",
+  "market_data_sha256": "243e63e121eb9a223f7cd04e3964121a62ea6af87d46b1e659ef026882478bd4",
+  "currency": "USDT",
+  "frequency": "1d",
+  "evaluation_period_utc": [
+    "2026-06-02",
+    "2026-07-31"
+  ],
+  "initial_equity": 10000,
+  "initial_equity_semantics": "Pre-evaluation-bar initial cash declared by the original backtest harness; first JSONL row is after first evaluation bar and is not the initial cash.",
+  "cases": [
+    {
+      "case": "baseline_a",
+      "file": "baseline_a.equity.jsonl",
+      "sha256": "e356df8eadf9ee64dd05479882577958e60861501639bb8a2b9562eb52f9d053",
+      "spec": {
+        "steps": 60,
+        "until": "2026-07-31",
+        "warmup": 50
+      },
+      "points": 60
+    },
+    {
+      "case": "weight_variant",
+      "file": "weight_variant.equity.jsonl",
+      "sha256": "eaf95ce7559f99967a8bdee6680978d60d5e6dd8637a4dab459c19a91b26ab51",
+      "spec": {
+        "steps": 60,
+        "until": "2026-07-31",
+        "warmup": 50,
+        "ta_weight": 0.25
+      },
+      "points": 60
+    },
+    {
+      "case": "warmup_variant",
+      "file": "warmup_variant.equity.jsonl",
+      "sha256": "e356df8eadf9ee64dd05479882577958e60861501639bb8a2b9562eb52f9d053",
+      "spec": {
+        "steps": 60,
+        "until": "2026-07-31",
+        "warmup": 200
+      },
+      "points": 60
+    }
+  ],
+  "limitations": [
+    "Unmodified native AIMM Python engine; ordinary JSON configuration changed by the original harness.",
+    "Reference CSV was taken from the upstream repository; exchange provenance was not independently authenticated.",
+    "These are simulation outputs, not live account data or hosted Nexus responses.",
+    "The interval was already examined; not an unseen holdout.",
+    "Original complete execution/reproduction archive is research material, not included as implemented product code."
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "checks": {
+    "aimm": {
+      "comparable": true,
+      "created": 201,
+      "evidence_json_bytes": 45820,
+      "experiment_id": "e_5812ac3b737196bacdb108f9a0306d13",
+      "history_count": 1,
+      "reproduction": {
+        "method_version": "fixed-initial-80-20/v1",
+        "payload_sha256": "4aea48740f8fa4219c1d9f52d7ef844600e0427e51fd889f4c3bf7eeaa96da06",
+        "verified": true
+      },
+      "result_display_language": "en",
+      "round_trip_equal": true,
+      "wall_seconds": {
+        "create": 0.48669825005345047,
+        "export": 0.3883614999940619
+      }
+    },
+    "assets_and_schema": {
+      "html_js_css_openapi": 200,
+      "unlisted_static_asset": 404
+    },
+    "external_source": {
+      "nexus_configured": false,
+      "nexus_import": 503
+    },
+    "large_record": {
+      "daily_points_per_curve": 5000,
+      "evidence_json_bytes": 3837883,
+      "experiment_id": "e_1db0a81b48884e3b90a11d6f15cee6f6",
+      "history_count": 1,
+      "history_json_bytes": 224,
+      "reproduction": {
+        "method_version": "fixed-initial-80-20/v1",
+        "payload_sha256": "b644b3774aaae2f07434d1133d68abe1229dc68f83d8e769473fe2e1b9f8f823",
+        "verified": true
+      },
+      "result_json_bytes": 2278883,
+      "round_trip_equal": true,
+      "wall_seconds": {
+        "create": 2.1834900830872357,
+        "export": 1.3244633750291541,
+        "history": 0.2987722079269588,
+        "read": 1.2085314580472186
+      }
+    },
+    "release_binding": {
+      "health": {
+        "commit": "778327c87d80ba18bcac54693a985e3502dc8895",
+        "method_version": "fixed-initial-80-20/v1",
+        "release_bound": true,
+        "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+        "status": "ok"
+      },
+      "health_wall_seconds": 3.307413166970946,
+      "proof": {
+        "commit": "778327c87d80ba18bcac54693a985e3502dc8895",
+        "schemaVersion": 1,
+        "slug": "paratrix-strategy-increment"
+      }
+    },
+    "security": {
+      "cross_origin_write": 403,
+      "cross_session_detail": 404,
+      "cross_session_evidence": 404,
+      "cross_session_pair": 404,
+      "duplicate_json_key": 422,
+      "technical_errors_ascii": true
+    }
+  },
+  "client_compatibility": {
+    "explicit_client_user_agent_health_status": 200,
+    "python_default_user_agent_edge_error": "Cloudflare 1010",
+    "python_default_user_agent_health_status": 403,
+    "verification_user_agent": "StrategyIncrement-Verification/1.0"
+  },
+  "completed_at_utc": "2026-09-25T07:42:55.533201Z",
+  "expected_review_commit": "778327c87d80ba18bcac54693a985e3502dc8895",
+  "expected_source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+  "origin": "https://strategy-increment.raspy-boat-dbb0.workers.dev",
+  "passed": true,
+  "runtime": "Hosted Cloudflare Workers with Python and SQLite Durable Objects",
+  "scope": {
+    "data": "Bundled public AIMM example and generated simulation; no live trading account data.",
+    "production_deployment": true,
+    "quota_load_test": false,
+    "timing": "HTTPS end-to-end wall time; not Cloudflare CPU measurements or a performance guarantee."
+  },
+  "started_at_utc": "2026-09-25T07:42:30.572825Z",
+  "redeployment_persistence": {
+    "checked_at_utc": "2026-09-25T07:43:02.069145Z",
+    "current_health": {
+      "commit": "778327c87d80ba18bcac54693a985e3502dc8895",
+      "method_version": "fixed-initial-80-20/v1",
+      "release_bound": true,
+      "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+      "status": "ok"
+    },
+    "origin": "https://strategy-increment.raspy-boat-dbb0.workers.dev",
+    "records": {
+      "aimm": {
+        "detail_equal": true,
+        "evidence_equal": true,
+        "evidence_payload_sha256": "31e15224990d8c7b20da42019aa09b1053aff1831c2964b883d851ab6beef732",
+        "history_equal": true,
+        "original_review_commit": "f86f5e071bc4115e70a572770150d83a54e5e1f0",
+        "original_source_sha256": "8dde7333a107fd876816d8bc95038f2734d4c69dec945d240fbce070b87900eb"
+      },
+      "large": {
+        "detail_equal": true,
+        "evidence_equal": true,
+        "evidence_payload_sha256": "a7140c53bcd9f3c071588984ae59232196514c727416d531069505c7eeca9f27",
+        "history_equal": true,
+        "original_review_commit": "f86f5e071bc4115e70a572770150d83a54e5e1f0",
+        "original_source_sha256": "8dde7333a107fd876816d8bc95038f2734d4c69dec945d240fbce070b87900eb"
+      }
+    },
+    "verified": true
+  },
+  "cloudflare_deployment_version": "6a3e02ee-51c7-412f-9f50-886552dee542"
+}

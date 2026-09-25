@@ -1,0 +1,32 @@
+{
+  "scope": "Local in-app browser against the validated workerd deployment; not a public deployment check.",
+  "checked_at_utc": "2026-09-25T07:40:34.032426Z",
+  "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+  "checks": {
+    "initial_examples_load": true,
+    "missing_day_field_error_in_chinese": true,
+    "incomplete_criteria_message_in_chinese": true,
+    "criteria_result_and_four_differences_in_chinese": true,
+    "equity_drawdown_chart_switch": true,
+    "history_restored_after_reload": true,
+    "restored_evidence_link_unchanged": true,
+    "evidence_download_link_clicked": true
+  },
+  "sample_result": {
+    "case": "tradeoff",
+    "criteria": [
+      "0",
+      "2",
+      "0",
+      "2"
+    ],
+    "status": "criteria_not_met",
+    "returns_pct": [
+      "30",
+      "24.6",
+      "24"
+    ],
+    "experiment_id": "e_8bea6f0eb0f55a40cbb672f14556371e"
+  },
+  "origin": "http://127.0.0.1:8788"
+}

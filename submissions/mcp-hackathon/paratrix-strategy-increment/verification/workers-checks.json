@@ -1,0 +1,95 @@
+{
+  "concurrent_experiments": {
+    "declared_holdout": 1,
+    "historical_exploration": 7,
+    "requests": 8
+  },
+  "health": {
+    "commit": null,
+    "method_version": "fixed-initial-80-20/v1",
+    "release_bound": false,
+    "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+    "status": "ok"
+  },
+  "http_checks_completed_at_utc": "2026-09-25T07:37:27.842181Z",
+  "installed_toolchain": {
+    "fastapi": "0.141.1",
+    "workers-py": "1.17.4",
+    "workers-runtime-sdk": "1.9.0",
+    "wrangler": "4.140.0"
+  },
+  "large_record": {
+    "daily_points_per_curve": 5000,
+    "evidence_json_bytes": 3837779,
+    "reproduction": {
+      "method_version": "fixed-initial-80-20/v1",
+      "payload_sha256": "02dc6ad473d65cd7ce7727053c0ee3161398e657c0935fa03a8a52a2a7f7d85e",
+      "verified": true
+    },
+    "result_json_bytes": 2278883,
+    "round_trip_equal": true,
+    "wall_seconds": {
+      "create": 0.30283441697247326,
+      "export": 0.14328645903151482,
+      "history": 0.00785479205660522,
+      "read": 0.09655645804014057
+    }
+  },
+  "ordinary_reproduction": {
+    "method_version": "fixed-initial-80-20/v1",
+    "payload_sha256": "8e1c7ef530adcdcd94f5675c46a2beded10490c17b00324a2e79fd4658fd7dcf",
+    "verified": true
+  },
+  "persistence_after_restart": {
+    "large_history_and_evidence_equal": true,
+    "regular_history_and_evidence_equal": true
+  },
+  "recorded_aimm_reproduction": {
+    "method_version": "fixed-initial-80-20/v1",
+    "payload_sha256": "3f6a82cd32fce52de81be8a263faf9161e41f873eb607431de72a1d45893af69",
+    "verified": true
+  },
+  "restart_checks_completed_at_utc": "2026-09-25T07:37:52.926192Z",
+  "runtime": "local Wrangler/workerd with Python Workers and SQLite Durable Objects",
+  "scope": {
+    "cloudflare_account_access": false,
+    "data": "Generated simulations and bundled public AIMM examples; no live account data.",
+    "local_only": true,
+    "production_deployment": false
+  },
+  "security": {
+    "cross_origin_write": 403,
+    "cross_session_detail_and_export": 404,
+    "cross_session_pair": 404,
+    "duplicate_json_key": 422,
+    "technical_errors_ascii": true,
+    "unlisted_static_asset": 404
+  },
+  "snapshot_quota": {
+    "concurrent_requests": 8,
+    "created": 2,
+    "existing": 98,
+    "http_429": 6
+  },
+  "started_at_utc": "2026-09-25T07:37:25.316513Z",
+  "timing_scope": "Local end-to-end wall time; not CPU time or a hosted performance guarantee.",
+  "runtime_warnings": [
+    {
+      "kind": "local_file_watcher_limit",
+      "observed": "Wrangler reported EMFILE and disabled the assets watcher on this macOS environment even with process descriptor limit 8192.",
+      "verification_impact": "Both cold starts, complete HTTP workflow and restart persistence checks passed. No hot reload was used; hot reload is not verified."
+    }
+  ],
+  "automated_checks": {
+    "pytest": {
+      "passed": 147,
+      "subtests_passed": 66
+    },
+    "ruff": "passed",
+    "frontend_syntax": "passed",
+    "dependency_lock": "passed",
+    "historical_evidence_reproduction": "verified",
+    "completed_at_utc": "2026-09-25T07:38:43.415121Z",
+    "warning": "One Starlette TestClient/httpx deprecation warning."
+  }
+}

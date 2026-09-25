@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="用完整模拟净值比较新策略的组合增量，固定研究标准，保存并复算每一次历史实验。">
+  <title>策略增量实验助手 · Paratrix</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">跳到实验工作台</a>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="策略增量实验助手首页"><span class="brand-mark" aria-hidden="true">p<span>↗</span></span><span>PARATRIX <small>RESEARCH LAB</small></span></a>
+    <div class="header-right"><span class="environment-badge"><span aria-hidden="true"></span>模拟研究工作台</span><a href="/docs" target="_blank" rel="noopener">API 文档 <span aria-hidden="true">↗</span></a></div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div><p class="eyebrow">STRATEGY INCREMENT / 策略增量实验</p><h1 id="page-title">新策略，真的带来了增量吗？</h1><p class="hero-description">加入候选 B 后，与原策略、同份额现金一起比较。<br class="desktop-only">用同一组历史数据，看清改善来自哪里，留下可复算的证据。</p></div>
+      <div class="model-note"><span>一个实验 · 三组对照</span><div><strong>100% A</strong><i>vs</i><strong>80% A + 20% B</strong><i>vs</i><strong>80% A + 20% 现金</strong></div><small>固定初始份额 · 不再平衡 · 现金收益为 0</small></div>
+    </section>
+
+    <div id="service-message" class="notice" role="status" hidden></div>
+    <div class="workspace" id="workspace">
+      <aside class="setup-panel" aria-labelledby="setup-title">
+        <div class="panel-heading"><div><p class="eyebrow">EXPERIMENT SETUP</p><h2 id="setup-title">构建一次实验</h2></div><span class="pill neutral" id="draft-status">新草稿</span></div>
+        <form id="experiment-form" novalidate>
+          <section class="setup-section" aria-labelledby="source-title">
+            <div class="step-heading"><span class="step-number">01</span><h3 id="source-title">选择模拟结果</h3></div>
+            <label for="demo-select">从可复算案例开始</label>
+            <div class="inline-input"><select id="demo-select"><option value="">正在读取案例…</option></select><button type="button" id="load-demo" class="button secondary compact">载入</button></div>
+            <p class="help" id="demo-description">也可以上传两份自己的完整日频模拟净值。</p>
+            <div class="curve-card" id="baseline-card"><div class="curve-heading"><span class="curve-letter baseline-color">A</span><div><span class="muted">基线策略</span><strong id="baseline-name">尚未选择</strong></div><label class="upload-link" for="baseline-file">导入 JSON<input id="baseline-file" type="file" accept=".json,application/json"></label></div><div id="baseline-meta" class="curve-meta">保留原有策略，作为比较起点。</div></div>
+            <div class="curve-card" id="candidate-card"><div class="curve-heading"><span class="curve-letter candidate-color">B</span><div><span class="muted">候选策略</span><strong id="candidate-name">尚未选择</strong></div><label class="upload-link" for="candidate-file">导入 JSON<input id="candidate-file" type="file" accept=".json,application/json"></label></div><div id="candidate-meta" class="curve-meta">观察加入候选后的组合变化。</div></div>
+            <button type="button" id="download-template" class="text-button">↓ 下载模拟净值格式示例</button>
+            <details class="source-details"><summary>Nexus 模拟结果接入 <span class="tiny-badge" id="nexus-badge">读取状态</span></summary><p class="help" id="nexus-note">正在检查服务配置。</p><div id="nexus-controls" hidden><label for="nexus-ref">已授权公开导入的模拟策略</label><select id="nexus-ref" aria-label="已授权公开导入的模拟策略"></select><div class="nexus-actions"><button type="button" class="button secondary compact" id="nexus-baseline">导入为 A</button><button type="button" class="button secondary compact" id="nexus-candidate">导入为 B</button></div><p class="help">这里只读取模拟结果；不在浏览器填写服务密钥。</p></div></details>
+          </section>
+
+          <section class="setup-section" aria-labelledby="period-title">
+            <div class="step-heading"><span class="step-number">02</span><h3 id="period-title">确定研究范围</h3></div>
+            <label class="checkbox-label"><input id="custom-period" type="checkbox">指定估值区间</label>
+            <p class="help">默认比较完整范围。不会自动截取交集、补点或插值。</p>
+            <div id="period-fields" hidden><label for="period-start">起始估值时点（UTC）</label><input id="period-start" type="text" placeholder="2026-06-02T00:00:00Z" spellcheck="false"><label for="period-end">结束估值时点（UTC）</label><input id="period-end" type="text" placeholder="2026-08-01T00:00:00Z" spellcheck="false"><p class="help">必须对应两份数据实际存在的估值边界。起点重新归一化为 1。</p></div>
+            <label for="research-mode">研究类型</label><select id="research-mode"><option value="historical_exploration">历史探索</option><option value="declared_holdout">声明固定检验</option></select>
+            <label class="checkbox-label seen-label"><input id="data-seen" type="checkbox" checked>我已看过这段数据或相关结果</label>
+            <p class="help" id="mode-note">示例数据已被观察，记录为历史探索。固定检验声明不构成“未见数据”的独立证明。</p>
+          </section>
+
+          <section class="setup-section" aria-labelledby="criteria-title">
+            <div class="step-heading"><span class="step-number">03</span><h3 id="criteria-title">设置研究标准</h3></div>
+            <fieldset class="segmented" aria-label="比较模式"><legend class="sr-only">比较模式</legend><label><input type="radio" name="criteria-mode" value="facts" checked><span>只比较事实</span></label><label><input type="radio" name="criteria-mode" value="criteria"><span>设定四项标准</span></label></fieldset>
+            <p class="help" id="criteria-help">展示三组对照及取舍，不给出达标结论。</p>
+            <div id="criteria-fields" hidden>
+              <div class="criteria-input"><label for="min_drawdown_improvement_pp">相对 A，回撤至少改善</label><div><input id="min_drawdown_improvement_pp" type="number" min="0" max="10000" step="any" inputmode="decimal" placeholder="必填"><span>百分点</span></div></div>
+              <div class="criteria-input"><label for="max_return_sacrifice_pp">相对 A，收益最多牺牲</label><div><input id="max_return_sacrifice_pp" type="number" min="0" max="10000" step="any" inputmode="decimal" placeholder="必填"><span>百分点</span></div></div>
+              <div class="criteria-input"><label for="min_return_above_cash_pp">相对现金对照，收益至少增加</label><div><input id="min_return_above_cash_pp" type="number" min="0" max="10000" step="any" inputmode="decimal" placeholder="必填"><span>百分点</span></div></div>
+              <div class="criteria-input"><label for="max_drawdown_above_cash_pp">相对现金对照，回撤最多增加</label><div><input id="max_drawdown_above_cash_pp" type="number" min="0" max="10000" step="any" inputmode="decimal" placeholder="必填"><span>百分点</span></div></div>
+              <button class="text-button" type="button" id="criteria-preset">填入教学示例：0 / 2 / 0 / 2</button><p class="help">阈值表达个人研究偏好，四项全部达到才算达标。教学示例不是投资标准。</p>
+            </div>
+          </section>
+
+          <div class="run-section"><div id="parent-note" class="parent-note" hidden></div><div id="form-error" class="form-error" role="alert" hidden></div><button type="submit" id="run-experiment" class="button primary full-width"><span id="run-label">保存并运行实验</span><span aria-hidden="true">↗</span></button><p class="help">每次运行保存不可变快照；修改条件会创建新实验。</p><div id="run-progress" class="run-progress" role="status" aria-live="polite" hidden></div></div>
+        </form>
+      </aside>
+
+      <section class="results-column" aria-label="实验报告">
+        <div id="empty-state" class="empty-state"><span class="empty-icon" aria-hidden="true">↗</span><p class="eyebrow">EVIDENCE BEFORE CONVICTION</p><h2>先看增量，再作判断</h2><p>左侧载入两份模拟净值，运行一次实验。<br>这里会呈现相对原策略和现金对照的具体变化。</p><div class="empty-steps"><span><b>01</b> 检查数据可比性</span><span><b>02</b> 比较三组历史路径</span><span><b>03</b> 下载证据并复算</span></div><p class="empty-footnote">免凭据案例可直接体验完整流程。</p></div>
+        <div id="report" hidden>
+          <div id="stale-notice" class="notice warning" hidden>草稿已修改。下方仍是上一次保存的实验；重新运行后才能查看新条件的结果。</div>
+          <section class="result-summary" aria-labelledby="result-title"><div class="summary-top"><p class="eyebrow">EXPERIMENT REPORT</p><span id="result-status" class="pill"></span></div><h2 id="result-title" tabindex="-1"></h2><p id="result-summary-text"></p><div class="report-meta"><span id="result-period"></span><span id="result-mode"></span></div><p class="result-scope">结论仅适用于这段历史和固定规则，不代表未来表现或交易放行。</p></section>
+          <section class="metrics-section" aria-labelledby="metrics-title"><div class="section-heading"><h3 id="metrics-title">三组对照</h3><span>收益 / 回撤均为整个选定区间</span></div><div id="metric-cards" class="metric-cards"></div></section>
+          <section class="report-panel" id="criteria-results-panel" aria-labelledby="criteria-results-title" hidden><div class="section-heading"><h3 id="criteria-results-title">是否达到预设标准</h3><span>依据未舍入数值判定</span></div><div class="table-scroll"><table class="criteria-table"><thead><tr><th scope="col">研究条件</th><th scope="col">实际差值</th><th scope="col">设定门槛</th><th scope="col">结果</th></tr></thead><tbody id="criteria-results"></tbody></table></div><p class="help">差值使用百分点。负的“收益牺牲”表示收益增加；负的“回撤改善”表示回撤扩大。</p></section>
+          <section class="report-panel" aria-labelledby="chart-title"><div class="section-heading chart-heading"><div><h3 id="chart-title">历史净值路径</h3><span id="chart-subtitle">各组初始净值归一化为 1</span></div><div class="chart-tabs" role="group" aria-label="图表类型"><button type="button" id="chart-nav" class="active" aria-pressed="true">净值</button><button type="button" id="chart-dd" aria-pressed="false">回撤</button></div></div><div class="chart-legend"><span class="legend-a">100% A</span><span class="legend-b">80% A + 20% B</span><span class="legend-c">80% A + 20% 现金</span></div><div id="path-chart" class="path-chart" role="img" aria-label="三组对照的历史路径图，数值可在下方估值表中查看"></div><p class="help">日频估值回撤不包含日内极值。固定初始份额，不做组合层再平衡。</p><details class="observations-details"><summary>查看各日估值与回撤</summary><div class="table-scroll observations-scroll"><table><caption class="sr-only">完整计算路径；净值保留六位，回撤保留四位供显示</caption><thead><tr><th scope="col">估值日期（UTC）</th><th scope="col">A 净值</th><th scope="col">A+B 净值</th><th scope="col">A+现金 净值</th><th scope="col">A 回撤</th><th scope="col">A+B 回撤</th><th scope="col">A+现金 回撤</th></tr></thead><tbody id="observation-rows"></tbody></table></div></details></section>
+          <section class="report-panel" aria-labelledby="diagnostics-title"><div class="section-heading"><h3 id="diagnostics-title">辅助观察</h3><span>不参与达标判断</span></div><div id="diagnostics" class="diagnostics"></div><p class="help">低相关不保证增量。共同亏损次数和相关性只是这段样本的描述。</p></section>
+          <section class="report-panel evidence-panel" aria-labelledby="evidence-title"><div class="section-heading"><div><p class="eyebrow">REPRODUCIBLE BY DESIGN</p><h3 id="evidence-title">把结论带回数据</h3></div><a id="download-evidence" class="button secondary" href="#">下载复算包 ↓</a></div><p>包含两份规范化输入、固定条件、计算版本和结果。无需服务密钥，可用项目提供的 CLI 离线验证。</p><details open><summary>来源与研究记录</summary><dl id="provenance" class="provenance-grid"></dl></details><details><summary>方法与适用边界</summary><ul id="limitations" class="limitations"></ul></details><p class="help" id="experiment-id"></p></section>
+        </div>
+
+        <section class="history-panel" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">RESEARCH NOTEBOOK</p><h3 id="history-title">本会话实验记录</h3></div><button id="refresh-history" type="button" class="text-button">刷新 ↻</button></div><p class="help">保存在当前浏览器会话中。打开历史记录后修改条件，会保留原实验并创建派生实验。</p><div id="experiment-history" class="history-list"><p class="history-empty">尚无实验记录。</p></div></section>
+      </section>
+    </div>
+  </main>
+  <footer><span>PARATRIX · 策略增量实验助手</span><span>仅使用模拟结果 · 无实盘账户与交易操作</span></footer>
+</body>
+</html>

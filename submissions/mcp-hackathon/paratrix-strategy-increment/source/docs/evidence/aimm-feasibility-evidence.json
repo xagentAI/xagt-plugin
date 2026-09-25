@@ -1,0 +1,876 @@
+{
+  "source_commit": "dd711507690450e9c4c9b170829b01f1e7d7f1b6",
+  "quality": {
+    "smoke": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 20,
+      "both_real_desks_count": 20,
+      "ta_indicator_count": 20,
+      "decisions": 20,
+      "actions": {
+        "BUY": 7,
+        "HOLD": 9,
+        "SELL": 4
+      },
+      "market_information_cutoff_start": "2026-07-11T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-07-30T00:00:00+00:00",
+      "eval_bars": 20,
+      "warmup_bars": 50,
+      "trade_count": 2,
+      "final_equity": 9855.31,
+      "runtime_seconds": 2.793666042969562,
+      "use_llm": false
+    },
+    "baseline_a": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 60,
+      "both_real_desks_count": 60,
+      "ta_indicator_count": 60,
+      "decisions": 60,
+      "actions": {
+        "SELL": 22,
+        "HOLD": 27,
+        "BUY": 11
+      },
+      "market_information_cutoff_start": "2026-06-01T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-07-30T00:00:00+00:00",
+      "eval_bars": 60,
+      "warmup_bars": 50,
+      "trade_count": 6,
+      "final_equity": 9786.74,
+      "runtime_seconds": 3.80142287700437,
+      "use_llm": false
+    },
+    "baseline_b": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 60,
+      "both_real_desks_count": 60,
+      "ta_indicator_count": 60,
+      "decisions": 60,
+      "actions": {
+        "SELL": 22,
+        "HOLD": 27,
+        "BUY": 11
+      },
+      "market_information_cutoff_start": "2026-06-01T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-07-30T00:00:00+00:00",
+      "eval_bars": 60,
+      "warmup_bars": 50,
+      "trade_count": 6,
+      "final_equity": 9786.74,
+      "runtime_seconds": 3.795348834944889,
+      "use_llm": false
+    },
+    "weight_variant": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 60,
+      "both_real_desks_count": 60,
+      "ta_indicator_count": 60,
+      "decisions": 60,
+      "actions": {
+        "SELL": 22,
+        "HOLD": 21,
+        "BUY": 17
+      },
+      "market_information_cutoff_start": "2026-06-01T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-07-30T00:00:00+00:00",
+      "eval_bars": 60,
+      "warmup_bars": 50,
+      "trade_count": 6,
+      "final_equity": 9771.88,
+      "runtime_seconds": 3.7466355020878837,
+      "use_llm": false
+    },
+    "warmup_variant": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 60,
+      "both_real_desks_count": 60,
+      "ta_indicator_count": 60,
+      "decisions": 60,
+      "actions": {
+        "SELL": 22,
+        "HOLD": 27,
+        "BUY": 11
+      },
+      "market_information_cutoff_start": "2026-06-01T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-07-30T00:00:00+00:00",
+      "eval_bars": 60,
+      "warmup_bars": 200,
+      "trade_count": 6,
+      "final_equity": 9786.74,
+      "runtime_seconds": 3.7865707520395517,
+      "use_llm": false
+    },
+    "prefix_control": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 30,
+      "both_real_desks_count": 30,
+      "ta_indicator_count": 30,
+      "decisions": 30,
+      "actions": {
+        "SELL": 18,
+        "HOLD": 12
+      },
+      "market_information_cutoff_start": "2026-06-01T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-06-30T00:00:00+00:00",
+      "eval_bars": 30,
+      "warmup_bars": 50,
+      "trade_count": 3,
+      "final_equity": 10092.77,
+      "runtime_seconds": 3.2350412510568276,
+      "use_llm": false
+    },
+    "weight_replay": {
+      "exit_code": 0,
+      "network_attempts": 0,
+      "workflow_errors": 0,
+      "node_errors": 0,
+      "data_quality_passed_count": 60,
+      "both_real_desks_count": 60,
+      "ta_indicator_count": 60,
+      "decisions": 60,
+      "actions": {
+        "SELL": 22,
+        "HOLD": 21,
+        "BUY": 17
+      },
+      "market_information_cutoff_start": "2026-06-01T00:00:00+00:00",
+      "market_information_cutoff_end": "2026-07-30T00:00:00+00:00",
+      "eval_bars": 60,
+      "warmup_bars": 50,
+      "trade_count": 6,
+      "final_equity": 9771.88,
+      "runtime_seconds": 4.015352168935351,
+      "use_llm": false
+    }
+  },
+  "comparisons": {
+    "baseline_b": {
+      "common_decisions": 60,
+      "common_start": "2026-06-01T00:00:00+00:00",
+      "common_end": "2026-07-30T00:00:00+00:00",
+      "difference_counts": {
+        "action": 0,
+        "decision": 0,
+        "ta_indicators": 0,
+        "ta_composite": 0,
+        "pattern_composite": 0
+      },
+      "first_action_difference": null,
+      "first_decision_difference": null,
+      "first_ta_composite_difference": null,
+      "equity_equal": true,
+      "trades_equal_ignoring_run_and_bar_index": true
+    },
+    "weight_variant": {
+      "common_decisions": 60,
+      "common_start": "2026-06-01T00:00:00+00:00",
+      "common_end": "2026-07-30T00:00:00+00:00",
+      "difference_counts": {
+        "action": 6,
+        "decision": 43,
+        "ta_indicators": 0,
+        "ta_composite": 0,
+        "pattern_composite": 0
+      },
+      "first_action_difference": {
+        "symbol": "BTC/USDT",
+        "market_information_cutoff": "2026-06-16T00:00:00+00:00",
+        "left": "HOLD",
+        "right": "BUY"
+      },
+      "first_decision_difference": {
+        "symbol": "BTC/USDT",
+        "market_information_cutoff": "2026-06-02T00:00:00+00:00",
+        "left": {
+          "action": "SELL",
+          "stance": "bearish",
+          "confidence": 0.27
+        },
+        "right": {
+          "action": "SELL",
+          "stance": "bearish",
+          "confidence": 0.95
+        }
+      },
+      "first_ta_composite_difference": null,
+      "equity_equal": false,
+      "trades_equal_ignoring_run_and_bar_index": false
+    },
+    "warmup_variant": {
+      "common_decisions": 60,
+      "common_start": "2026-06-01T00:00:00+00:00",
+      "common_end": "2026-07-30T00:00:00+00:00",
+      "difference_counts": {
+        "action": 0,
+        "decision": 12,
+        "ta_indicators": 60,
+        "ta_composite": 57,
+        "pattern_composite": 0
+      },
+      "first_action_difference": null,
+      "first_decision_difference": {
+        "symbol": "BTC/USDT",
+        "market_information_cutoff": "2026-06-01T00:00:00+00:00",
+        "left": {
+          "action": "SELL",
+          "stance": "bearish",
+          "confidence": 0.87
+        },
+        "right": {
+          "action": "SELL",
+          "stance": "bearish",
+          "confidence": 0.95
+        }
+      },
+      "first_ta_composite_difference": {
+        "symbol": "BTC/USDT",
+        "market_information_cutoff": "2026-06-01T00:00:00+00:00",
+        "left": 0.3165,
+        "right": 0.2638
+      },
+      "equity_equal": true,
+      "trades_equal_ignoring_run_and_bar_index": true
+    },
+    "prefix_control": {
+      "common_decisions": 30,
+      "common_start": "2026-06-01T00:00:00+00:00",
+      "common_end": "2026-06-30T00:00:00+00:00",
+      "difference_counts": {
+        "action": 0,
+        "decision": 0,
+        "ta_indicators": 0,
+        "ta_composite": 0,
+        "pattern_composite": 0
+      },
+      "first_action_difference": null,
+      "first_decision_difference": null,
+      "first_ta_composite_difference": null,
+      "equity_equal": false,
+      "trades_equal_ignoring_run_and_bar_index": false
+    },
+    "weight_replay": {
+      "common_decisions": 60,
+      "common_start": "2026-06-01T00:00:00+00:00",
+      "common_end": "2026-07-30T00:00:00+00:00",
+      "difference_counts": {
+        "action": 6,
+        "decision": 43,
+        "ta_indicators": 0,
+        "ta_composite": 0,
+        "pattern_composite": 0
+      },
+      "first_action_difference": {
+        "symbol": "BTC/USDT",
+        "market_information_cutoff": "2026-06-16T00:00:00+00:00",
+        "left": "HOLD",
+        "right": "BUY"
+      },
+      "first_decision_difference": {
+        "symbol": "BTC/USDT",
+        "market_information_cutoff": "2026-06-02T00:00:00+00:00",
+        "left": {
+          "action": "SELL",
+          "stance": "bearish",
+          "confidence": 0.27
+        },
+        "right": {
+          "action": "SELL",
+          "stance": "bearish",
+          "confidence": 0.95
+        }
+      },
+      "first_ta_composite_difference": null,
+      "equity_equal": false,
+      "trades_equal_ignoring_run_and_bar_index": false
+    },
+    "variant_vs_fresh_replay": {
+      "common_decisions": 60,
+      "common_start": "2026-06-01T00:00:00+00:00",
+      "common_end": "2026-07-30T00:00:00+00:00",
+      "difference_counts": {
+        "action": 0,
+        "decision": 0,
+        "ta_indicators": 0,
+        "ta_composite": 0,
+        "pattern_composite": 0
+      },
+      "first_action_difference": null,
+      "first_decision_difference": null,
+      "first_ta_composite_difference": null,
+      "equity_equal": true,
+      "trades_equal_ignoring_run_and_bar_index": true
+    }
+  },
+  "fresh_execution_regression_assertions": "passed",
+  "first_action_difference_native_evidence": {
+    "market_information_cutoff": "2026-06-16T00:00:00+00:00",
+    "execution_bar_time_utc": "2026-06-17T00:00:00+00:00",
+    "cases": {
+      "baseline_a": {
+        "weights": {
+          "technical_ta_engine": 0.75,
+          "pattern_recognition_bot": 0.25
+        },
+        "account_at_decision": {
+          "cash": 10279.688615187086,
+          "equity": 10279.688615187086,
+          "qty": 0.0,
+          "positions": {}
+        },
+        "desk_outputs": [
+          {
+            "agent_id": "pattern_recognition_bot",
+            "source": null,
+            "composite": 0.61,
+            "confidence": 0.72,
+            "signal": {
+              "Setup_Score": 70,
+              "kalman_support": 60849.7,
+              "pattern": "trend"
+            },
+            "stance": "bullish"
+          },
+          {
+            "agent_id": "technical_ta_engine",
+            "source": null,
+            "composite": 0.5685,
+            "confidence": 0.637,
+            "signal": {
+              "ta_period": 14,
+              "bars_used": 65,
+              "indicator_catalog_version": "ta_bundle/v2",
+              "ta_indicators": {
+                "rsi": 41.9119693433779,
+                "sma": 63469.55714285712,
+                "ema": {
+                  "fast": 64874.020605669066,
+                  "slow": 66817.25896988406
+                },
+                "bb_upper": 66819.74368155832,
+                "bb_mid": 63469.55714285712,
+                "bb_lower": 60119.37060415592,
+                "macd": -2597.5680542557457,
+                "macd_signal": -3218.738212368919,
+                "macd_hist": 621.1701581131733,
+                "atr": 2270.176796463689,
+                "stoch_k": 81.87308591327563,
+                "stoch_d": 87.54741476178748,
+                "adx": 41.42796298070647,
+                "cci": 122.93559948898448,
+                "willr": -21.97580165917896,
+                "obv": -1555524.9139999999,
+                "mfi": 36.65802106025479,
+                "roc": -1.6262550576951806,
+                "price_momentum": 0.06767810004928146,
+                "close_vs_sma": 0.0342722236464775
+              }
+            },
+            "stance": "bullish"
+          }
+        ],
+        "native_events": {
+          "signal_arbitrator": {
+            "event_line": 594,
+            "decision": {
+              "agent_id": "technical_ta_engine",
+              "agent_type": "technical_ta_engine",
+              "label": "Technical Analysis",
+              "composite": 0.5685,
+              "agent_weight": 0.75,
+              "weighted_composite": 0.4264,
+              "stance": "bullish",
+              "confidence": 0.637,
+              "factor_count": 9,
+              "factor_breakdown": {
+                "adx": {
+                  "raw": 0.8286,
+                  "normalized": 0.8286,
+                  "weight": 0.12
+                },
+                "atr": {
+                  "raw": 0.0,
+                  "normalized": 0.0,
+                  "weight": 0.05
+                },
+                "ema_cross": {
+                  "raw": 0.3546,
+                  "normalized": 0.3546,
+                  "weight": 0.14
+                },
+                "macd": {
+                  "raw": 0.8994,
+                  "normalized": 0.8994,
+                  "weight": 0.16
+                },
+                "obv": {
+                  "raw": 0.2,
+                  "normalized": 0.2,
+                  "weight": 0.08
+                },
+                "price_momentum": {
+                  "raw": 0.782,
+                  "normalized": 0.782,
+                  "weight": 0.18
+                },
+                "roc": {
+                  "raw": 0.3916,
+                  "normalized": 0.3916,
+                  "weight": 0.1
+                },
+                "rsi": {
+                  "raw": 0.7964,
+                  "normalized": 0.7964,
+                  "weight": 0.1
+                },
+                "volume": {
+                  "raw": 0.0,
+                  "normalized": 0.0,
+                  "weight": 0.07
+                }
+              }
+            }
+          },
+          "execution_intent": {
+            "event_line": 592,
+            "decision": {
+              "ticker": "BTC/USDT",
+              "action": "HOLD",
+              "confidence": 0.16,
+              "reasons": [
+                "HOLD: stance=bullish, composite=0.579, confidence=0.158",
+                "top_contributor: [technical_ta_engine] Technical Analysis composite=0.569 (weight=0.75)",
+                "top_contributor: [pattern_recognition_bot] Pattern Recognition composite=0.610 (weight=0.25)"
+              ],
+              "constraints": {
+                "max_notional_usd": 2467.1252676449003,
+                "requires_price": true
+              },
+              "context": {
+                "run_mode": "backtest",
+                "cash_usd": 10279.688615187086,
+                "equity_usd": 10279.688615187086,
+                "qty_base": 0.0,
+                "price": 65644.8
+              },
+              "meta": {
+                "source": "execution_intent_v1",
+                "derived_from": "proposed_signal.params.stance",
+                "min_confidence_directional": 0.26,
+                "is_flat": true,
+                "effective_min_confidence": 0.21000000000000002,
+                "arbitrator_gated": true
+              }
+            }
+          },
+          "risk_guard": {
+            "event_line": 601,
+            "decision": {
+              "status": "APPROVED",
+              "risk_score": 0.35
+            }
+          }
+        }
+      },
+      "weight_variant": {
+        "weights": {
+          "technical_ta_engine": 0.25,
+          "pattern_recognition_bot": 0.75
+        },
+        "account_at_decision": {
+          "cash": 10279.688615187086,
+          "equity": 10279.688615187086,
+          "qty": 0.0,
+          "positions": {}
+        },
+        "desk_outputs": [
+          {
+            "agent_id": "pattern_recognition_bot",
+            "source": null,
+            "composite": 0.61,
+            "confidence": 0.72,
+            "signal": {
+              "Setup_Score": 70,
+              "kalman_support": 60849.7,
+              "pattern": "trend"
+            },
+            "stance": "bullish"
+          },
+          {
+            "agent_id": "technical_ta_engine",
+            "source": null,
+            "composite": 0.5685,
+            "confidence": 0.637,
+            "signal": {
+              "ta_period": 14,
+              "bars_used": 65,
+              "indicator_catalog_version": "ta_bundle/v2",
+              "ta_indicators": {
+                "rsi": 41.9119693433779,
+                "sma": 63469.55714285712,
+                "ema": {
+                  "fast": 64874.020605669066,
+                  "slow": 66817.25896988406
+                },
+                "bb_upper": 66819.74368155832,
+                "bb_mid": 63469.55714285712,
+                "bb_lower": 60119.37060415592,
+                "macd": -2597.5680542557457,
+                "macd_signal": -3218.738212368919,
+                "macd_hist": 621.1701581131733,
+                "atr": 2270.176796463689,
+                "stoch_k": 81.87308591327563,
+                "stoch_d": 87.54741476178748,
+                "adx": 41.42796298070647,
+                "cci": 122.93559948898448,
+                "willr": -21.97580165917896,
+                "obv": -1555524.9139999999,
+                "mfi": 36.65802106025479,
+                "roc": -1.6262550576951806,
+                "price_momentum": 0.06767810004928146,
+                "close_vs_sma": 0.0342722236464775
+              }
+            },
+            "stance": "bullish"
+          }
+        ],
+        "native_events": {
+          "signal_arbitrator": {
+            "event_line": 594,
+            "decision": {
+              "agent_id": "technical_ta_engine",
+              "agent_type": "technical_ta_engine",
+              "label": "Technical Analysis",
+              "composite": 0.5685,
+              "agent_weight": 0.25,
+              "weighted_composite": 0.1421,
+              "stance": "bullish",
+              "confidence": 0.637,
+              "factor_count": 9,
+              "factor_breakdown": {
+                "adx": {
+                  "raw": 0.8286,
+                  "normalized": 0.8286,
+                  "weight": 0.12
+                },
+                "atr": {
+                  "raw": 0.0,
+                  "normalized": 0.0,
+                  "weight": 0.05
+                },
+                "ema_cross": {
+                  "raw": 0.3546,
+                  "normalized": 0.3546,
+                  "weight": 0.14
+                },
+                "macd": {
+                  "raw": 0.8994,
+                  "normalized": 0.8994,
+                  "weight": 0.16
+                },
+                "obv": {
+                  "raw": 0.2,
+                  "normalized": 0.2,
+                  "weight": 0.08
+                },
+                "price_momentum": {
+                  "raw": 0.782,
+                  "normalized": 0.782,
+                  "weight": 0.18
+                },
+                "roc": {
+                  "raw": 0.3916,
+                  "normalized": 0.3916,
+                  "weight": 0.1
+                },
+                "rsi": {
+                  "raw": 0.7964,
+                  "normalized": 0.7964,
+                  "weight": 0.1
+                },
+                "volume": {
+                  "raw": 0.0,
+                  "normalized": 0.0,
+                  "weight": 0.07
+                }
+              }
+            }
+          },
+          "execution_intent": {
+            "event_line": 592,
+            "decision": {
+              "ticker": "BTC/USDT",
+              "action": "BUY",
+              "confidence": 0.2,
+              "reasons": [
+                "BUY signal: composite=0.600 >= 0.53, confidence=0.199 >= 0.16",
+                "consensus: 2/2 agents bullish",
+                "top_contributor: [pattern_recognition_bot] Pattern Recognition composite=0.610 (weight=0.75)",
+                "top_contributor: [technical_ta_engine] Technical Analysis composite=0.569 (weight=0.25)"
+              ],
+              "constraints": {
+                "max_notional_usd": 2467.1252676449003,
+                "requires_price": true
+              },
+              "context": {
+                "run_mode": "backtest",
+                "cash_usd": 10279.688615187086,
+                "equity_usd": 10279.688615187086,
+                "qty_base": 0.0,
+                "price": 65644.8
+              },
+              "meta": {
+                "source": "execution_intent_v1",
+                "derived_from": "proposed_signal.params.stance",
+                "min_confidence_directional": 0.26,
+                "is_flat": true,
+                "effective_min_confidence": 0.0,
+                "arbitrator_gated": true
+              }
+            }
+          },
+          "risk_guard": {
+            "event_line": 601,
+            "decision": {
+              "status": "APPROVED",
+              "risk_score": 0.35
+            }
+          }
+        }
+      },
+      "weight_replay": {
+        "weights": {
+          "technical_ta_engine": 0.25,
+          "pattern_recognition_bot": 0.75
+        },
+        "account_at_decision": {
+          "cash": 10279.688615187086,
+          "equity": 10279.688615187086,
+          "qty": 0.0,
+          "positions": {}
+        },
+        "desk_outputs": [
+          {
+            "agent_id": "pattern_recognition_bot",
+            "source": null,
+            "composite": 0.61,
+            "confidence": 0.72,
+            "signal": {
+              "Setup_Score": 70,
+              "kalman_support": 60849.7,
+              "pattern": "trend"
+            },
+            "stance": "bullish"
+          },
+          {
+            "agent_id": "technical_ta_engine",
+            "source": null,
+            "composite": 0.5685,
+            "confidence": 0.637,
+            "signal": {
+              "ta_period": 14,
+              "bars_used": 65,
+              "indicator_catalog_version": "ta_bundle/v2",
+              "ta_indicators": {
+                "rsi": 41.9119693433779,
+                "sma": 63469.55714285712,
+                "ema": {
+                  "fast": 64874.020605669066,
+                  "slow": 66817.25896988406
+                },
+                "bb_upper": 66819.74368155832,
+                "bb_mid": 63469.55714285712,
+                "bb_lower": 60119.37060415592,
+                "macd": -2597.5680542557457,
+                "macd_signal": -3218.738212368919,
+                "macd_hist": 621.1701581131733,
+                "atr": 2270.176796463689,
+                "stoch_k": 81.87308591327563,
+                "stoch_d": 87.54741476178748,
+                "adx": 41.42796298070647,
+                "cci": 122.93559948898448,
+                "willr": -21.97580165917896,
+                "obv": -1555524.9139999999,
+                "mfi": 36.65802106025479,
+                "roc": -1.6262550576951806,
+                "price_momentum": 0.06767810004928146,
+                "close_vs_sma": 0.0342722236464775
+              }
+            },
+            "stance": "bullish"
+          }
+        ],
+        "native_events": {
+          "signal_arbitrator": {
+            "event_line": 594,
+            "decision": {
+              "agent_id": "technical_ta_engine",
+              "agent_type": "technical_ta_engine",
+              "label": "Technical Analysis",
+              "composite": 0.5685,
+              "agent_weight": 0.25,
+              "weighted_composite": 0.1421,
+              "stance": "bullish",
+              "confidence": 0.637,
+              "factor_count": 9,
+              "factor_breakdown": {
+                "adx": {
+                  "raw": 0.8286,
+                  "normalized": 0.8286,
+                  "weight": 0.12
+                },
+                "atr": {
+                  "raw": 0.0,
+                  "normalized": 0.0,
+                  "weight": 0.05
+                },
+                "ema_cross": {
+                  "raw": 0.3546,
+                  "normalized": 0.3546,
+                  "weight": 0.14
+                },
+                "macd": {
+                  "raw": 0.8994,
+                  "normalized": 0.8994,
+                  "weight": 0.16
+                },
+                "obv": {
+                  "raw": 0.2,
+                  "normalized": 0.2,
+                  "weight": 0.08
+                },
+                "price_momentum": {
+                  "raw": 0.782,
+                  "normalized": 0.782,
+                  "weight": 0.18
+                },
+                "roc": {
+                  "raw": 0.3916,
+                  "normalized": 0.3916,
+                  "weight": 0.1
+                },
+                "rsi": {
+                  "raw": 0.7964,
+                  "normalized": 0.7964,
+                  "weight": 0.1
+                },
+                "volume": {
+                  "raw": 0.0,
+                  "normalized": 0.0,
+                  "weight": 0.07
+                }
+              }
+            }
+          },
+          "execution_intent": {
+            "event_line": 592,
+            "decision": {
+              "ticker": "BTC/USDT",
+              "action": "BUY",
+              "confidence": 0.2,
+              "reasons": [
+                "BUY signal: composite=0.600 >= 0.53, confidence=0.199 >= 0.16",
+                "consensus: 2/2 agents bullish",
+                "top_contributor: [pattern_recognition_bot] Pattern Recognition composite=0.610 (weight=0.75)",
+                "top_contributor: [technical_ta_engine] Technical Analysis composite=0.569 (weight=0.25)"
+              ],
+              "constraints": {
+                "max_notional_usd": 2467.1252676449003,
+                "requires_price": true
+              },
+              "context": {
+                "run_mode": "backtest",
+                "cash_usd": 10279.688615187086,
+                "equity_usd": 10279.688615187086,
+                "qty_base": 0.0,
+                "price": 65644.8
+              },
+              "meta": {
+                "source": "execution_intent_v1",
+                "derived_from": "proposed_signal.params.stance",
+                "min_confidence_directional": 0.26,
+                "is_flat": true,
+                "effective_min_confidence": 0.0,
+                "arbitrator_gated": true
+              }
+            }
+          },
+          "risk_guard": {
+            "event_line": 601,
+            "decision": {
+              "status": "APPROVED",
+              "risk_score": 0.35
+            }
+          }
+        }
+      }
+    },
+    "interpretation": "Both composites exceed 0.53. Weighted confidence 0.1578 < 0.16 versus 0.1993 >= 0.16 changes HOLD to BUY. No immediate simulated fill: 10-bar cooldown.",
+    "interpretation_basis": "Native events and pinned weight_assigner.py, weighted_arbitrator.py and PerpEngine source; not a general causal inference algorithm."
+  },
+  "first_simulated_trade_difference": {
+    "entry_time_utc": "2026-07-06T00:00:00+00:00",
+    "left": {
+      "symbol": "BTC/USDT",
+      "direction": 1,
+      "entry_price": 63649.0086,
+      "exit_price": 62026.7544933075,
+      "size": 0.040435,
+      "leverage": 1.5,
+      "pnl": -65.5958448,
+      "pnl_pct": -3.8231,
+      "exit_reason": "stop_loss",
+      "holding_bars": 2,
+      "commission": 5.08169948,
+      "entry_ts_ms": 1783296000000,
+      "time": 1783468800000,
+      "exit_ts_ms": 1783468800000
+    },
+    "right": {
+      "symbol": "BTC/USDT",
+      "direction": 1,
+      "entry_price": 63649.0086,
+      "exit_price": 62026.7544933075,
+      "size": 0.047571,
+      "leverage": 1.5,
+      "pnl": -77.17225011,
+      "pnl_pct": -3.8231,
+      "exit_reason": "stop_loss",
+      "holding_bars": 2,
+      "commission": 5.97852173,
+      "entry_ts_ms": 1783296000000,
+      "time": 1783468800000,
+      "exit_ts_ms": 1783468800000
+    },
+    "note": "PerpEngine simulated trade ledger, not workflow portfolio_execute events."
+  },
+  "limits": [
+    "Actual local AIMM no-LLM offline engine only; not hosted Nexus.",
+    "No external calls or credentials; no model or exchange execution.",
+    "Exact comparison of selected business fields, not wall-clock/run IDs.",
+    "Changes in warmup/weights are interventions, not automatically defects.",
+    "Reference fixture is not a profitability evaluation.",
+    "Prefix experiment compares only shared decision timestamps. Full equity/trade arrays cover different horizons and are not expected to match.",
+    "The prefix experiment changes the evaluation end, not the full available data file; it is not a general future-data-leakage test.",
+    "Diagnostic interpretations use inspection of the pinned AIMM source version."
+  ],
+  "scope": "Local AIMM fixture generation and intervention checks. Product calculations are documented separately in verification/local-evidence.json."
+}
