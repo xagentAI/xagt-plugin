@@ -17,6 +17,7 @@ The [runtime report](../../verification/workers-checks.json) records Python Work
 | Process restart using the same state | Ordinary and large-record history and evidence hashes remained identical |
 | Session and request boundaries | Foreign records/references 404; cross-origin write 403; duplicate JSON key 422; unlisted asset 404 |
 | API diagnostics | Technical error messages are ASCII English |
+| Robustness regressions | Malformed cookie signatures rotate safely; malformed evidence structures and duplicate JSON fields return explicit verification failures; stale history responses cannot replace newer results |
 | Evidence compatibility | The fixed `local-evidence.json` regression fixture verifies unchanged; altered conclusions, labels, limitations and numbers are rejected even after rehashing |
 | Workbench | Chinese errors, criteria/report text, chart switching, download and history restoration passed |
 
@@ -42,6 +43,7 @@ Run from `source/`:
 uv run pytest -q
 uv run ruff check app tests scripts worker.py
 node --check web/app.js
+node --test tests/test_web.mjs
 uv lock --check --offline
 ```
 

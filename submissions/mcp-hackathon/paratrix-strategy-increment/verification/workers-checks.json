@@ -8,10 +8,10 @@
     "commit": null,
     "method_version": "fixed-initial-80-20/v1",
     "release_bound": false,
-    "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+    "source_sha256": "13dd11cec44dfd723c073ae2b0e1d1ef10e502852f6fd190dce92cfe8ce36b73",
     "status": "ok"
   },
-  "http_checks_completed_at_utc": "2026-09-25T07:37:27.842181Z",
+  "http_checks_completed_at_utc": "2026-09-25T08:16:28.048912Z",
   "installed_toolchain": {
     "fastapi": "0.141.1",
     "workers-py": "1.17.4",
@@ -23,21 +23,21 @@
     "evidence_json_bytes": 3837779,
     "reproduction": {
       "method_version": "fixed-initial-80-20/v1",
-      "payload_sha256": "02dc6ad473d65cd7ce7727053c0ee3161398e657c0935fa03a8a52a2a7f7d85e",
+      "payload_sha256": "9c78b33b75f83cc54ad2897f74fd758058214fcaed8de482aa8cd89683842a47",
       "verified": true
     },
     "result_json_bytes": 2278883,
     "round_trip_equal": true,
     "wall_seconds": {
-      "create": 0.30283441697247326,
-      "export": 0.14328645903151482,
-      "history": 0.00785479205660522,
-      "read": 0.09655645804014057
+      "create": 0.3104449169477448,
+      "export": 0.1417012499878183,
+      "history": 0.011639958014711738,
+      "read": 0.10070575005374849
     }
   },
   "ordinary_reproduction": {
     "method_version": "fixed-initial-80-20/v1",
-    "payload_sha256": "8e1c7ef530adcdcd94f5675c46a2beded10490c17b00324a2e79fd4658fd7dcf",
+    "payload_sha256": "0701ec318116fe041f219744e371acbd01e8bd24fe4f113a99f3cc0667abdefa",
     "verified": true
   },
   "persistence_after_restart": {
@@ -46,10 +46,10 @@
   },
   "recorded_aimm_reproduction": {
     "method_version": "fixed-initial-80-20/v1",
-    "payload_sha256": "3f6a82cd32fce52de81be8a263faf9161e41f873eb607431de72a1d45893af69",
+    "payload_sha256": "92529e84ba5cc549edab98074b864cde177c80978d7cc7e9770ef0abb00995ac",
     "verified": true
   },
-  "restart_checks_completed_at_utc": "2026-09-25T07:37:52.926192Z",
+  "restart_checks_completed_at_utc": "2026-09-25T08:17:25.230462Z",
   "runtime": "local Wrangler/workerd with Python Workers and SQLite Durable Objects",
   "scope": {
     "cloudflare_account_access": false,
@@ -71,25 +71,30 @@
     "existing": 98,
     "http_429": 6
   },
-  "started_at_utc": "2026-09-25T07:37:25.316513Z",
+  "started_at_utc": "2026-09-25T08:16:25.031406Z",
   "timing_scope": "Local end-to-end wall time; not CPU time or a hosted performance guarantee.",
   "runtime_warnings": [
     {
       "kind": "local_file_watcher_limit",
-      "observed": "Wrangler reported EMFILE and disabled the assets watcher on this macOS environment even with process descriptor limit 8192.",
-      "verification_impact": "Both cold starts, complete HTTP workflow and restart persistence checks passed. No hot reload was used; hot reload is not verified."
+      "observed": "Wrangler reported EMFILE and disabled the assets watcher on this macOS environment.",
+      "verification_impact": "Startup, complete HTTP workflow and restart persistence checks passed. Source changes require an explicit rebuild and restart; automatic hot reload was not used."
     }
   ],
   "automated_checks": {
     "pytest": {
-      "passed": 147,
+      "passed": 160,
       "subtests_passed": 66
+    },
+    "frontend_behavior": {
+      "passed": 3,
+      "command": "node --test tests/test_web.mjs"
     },
     "ruff": "passed",
     "frontend_syntax": "passed",
     "dependency_lock": "passed",
     "historical_evidence_reproduction": "verified",
-    "completed_at_utc": "2026-09-25T07:38:43.415121Z",
+    "source_and_isolated_copy": "passed",
+    "completed_at_utc": "2026-09-25T08:22:07.346329Z",
     "warning": "One Starlette TestClient/httpx deprecation warning."
   }
 }

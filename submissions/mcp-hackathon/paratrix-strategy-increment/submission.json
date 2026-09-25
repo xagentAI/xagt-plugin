@@ -6,5 +6,5 @@
   "apiBaseUrl": "https://strategy-increment.raspy-boat-dbb0.workers.dev/v1",
   "healthCheckUrl": "https://strategy-increment.raspy-boat-dbb0.workers.dev/health",
   "deploymentProofUrl": "https://strategy-increment.raspy-boat-dbb0.workers.dev/.well-known/xagent-verification.json",
-  "reviewCommit": "778327c87d80ba18bcac54693a985e3502dc8895"
+  "reviewCommit": "040c70f5ca044a8c38610952b4ba174b559474ba"
 }

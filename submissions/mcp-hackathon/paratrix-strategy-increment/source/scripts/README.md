@@ -4,7 +4,7 @@ Run these commands from `source/`:
 
 - `python scripts/smoke.py --base-url http://127.0.0.1:8787`: exercise the complete workflow over real HTTP; output defaults to the ignored `runtime/` directory.
 - `python -m app.reproduce runtime/smoke-evidence.json`: reproduce evidence with the Python standard library and no network access.
-- `python scripts/build_worker.py`: build an isolated local Cloudflare Worker project in `runtime/worker-bundle`; this command does not deploy or access a Cloudflare account.
+- `python scripts/build_worker.py`: build matching code and asset snapshots in `runtime/worker-bundle`; this command does not deploy or access a Cloudflare account. Stop Wrangler before rebuilding after source edits, then restart it. Rebuilds preserve the local Durable Object state and session secret.
 - `python scripts/package_submission.py /tmp/new-review-directory`: create a complete review copy from a clean Git checkout. The packager combines repository `submission-config.json` with Git HEAD to generate the review package's `submission.json`, and excludes installed dependencies, caches, runtime data, and credentials. The destination directory must not exist; the independent source repository must not contain a root `submission.json`.
 
 Worker release builds require a clean Git checkout and a public HTTPS origin. Build configuration and deployment commands are in [deployment](../docs/DEPLOYMENT.md); publication and review-package steps are in the [release guide](../docs/RELEASE.md).

@@ -146,7 +146,7 @@ The official `--online` validator must also confirm the public source commit, HT
 
 ## Hosted release verification
 
-The [hosted check report](hosted-checks.json) records actual Cloudflare API responses for review commit `778327c87d80ba18bcac54693a985e3502dc8895`. It covers the AIMM workflow, a 5,000-point generated simulation, session isolation, safe errors, and unchanged stored records across deployment. Durations are HTTPS wall times, not CPU measurements.
+The [hosted check report](hosted-checks.json) records actual Cloudflare API responses for review commit `040c70f5ca044a8c38610952b4ba174b559474ba`. It covers the AIMM workflow, a 5,000-point generated simulation, session isolation, safe errors, and unchanged stored records across deployment. The persistence section distinguishes the original record provenance from the currently deployed revision. Durations are HTTPS wall times, not CPU measurements.
 
 Reproduce the [hosted AIMM export](hosted-evidence.json) from `source/`:
 
@@ -154,4 +154,4 @@ Reproduce the [hosted AIMM export](hosted-evidence.json) from `source/`:
 python3 -m app.reproduce ../verification/hosted-evidence.json
 ```
 
-Python HTTP clients should send a descriptive `User-Agent`; the deployment edge rejected the stock urllib user agent with Cloudflare error 1010. The included smoke client identifies itself as `StrategyIncrement-Verification/1.0`. The curl workflow and official submission validator both reached the service.
+The tested default Python urllib User-Agent received Cloudflare error 1010. The included smoke client uses `StrategyIncrement-Verification/1.0`, which passed the hosted checks. Local verification of previously saved sessions used TLS 1.2 with normal certificate and hostname verification after a local TLS 1.3 handshake failed.

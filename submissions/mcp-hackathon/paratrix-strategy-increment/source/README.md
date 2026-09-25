@@ -17,6 +17,8 @@ uv run --locked pywrangler dev --local
 
 Open the [Chinese-language workbench](http://127.0.0.1:8787). Interactive API documentation is at `/docs`; the schema is at `/openapi.json`. API descriptions and messages are in English. The Worker toolchain is pinned under `workers/`; the builder creates its runnable project under ignored `runtime/worker-bundle`. Deployment commands and configuration are in the [deployment guide](docs/DEPLOYMENT.md).
 
+After changing source code or workbench assets, stop Wrangler, rebuild from `source/`, and restart it using the commands above. The bundle contains matching copies of code and assets; local state and the session secret survive rebuilds. See the [edit and rerun workflow](docs/DEPLOYMENT.md#edit-and-rerun).
+
 ## Complete an experiment
 
 1. Load A/B from the example menu or upload two simulated equity JSON files.
@@ -35,6 +37,7 @@ Run in a second terminal from `source/`. The root `pyproject.toml` and `uv.lock`
 uv sync --frozen
 uv run pytest -q
 uv run ruff check app tests scripts worker.py
+node --test tests/test_web.mjs
 uv run python scripts/smoke.py --base-url http://127.0.0.1:8787
 uv run python -m app.reproduce runtime/smoke-evidence.json
 ```
@@ -58,7 +61,7 @@ The [machine contract](docs/IMPLEMENTATION-CONTRACT.md) defines input fields and
 | `GET /v1/demo-cases`, `/v1/demo-cases/{id}` | Example catalog and inputs |
 | `POST /v1/data-snapshots` | Normalize and save an immutable input |
 | `POST /v1/comparison-inputs/validate` | Check comparability before creating an experiment |
-| `POST /v1/experiments` | Revalidate, calculate, and save atomically |
+| `POST /v1/experiments` | Revalidate and calculate, then atomically save the result and research declaration |
 | `GET /v1/experiments`, `/v1/experiments/{id}` | Session history and experiment details |
 | `GET /v1/experiments/{id}/evidence` | Reproducible JSON package |
 | `GET /v1/source-status` | Source configuration and verification state |

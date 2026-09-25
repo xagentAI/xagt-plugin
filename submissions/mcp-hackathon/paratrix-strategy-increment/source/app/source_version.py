@@ -1,4 +1,4 @@
-"""Stable source identity shared by the local server and Cloudflare build."""
+"""Stable source identity for local and deployed Cloudflare Worker builds."""
 
 from __future__ import annotations
 

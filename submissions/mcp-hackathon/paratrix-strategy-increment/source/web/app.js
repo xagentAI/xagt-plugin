@@ -35,7 +35,6 @@ const ERROR_MESSAGES = Object.freeze({
   "incomplete_period": "指定区间时，需要同时填写起始和结束估值时点。",
   "not_evaluable": "当前输入不满足评估条件。请按字段提示补充数据，系统不会自动补点或截短区间。",
   "missing_template": "暂无可用格式示例，请先恢复案例服务。",
-  "missing_strategy_ref": "请填写服务端已配置的策略引用；无需输入密钥。",
   "host_rejected": "当前访问域名未配置，请使用已发布的服务地址。",
   "origin_rejected": "仅接受来自当前站点的浏览器请求，请回到应用页面重试。",
   "json_required": "请求必须使用 application/json 格式。",
@@ -46,9 +45,7 @@ const ERROR_MESSAGES = Object.freeze({
   "storage_unavailable": "存储暂时不可用。如果刚才在保存实验，请先查看历史记录，再决定是否重试。",
   "stored_data_mismatch": "已保存数据未通过一致性检查，计算和导出已停止。",
   "internal_error": "请求处理失败。如果刚才在保存实验，请先查看历史记录，再决定是否重试。",
-  "release_not_bound": "服务尚未绑定实际发布版本。",
-  "source_unavailable": "Nexus 来源暂时不可用，请检查服务端配置或稍后重试。",
-  "source_not_sufficient": "Nexus 返回的数据缺少完整分析所需的字段。"
+  "release_not_bound": "服务尚未绑定实际发布版本。"
 });
 const ISSUE_MESSAGES = Object.freeze({
   "invalid_field": "字段缺失、类型不正确，或不属于支持的字段。",
@@ -91,7 +88,7 @@ const RESULT_SUMMARIES = Object.freeze({
 });
 const DISPLAY_TEXT = Object.freeze({
   "This describes the supplied simulated equity and selected interval only; source declarations do not independently authenticate market data or authorship.": "仅描述输入的模拟净值及所选区间；来源声明不等于对行情真实性或作者身份的独立认证。",
-  "Initial 80/20 weights remain fixed without rebalancing; cash earns zero and shared accounts, margin, liquidation, and capital-scale effects are not modeled.": "固定初始80/20份额，不再平衡；现金收益为0，未模拟共享账户、保证金、强平或资本规模效应。",
+  "Initial 80/20 weights remain fixed without rebalancing; cash earns zero and shared accounts, margin, liquidation, and capital-scale effects are not modeled.": "初始资金按80/20分配，持有份额不变；实际权重随净值变化，不再平衡。现金收益为0，未模拟共享账户、保证金、强平或资本规模效应。",
   "Metrics retain costs already reflected in source equity; no additional costs are deducted, and trading within a strategy is not assumed to be free.": "指标保留来源净值已包含的费用；没有额外扣费，亦不表示策略内部交易免费。",
   "Drawdown is measured at daily valuations and does not represent intraday maximum drawdown; daily volatility is the unannualized sample standard deviation.": "回撤仅在日频估值上计算，不能代表日内最大回撤；日波动使用样本标准差，未年化。",
   "Correlation is descriptive and does not determine whether criteria are met; user-selected thresholds do not establish future performance.": "相关性仅为辅助说明，不触发达标；研究阈值是用户偏好，不能证明未来表现。",
@@ -104,11 +101,6 @@ const DISPLAY_TEXT = Object.freeze({
   "The source is marked as previously observed demonstration or historical data.": "来源标记为已观察过的演示或历史数据。",
   "Derived from an existing experiment; exploration history is retained.": "派生自已有实验，保留探索历史。",
   "This session has an experiment over an overlapping interval; it cannot be relabeled as an unseen holdout.": "当前会话曾在重叠区间进行实验，不能重新标记为未见验证。",
-  "This deployment supports public examples and simulated equity JSON imports. The external Nexus connection is disabled.": "当前部署支持公开案例和模拟净值 JSON 导入；外部 Nexus 接入未启用。",
-  "No valid server-side mapping of strategy references to API keys is configured; local examples remain available.": "服务端尚未配置有效的策略引用与密钥映射；仍可使用本地案例。",
-  "API key mappings are configured, but no simulation references are authorized for public import; imports are denied by default.": "服务端已配置密钥映射，但尚未授权公开导入任何模拟策略引用；默认拒绝导入。",
-  "This process has successfully read and validated a complete equity contract; other strategies, future availability, and economic authenticity remain unverified.": "当前进程已读取并校验一份完整净值契约；其他策略、后续可用性及经济真实性仍未核验。",
-  "Server-side mappings are configured, but complete equity has not been verified; sparse chart responses from public documentation cannot be used directly.": "服务端已配置映射，但尚未核验完整净值；公开文档中的稀疏图表响应不能直接用于分析。",
   "Must be a finite decimal number; booleans are not accepted.": "必须为有限十进制数，不接受布尔值。",
   "Must be a finite decimal number represented by at most 160 characters.": "必须为有限十进制数，表示长度最多 160 个字符。",
   "Must be a UTC ISO valuation timestamp ending in Z or +00:00, with at most 6 fractional-second digits.": "必须为 UTC ISO 估值时间，以 Z 或 +00:00 结尾，秒的小数位最多 6 位。",
@@ -147,6 +139,7 @@ const state = {
   dirty: false,
   chart: "nav",
   history: [],
+  historyRequest: 0,
   demoCases: [],
 };
 
@@ -331,6 +324,19 @@ function selectSource(slot, curve, snapshotId = null) {
   updateSeenState();
 }
 
+function applyDemo(demo) {
+  selectSource("baseline", demo.baseline);
+  selectSource("candidate", demo.candidate);
+  $("demo-description").textContent = demo.description || "公开演示数据，已被观察，按历史探索记录。";
+  $("custom-period").checked = false;
+  $("period-fields").hidden = true;
+  $("period-start").value = demo.baseline.initial?.timestamp || "";
+  $("period-end").value = demo.baseline.points?.at(-1)?.timestamp || "";
+  $("research-mode").value = "historical_exploration";
+  $("data-seen").checked = true;
+  markDirty();
+}
+
 async function loadDemo() {
   const id = $("demo-select").value;
   if (!id || state.busy) return;
@@ -338,16 +344,7 @@ async function loadDemo() {
   setBusy(true, "正在载入公开演示案例…");
   try {
     const demo = await request(`/v1/demo-cases/${encodeURIComponent(id)}`);
-    selectSource("baseline", demo.baseline);
-    selectSource("candidate", demo.candidate);
-    $("demo-description").textContent = demo.description || "公开演示数据，已被观察，按历史探索记录。";
-    $("custom-period").checked = false;
-    $("period-fields").hidden = true;
-    $("period-start").value = demo.baseline.initial?.timestamp || "";
-    $("period-end").value = demo.baseline.points?.at(-1)?.timestamp || "";
-    $("research-mode").value = "historical_exploration";
-    $("data-seen").checked = true;
-    markDirty();
+    applyDemo(demo);
   } catch (error) {
     showError(error);
   } finally {
@@ -628,7 +625,7 @@ function renderProvenance(experiment) {
   add("已见数据声明", (p.data_seen ?? config.data_seen) ? "已观察过数据或相关结果" : "用户声明未观察；系统不能独立验证");
   if (Array.isArray(p.exploration_reasons) && p.exploration_reasons.length) add("探索记录", p.exploration_reasons.map(translatedText).join("；"));
   add("方法", experiment.result.method_version);
-  add("固定规则", "初始 80/20 独立净值份额；不再平衡；现金收益 0");
+  add("固定规则", "初始资金按 80/20 分配，持有份额不变；实际权重随净值变化；不再平衡；现金收益 0");
   add("保存时间", `${dateTime(experiment.created_at)}（北京时间）`);
   if (config.parent_experiment_id) add("来源实验", config.parent_experiment_id);
   for (const [key, label] of [["baseline", "A 数据摘要"], ["candidate", "B 数据摘要"]]) {
@@ -691,12 +688,16 @@ function renderHistory() {
 }
 
 async function refreshHistory(showFailure = true) {
+  const generation = ++state.historyRequest;
   try {
     const response = await request("/v1/experiments");
+    if (generation !== state.historyRequest) return;
     state.history = response.experiments || [];
     renderHistory();
   } catch (error) {
-    if (showFailure) $("experiment-history").replaceChildren(element("p", "history-empty", errorMessage(error)));
+    if (showFailure && generation === state.historyRequest) {
+      $("experiment-history").replaceChildren(element("p", "history-empty", errorMessage(error)));
+    }
   }
 }
 
@@ -762,46 +763,6 @@ async function downloadTemplate() {
   }
 }
 
-async function importNexus(slot) {
-  if (state.busy) return;
-  clearError();
-  const strategyRef = $("nexus-ref").value.trim();
-  if (!strategyRef) { showError(new RequestError("Select a server-configured strategy reference.", [], "missing_strategy_ref")); return; }
-  setBusy(true, "正在读取 Nexus 模拟结果并检查来源字段…");
-  try {
-    const saved = await request("/v1/nexus/import", { strategy_ref: strategyRef });
-    selectSource(slot, saved.curve, saved.snapshot_id);
-    $("demo-select").value = "";
-    $("demo-description").textContent = "已从 Nexus 导入模拟结果；继续检查与另一份数据的可比性。";
-    markDirty();
-  } catch (error) {
-    showError(error);
-  } finally {
-    await loadSourceStatus();
-    setBusy(false);
-  }
-}
-
-async function loadSourceStatus() {
-  try {
-    const response = await request("/v1/source-status");
-    const nexus = response.nexus || {};
-    const refs = Array.isArray(nexus.public_refs) ? nexus.public_refs.filter((ref) => typeof ref === "string") : [];
-    $("nexus-badge").textContent = nexus.configured ? !refs.length ? "已配置 · 未开放" : nexus.verified ? "已核验" : "已配置 · 待核验" : "未配置";
-    $("nexus-note").textContent = translatedText(nexus.note) || "本地示例无需服务凭据即可使用。";
-    $("nexus-controls").hidden = !nexus.configured || refs.length === 0;
-    $("nexus-ref").replaceChildren();
-    for (const ref of refs) {
-      const option = element("option", null, ref);
-      option.value = ref;
-      $("nexus-ref").append(option);
-    }
-  } catch {
-    $("nexus-badge").textContent = "状态不可用";
-    $("nexus-note").textContent = "暂时无法读取接入状态；可以先使用本地模拟文件。";
-  }
-}
-
 async function initialize() {
   $("experiment-form").addEventListener("submit", runExperiment);
   $("load-demo").addEventListener("click", loadDemo);
@@ -815,15 +776,14 @@ async function initialize() {
   $("chart-nav").addEventListener("click", () => { state.chart = "nav"; renderChart(); });
   $("chart-dd").addEventListener("click", () => { state.chart = "dd"; renderChart(); });
   $("refresh-history").addEventListener("click", () => refreshHistory());
-  $("nexus-baseline").addEventListener("click", () => importNexus("baseline"));
-  $("nexus-candidate").addEventListener("click", () => importNexus("candidate"));
   $("demo-select").addEventListener("change", () => {
     const selected = state.demoCases.find((item) => item.id === $("demo-select").value);
     if (selected) $("demo-description").textContent = `待载入：${selected.description || selected.name}`;
   });
+  setBusy(true, "正在建立研究会话并载入案例…");
   try {
-    // This first request establishes the session before independent reads and
-    // later parallel snapshot writes use it.
+    // Keep the draft stable during bootstrap. The HTML normally sets the cookie;
+    // this also prevents concurrent writes if the API must establish it again.
     const response = await request("/v1/demo-cases");
     state.demoCases = response.cases || [];
     const select = $("demo-select");
@@ -836,15 +796,18 @@ async function initialize() {
     }
     if (state.demoCases.length) {
       select.value = state.demoCases[0].id;
-      await loadDemo();
+      const demo = await request(`/v1/demo-cases/${encodeURIComponent(select.value)}`);
+      applyDemo(demo);
       $("draft-status").textContent = "待运行";
     }
+    await refreshHistory();
   } catch (error) {
     $("demo-select").replaceChildren(element("option", null, "案例暂不可用"));
-    $("service-message").textContent = errorMessage(error);
+    $("service-message").textContent = `${errorMessage(error)} 可刷新页面重新载入案例，或导入自己的模拟净值 JSON。`;
     $("service-message").hidden = false;
+  } finally {
+    setBusy(false);
   }
-  await Promise.allSettled([loadSourceStatus(), refreshHistory()]);
 }
 
 initialize();

@@ -31,7 +31,7 @@ Example endpoints return curves rather than creating snapshots. The workbench an
 | `app/workers_storage.py` | Session-scoped SQLite Durable Objects, atomic history/quota checks, chunked payloads, and compact history summaries |
 | `app/source_version.py` | Source fingerprint embedded by local and release Worker builds |
 | `worker.py` | Bind Worker storage and assets to FastAPI; disable the external Nexus connection |
-| `scripts/build_worker.py` | Produce an isolated Worker bundle with original fixture bytes and build identity |
+| `scripts/build_worker.py` | Produce an isolated Worker bundle with matching code/assets, original fixture bytes, and build identity |
 | `app/evidence.py` | Assemble evidence, check hashes and normalization, and call the engine for reproduction |
 | `app/reproduce.py` | Offline CLI; no source credentials or network access |
 | `web/` | Present API results, history, and downloads without a second financial calculation engine |

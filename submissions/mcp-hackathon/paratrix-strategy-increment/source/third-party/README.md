@@ -17,21 +17,21 @@ The upstream market-price input was `data/ohlcv/BTC_USDT_1d.csv`; that CSV is no
 
 ## Python application and verification dependencies
 
-The following application-library licenses come from installed package metadata at the locked versions. `uv.lock` records the complete Python test dependency set and platform hashes. The application runs through the Worker runtime dependency lock under `workers/`; the root environment supports behavior tests and offline verification.
+The following application-library licenses come from installed package metadata. `uv.lock` records the complete CPython test dependency set and platform hashes. `workers/uv.lock` pins the host-side build tools; `workers/pylock.toml` pins the packages loaded by the Pyodide Worker runtime. Behavior tests use the same FastAPI and Pydantic versions as the Worker. The host-side build-tool environment is separate from deployed application dependencies. The offline reproduction CLI itself uses only the standard library.
 
-| Package | Version | License |
-| --- | --- | --- |
-| annotated-doc | 0.0.5 | MIT |
-| annotated-types | 0.8.0 | MIT |
-| anyio | 4.15.1 | MIT |
-| fastapi | 0.141.1 | MIT |
-| h11 | 0.16.0 | MIT |
-| idna | 3.20 | BSD-3-Clause |
-| pydantic | 2.13.5 | MIT |
-| pydantic-core | 2.46.5 | MIT |
-| starlette | 1.7.0 | BSD-3-Clause |
-| typing-extensions | 4.16.0 | PSF-2.0 |
-| typing-inspection | 0.4.4 | MIT |
+| Package | CPython tests | Worker runtime | License |
+| --- | --- | --- | --- |
+| annotated-doc | 0.0.5 | 0.0.5 | MIT |
+| annotated-types | 0.8.0 | 0.8.0 | MIT |
+| anyio | 4.15.1 | 4.15.1 | MIT |
+| fastapi | 0.141.1 | 0.141.1 | MIT |
+| h11 | 0.16.0 | Not used | MIT |
+| idna | 3.20 | 3.20 | BSD-3-Clause |
+| pydantic | 2.12.5 | 2.12.5 | MIT |
+| pydantic-core | 2.41.5 | 2.41.5 | MIT |
+| starlette | 1.7.0 | 1.7.0 | BSD-3-Clause |
+| typing-extensions | 4.16.0 | 4.16.0 | PSF-2.0 |
+| typing-inspection | 0.4.4 | 0.4.4 | MIT |
 
 ## Worker runtime and build tools
 

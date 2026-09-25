@@ -94,6 +94,18 @@ def test_cross_session_cannot_read_or_reference(app):
         assert b.get(record["evidence_url"]).status_code == 404
 
 
+def test_non_ascii_cookie_signature_is_replaced_without_request_failure(client):
+    response = client.get(
+        "/health",
+        headers={b"cookie": b"strategy_increment_session=" + b"a" * 64 + b".\xe9"},
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    assert "strategy_increment_session=" in response.headers["set-cookie"]
+    assert response.headers["x-content-type-options"] == "nosniff"
+    make_experiment(client)
+
+
 def test_new_experiment_preserves_old_and_exploration(client):
     first = make_experiment(client, mode="declared_holdout", data_seen=False)
     assert first["provenance"]["effective_mode"] == "declared_holdout"
@@ -143,6 +155,40 @@ def test_tamper_detection_even_when_outer_hash_replaced(client):
     bundle["integrity"]["payload_sha256"] = digest({k: v for k, v in bundle.items() if k != "integrity"})
     with pytest.raises(EvidenceError, match="Reproduced"):
         reproduce(bundle)
+
+
+@pytest.mark.parametrize("field", ["result", "config", "curves", "provenance", "raw_curves", "integrity"])
+def test_invalid_evidence_shapes_have_structured_cli_failures(client, tmp_path, field):
+    record = make_experiment(client)
+    bundle = client.get(record["evidence_url"]).json()
+    bundle[field] = []
+    if field != "integrity":
+        bundle["integrity"]["payload_sha256"] = digest(
+            {key: value for key, value in bundle.items() if key != "integrity"}
+        )
+    path = tmp_path / "invalid-evidence.json"
+    path.write_text(json.dumps(bundle))
+    output = subprocess.run(
+        [sys.executable, "-m", "app.reproduce", str(path)], capture_output=True, text=True
+    )
+    assert output.returncode == 1
+    assert json.loads(output.stdout)["verified"] is False
+    assert output.stderr == ""
+
+
+def test_duplicate_json_fields_are_rejected_by_offline_verification(client, tmp_path):
+    record = make_experiment(client)
+    bundle = client.get(record["evidence_url"]).json()
+    encoded = json.dumps(bundle)
+    encoded = encoded.replace('"schema_version": 1', '"schema_version": 1, "schema_version": 1', 1)
+    path = tmp_path / "ambiguous-evidence.json"
+    path.write_text(encoded)
+    output = subprocess.run(
+        [sys.executable, "-m", "app.reproduce", str(path)], capture_output=True, text=True
+    )
+    assert output.returncode == 1
+    assert json.loads(output.stdout)["verified"] is False
+    assert output.stderr == ""
 
 
 def test_safe_request_boundaries_and_headers(client):

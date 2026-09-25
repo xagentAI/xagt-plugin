@@ -1,3 +1,5 @@
 # Behavior tests
 
 Run `uv run pytest -q` for domain, source, API, storage, build, and packaging tests. Coverage includes independent arithmetic, algebraic identities, insufficient data, precision boundaries, immutable experiments, session isolation, sanitized errors, content consistency, and the offline CLI. Worker-specific tests cover asynchronous application integration and Durable Object storage behavior; tests using a local model of platform bindings are distinct from checks executed in the actual Workers runtime. Acceptance requirements are in [ACCEPTANCE.md](../docs/ACCEPTANCE.md); recorded results and their runtime scope are in [VALIDATION.md](../docs/VALIDATION.md).
+
+Run `node --test tests/test_web.mjs` for the workbench behavior regression checks. These scripted checks complement the browser observations and the real HTTP Worker workflow.

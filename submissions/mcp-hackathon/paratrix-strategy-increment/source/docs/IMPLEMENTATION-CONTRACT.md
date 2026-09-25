@@ -160,6 +160,8 @@ Application errors use `{error:{code,message,issues:[]}}`, with English messages
 
 Errors do not echo keys, complete inputs, or internal exceptions. Malformed input, incompatibility, source failure, hash mismatch, and persistence failure cannot become `criteria_not_met`. Framework responses such as unsupported HTTP methods and unknown routes are outside this business-error mapping.
 
+Creation requests are not idempotent. A failed validation or rolled-back storage transaction creates no record, but a timeout or lost response can occur after a successful save. Clients should inspect session history before retrying an experiment request; repeating the POST can create another experiment.
+
 ## Evidence and reproduction
 
 Current evidence packages contain `schema_version`, `method_version`, `experiment_id`, `created_at`, `config`, `provenance`, `raw_curves`, `normalization_version`, `curves`, `result`, and `integrity`. `curves` contains normalized baseline/candidate inputs; `raw_curves` contains the corresponding structured inputs. `method_version` comes from the saved result and is not rewritten to the running software's version.

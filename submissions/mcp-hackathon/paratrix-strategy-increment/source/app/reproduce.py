@@ -13,6 +13,15 @@ def reject_constant(_value):
     raise ValueError("non-finite JSON")
 
 
+def unique_fields(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON field")
+        result[key] = value
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description="Reproduce a strategy increment evidence bundle offline")
     parser.add_argument("evidence", type=Path)
@@ -20,7 +29,11 @@ def main():
     try:
         if args.evidence.stat().st_size > 16 * 1024 * 1024:
             raise EvidenceError("Evidence bundle exceeds 16 MiB")
-        bundle = json.loads(args.evidence.read_text(encoding="utf-8"), parse_constant=reject_constant)
+        bundle = json.loads(
+            args.evidence.read_text(encoding="utf-8"),
+            parse_constant=reject_constant,
+            object_pairs_hook=unique_fields,
+        )
         result = reproduce(bundle)
     except (OSError, ValueError, InputError, RecursionError):
         print(

@@ -37,7 +37,7 @@ After downloading an evidence file, run this from `source/`:
 python3 -m app.reproduce /path/to/evidence.json
 ```
 
-Cloudflare Workers uses SQLite-backed Durable Objects for persistent session records. See the [deployment guide](source/docs/DEPLOYMENT.md) for the build, configuration, and release procedure. Local development uses Wrangler with the same Worker entrypoint, asset binding and Durable Object storage as deployment.
+Cloudflare Workers uses SQLite-backed Durable Objects for persistent session records. See the [deployment guide](source/docs/DEPLOYMENT.md) for the build, configuration, and release procedure. Local development uses Wrangler with the same Worker entrypoint, asset binding and Durable Object storage as deployment. After source changes, stop Wrangler, rebuild, and restart it; the matching code/assets bundle is refreshed while local session data is preserved.
 
 ## A hand-checkable example
 

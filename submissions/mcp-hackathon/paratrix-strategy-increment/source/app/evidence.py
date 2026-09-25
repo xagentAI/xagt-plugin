@@ -45,6 +45,11 @@ def reproduce(bundle):
     payload = {key: value for key, value in bundle.items() if key != "integrity"}
     integrity = bundle.get("integrity", {})
     try:
+        for field in ("integrity", "curves", "config", "provenance", "result"):
+            if not isinstance(bundle.get(field), dict):
+                raise EvidenceError("Evidence fields are missing or invalid")
+        if "raw_curves" in bundle and not isinstance(bundle["raw_curves"], dict):
+            raise EvidenceError("Evidence fields are missing or invalid")
         if (
             integrity["algorithm"] != "sha256-canonical-json-v1"
             or digest(payload) != integrity["payload_sha256"]

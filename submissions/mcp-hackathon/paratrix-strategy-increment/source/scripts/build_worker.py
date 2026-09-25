@@ -51,7 +51,11 @@ def release_commit(source: Path) -> str:
 def public_origin(value: str, *, release: bool) -> str:
     if not value and not release:
         return "http://127.0.0.1:8787"
+    if any(character.isspace() for character in value):
+        raise ValueError("PUBLIC_ORIGIN must not contain whitespace")
     parsed = urlsplit(value)
+    # urlsplit defers malformed/out-of-range port checks until this property is read.
+    _ = parsed.port
     if (
         parsed.scheme not in ({"https"} if release else {"http", "https"})
         or not parsed.hostname
@@ -119,11 +123,19 @@ def build(source: Path, *, release: bool = False, origin: str = "") -> dict:
     ]
     (app_output / "_worker_build.py").write_text("\n".join(generated), encoding="utf-8")
     shutil.copyfile(source / "worker.py", code_output / "worker.py")
+    assets_output = output / "assets"
+    if assets_output.is_symlink():
+        raise ValueError("Worker assets output must not be a symbolic link")
+    if assets_output.exists():
+        shutil.rmtree(assets_output)
+    # Assets and Python must belong to the same build. Referencing source/web
+    # directly would serve edited UI with stale Python and source identity.
+    shutil.copytree(source / "web", assets_output)
     for name in TOOLCHAIN_FILES:
         shutil.copyfile(source / "workers" / name, output / name)
     config = json.loads((source / "wrangler.jsonc").read_text(encoding="utf-8"))
     config["main"] = "src/worker.py"
-    config["assets"]["directory"] = "../../web"
+    config["assets"]["directory"] = "assets"
     config.setdefault("vars", {}).update(
         PUBLIC_ORIGIN=origin, COOKIE_SECURE="true" if release or origin.startswith("https:") else "false"
     )

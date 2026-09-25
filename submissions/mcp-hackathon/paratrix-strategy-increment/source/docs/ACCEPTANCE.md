@@ -17,7 +17,7 @@ This document defines expected behavior for calculations, data, interaction, and
 | AC11 | Reproduction with the same inputs, method, and rules | API, workbench, and CLI metrics and outcomes agree |
 | AC12 | Configuration changes or source updates | Create a new experiment or snapshot and preserve the old result |
 | AC13 | Repeated tuning over the same interval | Preserve exploration labels and derivation records |
-| AC14 | Endpoint or persistence failure | Report a service error, retain the prior result, and create no successful experiment |
+| AC14 | Validation, persistence, or response failure | Validation and failed storage transactions save no experiment. A lost response can follow a successful save: retain the prior displayed result, report uncertainty, and direct the user to history before retrying |
 | AC15 | Modified evidence package or reproduction without credentials | Valid packages reproduce offline; mismatched content or results fail explicitly |
 | AC16 | First-time user completes the task | The user can explain A, AB, and the cash control, identify failing conditions, and locate the evidence |
 | AC17 | Public deployment | Success, insufficient-data, and error paths follow the contract; API, health, and proof agree on version binding |

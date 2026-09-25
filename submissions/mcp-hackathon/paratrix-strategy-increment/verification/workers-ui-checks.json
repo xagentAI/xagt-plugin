@@ -1,32 +1,50 @@
 {
   "scope": "Local in-app browser against the validated workerd deployment; not a public deployment check.",
-  "checked_at_utc": "2026-09-25T07:40:34.032426Z",
-  "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+  "checked_at_utc": "2026-09-25T08:22:07.346329Z",
+  "source_sha256": "13dd11cec44dfd723c073ae2b0e1d1ef10e502852f6fd190dce92cfe8ce36b73",
+  "origin": "http://127.0.0.1:8789",
   "checks": {
-    "initial_examples_load": true,
+    "all_five_examples_loaded": true,
+    "duplicate_baseline_metrics_equal": true,
+    "cash_candidate_matches_cash_control": true,
     "missing_day_field_error_in_chinese": true,
     "incomplete_criteria_message_in_chinese": true,
-    "criteria_result_and_four_differences_in_chinese": true,
+    "criteria_pass_and_failure_results_in_chinese": true,
+    "initial_allocation_and_drifting_weights_explained": true,
     "equity_drawdown_chart_switch": true,
+    "derived_record_preserves_prior_history": true,
     "history_restored_after_reload": true,
     "restored_evidence_link_unchanged": true,
-    "evidence_download_link_clicked": true
+    "evidence_download_event_observed": true,
+    "browser_console_errors": []
   },
-  "sample_result": {
-    "case": "tradeoff",
-    "criteria": [
-      "0",
-      "2",
-      "0",
-      "2"
-    ],
-    "status": "criteria_not_met",
-    "returns_pct": [
-      "30",
-      "24.6",
-      "24"
-    ],
-    "experiment_id": "e_8bea6f0eb0f55a40cbb672f14556371e"
-  },
-  "origin": "http://127.0.0.1:8788"
+  "sample_results": [
+    {
+      "case": "tradeoff",
+      "criteria": [
+        "0",
+        "2",
+        "0",
+        "2"
+      ],
+      "status": "criteria_not_met",
+      "returns_pct": [
+        "30",
+        "24.6",
+        "24"
+      ],
+      "experiment_id": "e_8b6cea8490d8fc1543c468dd3d3dcb8c"
+    },
+    {
+      "case": "tradeoff",
+      "criteria": [
+        "0",
+        "6",
+        "0",
+        "2"
+      ],
+      "status": "criteria_met",
+      "experiment_id": "e_11a3284c54becb63b0b80733a67e438d"
+    }
+  ]
 }

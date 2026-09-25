@@ -35,7 +35,7 @@
             <div class="curve-card" id="baseline-card"><div class="curve-heading"><span class="curve-letter baseline-color">A</span><div><span class="muted">基线策略</span><strong id="baseline-name">尚未选择</strong></div><label class="upload-link" for="baseline-file">导入 JSON<input id="baseline-file" type="file" accept=".json,application/json"></label></div><div id="baseline-meta" class="curve-meta">保留原有策略，作为比较起点。</div></div>
             <div class="curve-card" id="candidate-card"><div class="curve-heading"><span class="curve-letter candidate-color">B</span><div><span class="muted">候选策略</span><strong id="candidate-name">尚未选择</strong></div><label class="upload-link" for="candidate-file">导入 JSON<input id="candidate-file" type="file" accept=".json,application/json"></label></div><div id="candidate-meta" class="curve-meta">观察加入候选后的组合变化。</div></div>
             <button type="button" id="download-template" class="text-button">↓ 下载模拟净值格式示例</button>
-            <details class="source-details"><summary>Nexus 模拟结果接入 <span class="tiny-badge" id="nexus-badge">读取状态</span></summary><p class="help" id="nexus-note">正在检查服务配置。</p><div id="nexus-controls" hidden><label for="nexus-ref">已授权公开导入的模拟策略</label><select id="nexus-ref" aria-label="已授权公开导入的模拟策略"></select><div class="nexus-actions"><button type="button" class="button secondary compact" id="nexus-baseline">导入为 A</button><button type="button" class="button secondary compact" id="nexus-candidate">导入为 B</button></div><p class="help">这里只读取模拟结果；不在浏览器填写服务密钥。</p></div></details>
+            <p class="help">支持公开案例和完整日频模拟净值 JSON；不连接外部 Nexus 服务。</p>
           </section>
 
           <section class="setup-section" aria-labelledby="period-title">
@@ -77,7 +77,7 @@
           <section class="report-panel evidence-panel" aria-labelledby="evidence-title"><div class="section-heading"><div><p class="eyebrow">REPRODUCIBLE BY DESIGN</p><h3 id="evidence-title">把结论带回数据</h3></div><a id="download-evidence" class="button secondary" href="#">下载复算包 ↓</a></div><p>包含两份规范化输入、固定条件、计算版本和结果。无需服务密钥，可用项目提供的 CLI 离线验证。</p><details open><summary>来源与研究记录</summary><dl id="provenance" class="provenance-grid"></dl></details><details><summary>方法与适用边界</summary><ul id="limitations" class="limitations"></ul></details><p class="help" id="experiment-id"></p></section>
         </div>
 
-        <section class="history-panel" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">RESEARCH NOTEBOOK</p><h3 id="history-title">本会话实验记录</h3></div><button id="refresh-history" type="button" class="text-button">刷新 ↻</button></div><p class="help">保存在当前浏览器会话中。打开历史记录后修改条件，会保留原实验并创建派生实验。</p><div id="experiment-history" class="history-list"><p class="history-empty">尚无实验记录。</p></div></section>
+        <section class="history-panel" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">RESEARCH NOTEBOOK</p><h3 id="history-title">本会话实验记录</h3></div><button id="refresh-history" type="button" class="text-button">刷新 ↻</button></div><p class="help">记录保存在服务端，通过当前浏览器的 30 天会话 Cookie 访问。Cookie 过期或被清除后无法恢复访问，请下载复算包留存。修改历史记录的条件会创建新实验，保留原记录。</p><div id="experiment-history" class="history-list"><p class="history-empty">尚无实验记录。</p></div></section>
       </section>
     </div>
   </main>

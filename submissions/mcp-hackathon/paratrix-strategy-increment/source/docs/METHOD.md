@@ -8,7 +8,7 @@ A and B must provide complete simulated mark-to-market equity curves with the sa
 
 | Field group | Requirement |
 | --- | --- |
-| Source | `recorded_local_aimm`, `recorded_nexus`, `inline_simulation`, or `synthetic`; retrieval time and source declarations |
+| Source | `recorded_local_aimm`, `recorded_nexus`, `inline_simulation`, or `synthetic`, with the available source declarations |
 | Identity | Strategy identifier, backtest/run identifier, and available configuration and engine version |
 | Initial valuation | Explicit initial equity, interval boundary, and valuation instant; the first post-return observation must not stand in for starting capital |
 | Time | Calendar, timezone, frequency, and whether timestamps are bar labels or actual valuation instants |
@@ -16,6 +16,8 @@ A and B must provide complete simulated mark-to-market equity curves with the sa
 | Capital and costs | No external deposits or withdrawals; explicit, compatible cost models; unknown costs cannot be assumed complete |
 
 Missing dates are not filled with zeros. Sampled curves are not interpolated. Points are not silently discarded, and the interval is not silently shortened to an intersection. An explicitly selected shorter interval is saved in the experiment configuration. Bar-open labels cannot be paired directly with closing valuations; adapters must record and convert verified time semantics.
+
+Snapshot `created_at` records when this service saved an input. It is not the upstream retrieval time. Optional upstream context belongs in the supported provenance fields, such as `description`, `data_version`, `engine_version`, and `reference`; the curve schema has no separate retrieval-time field.
 
 Non-finite values and non-positive equity that the model cannot interpret are rejected. Small samples may be used for clearly labeled descriptive demonstrations, without a statistical-validity claim. Source and no-cash-flow declarations are user or system records, not independent certification.
 
@@ -31,7 +33,7 @@ V_AB(t)  = 0.8 * NAV_A(t) + 0.2 * NAV_B(t)
 V_AC(t)  = 0.8 * NAV_A(t) + 0.2
 ```
 
-Cash return is zero, and every path starts at 1. There is no portfolio-level rebalancing; allocation values may drift. Weighting each day's returns 80/20 would represent a different model and cannot be described as no rebalancing. Each reported interval starts with a fresh allocation at its explicit initial point; drifted weights from a preceding design interval are not silently carried into a fixed evaluation.
+Cash return is zero, and every path starts at 1. Initial capital is allocated 80/20; there is no portfolio-level rebalancing, so the effective portfolio weights drift as A and B change value. Weighting each day's returns 80/20 would represent a different model and cannot be described as no rebalancing. Each reported interval starts with a fresh allocation at its explicit initial point; drifted weights from a preceding design interval are not silently carried into a fixed evaluation.
 
 This is a study of independent equity units combined into a portfolio. It does not simulate execution in a shared account, position netting, margin, liquidation, minimum order sizes, fixed fees, or nonlinear effects of capital size on signals. A claim about actual execution with an 80/20 capital allocation requires backtests at the corresponding capital levels.
 

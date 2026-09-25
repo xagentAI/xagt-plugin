@@ -63,17 +63,43 @@ def test_bundle_preserves_exact_fixture_bytes_and_local_state(source):
     original = source / "fixtures" / "recorded" / "aimm" / "example.jsonl"
     assert namespace["FIXTURE_BYTES"]["example.jsonl"] == original.read_bytes()
     assert not (bundle / "runtime").exists()
+    assets = bundle / config["assets"]["directory"]
+    assert assets.parent == bundle
+    assert (assets / "index.html").read_bytes() == (source / "web" / "index.html").read_bytes()
     secret = (bundle / ".dev.vars").read_bytes()
     assert (bundle / ".dev.vars").stat().st_mode & 0o777 == 0o600
     state = bundle / ".wrangler" / "state"
     state.mkdir(parents=True)
     (state / "saved").write_text("existing sessions")
     (bundle / "src" / "app" / "removed_module.py").write_text("# stale generated file")
+    (assets / "removed.html").write_text("stale generated asset")
     worker_build.build(source)
     assert (bundle / ".dev.vars").read_bytes() == secret
     assert (state / "saved").read_text() == "existing sessions"
     assert not (bundle / "src" / "app" / "removed_module.py").exists()
+    assert not (assets / "removed.html").exists()
     assert "SESSION_SECRET" not in (bundle / "wrangler.jsonc").read_text()
+
+
+def test_bundle_keeps_python_and_assets_together_until_explicit_rebuild(source):
+    first = worker_build.build(source)
+    bundle = Path(first["output"])
+    original_code = (bundle / "src" / "app" / "engine.py").read_text()
+    original_html = (bundle / "assets" / "index.html").read_text()
+    (source / "app" / "engine.py").write_text("answer = 43\n")
+    (source / "web" / "index.html").write_text("<p>Updated research</p>")
+
+    assert (bundle / "src" / "app" / "engine.py").read_text() == original_code
+    assert (bundle / "assets" / "index.html").read_text() == original_html
+    assert worker_build.source_digest(source) != first["source_sha256"]
+
+    second = worker_build.build(source)
+    assert (bundle / "src" / "app" / "engine.py").read_text() == "answer = 43\n"
+    assert (bundle / "assets" / "index.html").read_text() == "<p>Updated research</p>"
+    namespace = {}
+    exec((bundle / "src" / "app" / "_worker_build.py").read_text(), namespace)
+    assert namespace["SOURCE_HASH"] == second["source_sha256"]
+    assert second["source_sha256"] != first["source_sha256"]
 
 
 @pytest.mark.parametrize("broken", ["content", "traversal"])
@@ -115,6 +141,16 @@ def test_production_requires_https_and_committed_source(source):
     )
     with pytest.raises(ValueError, match="clean Git"):
         worker_build.build(source, release=True, origin="https://example.com")
+    assert not (source / "runtime").exists()
+
+
+@pytest.mark.parametrize("origin", [
+    "https://example.com:garbage", "https://example.com:999999",
+    "https://exa mple.com", "https://example.com\n",
+])
+def test_invalid_origin_rejected_before_creating_a_bundle(source, origin):
+    with pytest.raises(ValueError):
+        worker_build.build(source, origin=origin)
     assert not (source / "runtime").exists()
 
 

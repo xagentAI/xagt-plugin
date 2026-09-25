@@ -97,7 +97,11 @@ def create_app(*, store, nexus, settings, source_hash, assets):
         secret = app.state.store.secret.encode()
         nonce, _, sig = token.partition(".")
         expected = hmac.new(secret, nonce.encode(), hashlib.sha256).hexdigest()
-        fresh = not re.fullmatch(r"[0-9a-f]{64}", nonce) or not hmac.compare_digest(sig, expected)
+        fresh = (
+            not re.fullmatch(r"[0-9a-f]{64}", nonce)
+            or not re.fullmatch(r"[0-9a-f]{64}", sig)
+            or not hmac.compare_digest(sig, expected)
+        )
         if fresh:
             nonce = secrets.token_hex(32)
             token = nonce + "." + hmac.new(secret, nonce.encode(), hashlib.sha256).hexdigest()
@@ -265,7 +269,7 @@ def create_app(*, store, nexus, settings, source_hash, assets):
             return error(
                 503,
                 "source_unavailable",
-                "The Nexus source is unavailable. Check server configuration or retry later.",
+                "The external Nexus connection is disabled in this deployment. Use a public example or import simulated equity JSON.",
             )
         except SourceInsufficient as exc:
             return error(

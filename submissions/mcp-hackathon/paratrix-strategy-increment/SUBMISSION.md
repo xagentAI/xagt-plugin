@@ -60,7 +60,7 @@ npm ci
 uv run --locked pywrangler dev --local
 ```
 
-Open the local workbench at `http://127.0.0.1:8787`. Behavior tests and offline reproduction commands are documented in [validation](source/docs/VALIDATION.md). Local development and deployment use the same Worker entrypoint and Durable Object storage.
+Open the local workbench at `http://127.0.0.1:8787`. Behavior tests and offline reproduction commands are documented in [validation](source/docs/VALIDATION.md). Local development and deployment use the same Worker entrypoint and Durable Object storage. To apply source changes, stop Wrangler, rebuild, and restart; the [development workflow](source/docs/DEPLOYMENT.md#edit-and-rerun) preserves local sessions and updates code and assets together.
 
 Cloudflare Workers build, HTTPS, version binding, persistent storage, and operational controls are documented in the [deployment guide](source/docs/DEPLOYMENT.md). Examples and JSON imports need no external credentials. Session quotas limit stored records. Account-wide request-rate controls and resource budgets are operator-managed settings.
 
@@ -82,6 +82,6 @@ First-party licensing, dependencies, and AIMM sample provenance are documented i
 
 ## Release identity
 
-Review commit: `778327c87d80ba18bcac54693a985e3502dc8895`
+Review commit: `040c70f5ca044a8c38610952b4ba174b559474ba`
 
 The deployment health and proof endpoints must report this exact source revision.
