@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "finfold-growth-mission-api-test",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "APP_BASE_URL": "https://api.finfold.app",
+    "COMMIT_SHA": "1111111111111111111111111111111111111111",
+    "MODEL_PROVIDER": "http",
+    "LLM_API_BASE": "https://llm.test/v1",
+    "LLM_MODEL": "test-model",
+    "SUPPORT_EMAIL": "support@finfold.app"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "finfold-growth-mission-test",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

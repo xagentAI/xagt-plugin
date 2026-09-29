@@ -1,0 +1,78 @@
+{
+  "event": {
+    "event_id": "demo-jpy-sek-8pct",
+    "event_type": "fx_move",
+    "title": "JPY strengthens sharply against SEK",
+    "source": "synthetic judging fixture",
+    "observed_at": "2026-09-10T16:00:00Z",
+    "old_value": 15.0,
+    "new_value": 13.8,
+    "unit": "JPY per SEK",
+    "change_pct": -7.9999999999999964,
+    "base_currency": "SEK",
+    "quote_currency": "JPY",
+    "affected_currencies": [
+      "SEK",
+      "JPY"
+    ],
+    "jurisdiction": null,
+    "evidence_url": null,
+    "window_start": "2026-09-03T16:00:00Z",
+    "window_end": "2026-09-10T16:00:00Z",
+    "confidence": "scenario",
+    "provenance": {
+      "provider": "demo-fixture",
+      "source_type": "fixture",
+      "retrieved_at": "2026-09-10T16:00:00Z",
+      "series_id": null,
+      "source_url": null,
+      "notes": [
+        "Synthetic scenario; values and z-score are illustrative, not official observations."
+      ]
+    },
+    "metadata": {
+      "demo": true,
+      "z_score": -3.2
+    }
+  },
+  "profile": {
+    "home_currency": "SEK",
+    "home_country": "SE",
+    "net_monthly_income": 32000.0,
+    "monthly_work_hours": 160.0,
+    "travel_budget_home": 20000.0,
+    "travel_target_currency": "JPY",
+    "mortgage": {
+      "principal": 2500000.0,
+      "remaining_years": 25.0,
+      "current_annual_rate_pct": 3.8,
+      "currency": "SEK"
+    },
+    "savings_balance": 100000.0,
+    "commute": {
+      "monthly_fuel_liters": 65.0,
+      "fuel_price_per_liter": 18.5
+    },
+    "life_units": [
+      {
+        "name": "beer",
+        "price": 80.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "coffee",
+        "price": 45.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "lunch",
+        "price": 140.0,
+        "currency": "SEK"
+      }
+    ]
+  },
+  "assumptions": {
+    "interest_rate_pass_through": 0.5,
+    "oil_to_fuel_pass_through": 0.25
+  }
+}

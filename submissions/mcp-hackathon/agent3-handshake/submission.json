@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Agent3 Handshake",
+  "slug": "agent3-handshake",
+  "sourceRepository": "https://github.com/agent3-666/agent3-handshake",
+  "reviewCommit": "2571a1be25c6595d871b060c510767dd0ed0ce84",
+  "apiBaseUrl": "https://agent3-handshake-production.up.railway.app/v1",
+  "healthCheckUrl": "https://agent3-handshake-production.up.railway.app/health",
+  "deploymentProofUrl": "https://agent3-handshake-production.up.railway.app/.well-known/xagent-verification.json"
+}

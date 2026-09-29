@@ -1,0 +1,94 @@
+{
+  "event_provenance": {
+    "provider": "demo-fixture",
+    "source_type": "fixture",
+    "retrieved_at": "2026-09-10T16:00:00Z",
+    "series_id": null,
+    "source_url": null,
+    "notes": [
+      "Synthetic scenario; values and z-score are illustrative, not official observations."
+    ]
+  },
+  "event_observed_at": "2026-09-10T16:00:00Z",
+  "event_id": "demo-jpy-sek-8pct",
+  "headline": "JPY strengthens sharply against SEK",
+  "direct_effect_home": 1739.13,
+  "home_currency": "SEK",
+  "direction": "cost_increase",
+  "impact_horizon": "one_off_travel_budget",
+  "work_hours_equivalent": 8.7,
+  "life_units": [
+    {
+      "unit": "beer",
+      "quantity": 21.74,
+      "currency": "SEK",
+      "unit_price": 80.0
+    },
+    {
+      "unit": "coffee",
+      "quantity": 38.65,
+      "currency": "SEK",
+      "unit_price": 45.0
+    },
+    {
+      "unit": "lunch",
+      "quantity": 12.42,
+      "currency": "SEK",
+      "unit_price": 140.0
+    }
+  ],
+  "explanation": "To preserve the same JPY purchasing power for the trip, the user would need about 1739.13 SEK more than before.",
+  "confidence": "scenario",
+  "assumptions": [
+    "Rates in the trace are destination-currency units per home-currency unit.",
+    "Reference-rate comparison excludes retail exchange fees and spreads."
+  ],
+  "warnings": [
+    "This event uses a synthetic judging fixture, not a current market observation."
+  ],
+  "calculation_trace": [
+    {
+      "label": "old destination purchasing power",
+      "formula": "travel_budget_home × old_fx_rate",
+      "inputs": {
+        "travel_budget_home": 20000.0,
+        "old_fx_rate": 15.0
+      },
+      "result": 300000.0
+    },
+    {
+      "label": "new destination purchasing power",
+      "formula": "travel_budget_home × new_fx_rate",
+      "inputs": {
+        "travel_budget_home": 20000.0,
+        "new_fx_rate": 13.8
+      },
+      "result": 276000.0
+    },
+    {
+      "label": "budget required to restore old purchasing power",
+      "formula": "travel_budget_home × old_fx_rate / new_fx_rate",
+      "inputs": {
+        "travel_budget_home": 20000.0,
+        "old_fx_rate": 15.0,
+        "new_fx_rate": 13.8
+      },
+      "result": 21739.13
+    },
+    {
+      "label": "personal impact",
+      "formula": "restore_budget - travel_budget_home",
+      "inputs": {
+        "restore_budget": 21739.13,
+        "travel_budget_home": 20000.0
+      },
+      "result": 1739.13
+    }
+  ],
+  "details": {
+    "old_target_purchasing_power": 300000.0,
+    "new_target_purchasing_power": 276000.0,
+    "target_currency": "JPY",
+    "travel_budget_home": 20000.0
+  }
+}

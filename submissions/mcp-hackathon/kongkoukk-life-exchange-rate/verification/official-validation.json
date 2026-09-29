@@ -1,0 +1,72 @@
+{
+  "recorded_at": "2026-09-17T07:03:38.451224+00:00",
+  "source_review_commit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+  "submission_directory": "submissions/mcp-hackathon/kongkoukk-life-exchange-rate",
+  "validator_file": "scripts/validate-submission.mjs",
+  "validator_sha256": "1023f229ed5a3e33b12cd7c7d5f072fe9d4a6461b49c831c7e31502e2829954f",
+  "tls_verification": "Official validator unchanged; no TLS override supplied",
+  "runs": [
+    {
+      "mode": "offline",
+      "started_at": "2026-09-17T07:03:38.451224+00:00",
+      "finished_at": "2026-09-17T07:03:38.956449+00:00",
+      "command": "npm run validate:submission -- --dir submissions/mcp-hackathon/kongkoukk-life-exchange-rate",
+      "exit_code": 0,
+      "stdout": "\n> @xagt/agent-plugin@0.5.0 validate:submission\n> node scripts/validate-submission.mjs --dir submissions/mcp-hackathon/kongkoukk-life-exchange-rate\n\n{\n  \"status\": \"pass\",\n  \"slug\": \"kongkoukk-life-exchange-rate\",\n  \"checks\": [\n    \"submission structure and manifest are valid\",\n    \"73 source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)\",\n    \"verification evidence contains a health check and repeatable curl command\"\n  ],\n  \"manifest\": {\n    \"schemaVersion\": 1,\n    \"name\": \"Life Exchange Rate MCP\",\n    \"slug\": \"kongkoukk-life-exchange-rate\",\n    \"sourceRepository\": \"https://github.com/KongkouKK/life-exchange-rate-mcp\",\n    \"reviewCommit\": \"238954196ea6922d3cea2ae8acb914b0f4e01dbb\",\n    \"apiBaseUrl\": \"https://life-exchange-rate-mcp.vercel.app\",\n    \"healthCheckUrl\": \"https://life-exchange-rate-mcp.vercel.app/health\",\n    \"deploymentProofUrl\": \"https://life-exchange-rate-mcp.vercel.app/.well-known/xagent-verification.json\"\n  }\n}\n",
+      "stderr": "npm notice\nnpm notice New major version of npm available! 10.9.4 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice\n",
+      "validator_result": {
+        "status": "pass",
+        "slug": "kongkoukk-life-exchange-rate",
+        "checks": [
+          "submission structure and manifest are valid",
+          "73 source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)",
+          "verification evidence contains a health check and repeatable curl command"
+        ],
+        "manifest": {
+          "schemaVersion": 1,
+          "name": "Life Exchange Rate MCP",
+          "slug": "kongkoukk-life-exchange-rate",
+          "sourceRepository": "https://github.com/KongkouKK/life-exchange-rate-mcp",
+          "reviewCommit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+          "apiBaseUrl": "https://life-exchange-rate-mcp.vercel.app",
+          "healthCheckUrl": "https://life-exchange-rate-mcp.vercel.app/health",
+          "deploymentProofUrl": "https://life-exchange-rate-mcp.vercel.app/.well-known/xagent-verification.json"
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "mode": "online",
+      "started_at": "2026-09-17T07:03:38.956449+00:00",
+      "finished_at": "2026-09-17T07:03:42.721732+00:00",
+      "command": "npm run validate:submission -- --dir submissions/mcp-hackathon/kongkoukk-life-exchange-rate --online",
+      "exit_code": 0,
+      "stdout": "\n> @xagt/agent-plugin@0.5.0 validate:submission\n> node scripts/validate-submission.mjs --dir submissions/mcp-hackathon/kongkoukk-life-exchange-rate --online\n\n{\n  \"status\": \"pass\",\n  \"slug\": \"kongkoukk-life-exchange-rate\",\n  \"checks\": [\n    \"submission structure and manifest are valid\",\n    \"73 source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)\",\n    \"verification evidence contains a health check and repeatable curl command\",\n    \"the declared source version has been verified\",\n    \"the live health check is reachable and bound to the review commit\",\n    \"the standard deployment proof confirms control of the live service\"\n  ],\n  \"manifest\": {\n    \"schemaVersion\": 1,\n    \"name\": \"Life Exchange Rate MCP\",\n    \"slug\": \"kongkoukk-life-exchange-rate\",\n    \"sourceRepository\": \"https://github.com/KongkouKK/life-exchange-rate-mcp\",\n    \"reviewCommit\": \"238954196ea6922d3cea2ae8acb914b0f4e01dbb\",\n    \"apiBaseUrl\": \"https://life-exchange-rate-mcp.vercel.app\",\n    \"healthCheckUrl\": \"https://life-exchange-rate-mcp.vercel.app/health\",\n    \"deploymentProofUrl\": \"https://life-exchange-rate-mcp.vercel.app/.well-known/xagent-verification.json\"\n  }\n}\n",
+      "stderr": "npm notice\nnpm notice New major version of npm available! 10.9.4 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice\n",
+      "validator_result": {
+        "status": "pass",
+        "slug": "kongkoukk-life-exchange-rate",
+        "checks": [
+          "submission structure and manifest are valid",
+          "73 source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)",
+          "verification evidence contains a health check and repeatable curl command",
+          "the declared source version has been verified",
+          "the live health check is reachable and bound to the review commit",
+          "the standard deployment proof confirms control of the live service"
+        ],
+        "manifest": {
+          "schemaVersion": 1,
+          "name": "Life Exchange Rate MCP",
+          "slug": "kongkoukk-life-exchange-rate",
+          "sourceRepository": "https://github.com/KongkouKK/life-exchange-rate-mcp",
+          "reviewCommit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+          "apiBaseUrl": "https://life-exchange-rate-mcp.vercel.app",
+          "healthCheckUrl": "https://life-exchange-rate-mcp.vercel.app/health",
+          "deploymentProofUrl": "https://life-exchange-rate-mcp.vercel.app/.well-known/xagent-verification.json"
+        }
+      },
+      "status": "passed"
+    }
+  ],
+  "status": "passed"
+}

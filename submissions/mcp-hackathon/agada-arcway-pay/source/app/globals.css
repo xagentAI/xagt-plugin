@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/*
+ * Arcway design system.
+ *
+ * Tailwind CSS v4 uses CSS-first configuration: there is no tailwind.config.js.
+ * Tokens live in the `@theme` block below and are exposed both as utility
+ * classes (`bg-paper`, `text-ink-soft`, `border-line`) and as CSS custom
+ * properties (`--color-paper`).
+ *
+ * The house rules this system encodes:
+ *   - Warm paper ground, white cards, emerald as the only accent.
+ *   - Borders, never elevation. There are no shadow utilities in use.
+ *   - Instrument Serif for display type, Instrument Sans for everything else.
+ *   - Numbers are always tabular (set on `body`, inherited everywhere).
+ */
+
+@theme {
+  /* Drop Tailwind's default palette entirely — the blue/grey scales this
+   * design replaced are no longer reachable, so a stray `text-slate-500`
+   * fails loudly in review instead of quietly shipping off-brand colour. */
+  --color-*: initial;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-inherit: inherit;
+
+  --color-paper: #faf8f4;
+  --color-card: #ffffff;
+  --color-line: #e5e1d8;
+  --color-line-soft: #f0ece3;
+
+  --color-ink: #1a1917;
+  --color-ink-soft: #55524b;
+  --color-ink-mute: #85806f;
+
+  --color-emerald: #0b5c46;
+  --color-emerald-600: #0e7357;
+  --color-emerald-50: #e6f2ec;
+  --color-emerald-100: #cfe3d9;
+  /* Only used on the dark band, where the full-strength emerald goes muddy. */
+  --color-emerald-bright: #8fd3b8;
+
+  --color-amber: #b8681a;
+  --color-amber-50: #fdf6e9;
+  --color-amber-100: #ead9bd;
+  --color-amber-text: #8a5a12;
+
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-instrument-serif), Georgia, "Times New Roman",
+    serif;
+
+  --radius-btn: 6px;
+  --radius-card: 12px;
+  --radius-chip: 999px;
+}
+
+/* The spec names these without the Tailwind `--color-` namespace. Alias them
+ * so hand-written CSS and inline styles can use the short names too. */
+:root {
+  color-scheme: light;
+
+  --paper: var(--color-paper);
+  --card: var(--color-card);
+  --line: var(--color-line);
+  --line-soft: var(--color-line-soft);
+  --ink: var(--color-ink);
+  --ink-soft: var(--color-ink-soft);
+  --ink-mute: var(--color-ink-mute);
+  --emerald: var(--color-emerald);
+  --emerald-600: var(--color-emerald-600);
+  --emerald-50: var(--color-emerald-50);
+  --emerald-100: var(--color-emerald-100);
+  --amber: var(--color-amber);
+  --amber-50: var(--color-amber-50);
+  --amber-100: var(--color-amber-100);
+  --amber-text: var(--color-amber-text);
+}
+
+/* The top bars are sticky, so in-page anchors (#how-it-works, #pricing, #docs)
+ * would otherwise scroll their heading underneath the bar. Clears the tallest
+ * one — the landing header, 77px measured — with a little room to spare. */
+html {
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  /* Inherited by every descendant, so amounts, counts, and wallet addresses
+   * line up in columns without each call site remembering to ask. */
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background-color: var(--color-emerald-100);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-emerald);
+  outline-offset: 2px;
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.env
+coverage/
+benchmark-results/
+*.log
+*.cpuprofile
+.DS_Store
