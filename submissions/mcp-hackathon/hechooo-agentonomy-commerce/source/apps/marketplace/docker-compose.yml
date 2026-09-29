@@ -1,0 +1,188 @@
+x-marketplace-service: &marketplace-service
+  image: clink-marketplace:${MARKETPLACE_IMAGE_TAG:-local}
+  init: true
+  stop_grace_period: 30s
+
+x-database-common: &database-common
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB:
+
+x-migration-database-environment: &migration-database-environment
+  <<: *database-common
+  POSTGRES_USER: clink_marketplace_migrate
+  POSTGRES_PASSWORD: ${POSTGRES_MIGRATION_PASSWORD:-}
+
+x-api-database-environment: &api-database-environment
+  <<: *database-common
+  POSTGRES_USER: clink_marketplace_api
+  POSTGRES_PASSWORD: ${POSTGRES_API_PASSWORD:-}
+
+x-worker-database-environment: &worker-database-environment
+  <<: *database-common
+  POSTGRES_USER: clink_marketplace_worker
+  POSTGRES_PASSWORD: ${POSTGRES_WORKER_PASSWORD:-}
+
+x-redis-environment: &redis-environment
+  REDIS_URL: redis://redis:6379/1
+
+x-core-environment: &core-environment
+  CLINK_CORE_ACTION_SERVICE_URL:
+  CLINK_CORE_POLICY_SERVICE_URL:
+  CLINK_CORE_AUDIT_SERVICE_URL:
+  CLINK_CORE_FUNDING_SERVICE_URL:
+  CLINK_CORE_ACCOUNT_SERVICE_URL:
+  CLINK_CORE_INTERNAL_API_TOKEN:
+
+x-registry-environment: &registry-environment
+  MARKETPLACE_PEER_REGISTRIES_JSON:
+  MARKETPLACE_CDP_BAZAAR_SEARCH_URL:
+  MARKETPLACE_CDP_BAZAAR_RESOURCES_URL:
+  MARKETPLACE_BAZAAR_SYNC_PAGE_SIZE:
+  MARKETPLACE_BAZAAR_SYNC_MAX_PAGES:
+  MARKETPLACE_BAZAAR_REQUEST_TIMEOUT_SECONDS:
+  MARKETPLACE_BAZAAR_SYNC_QUERIES:
+  MARKETPLACE_BAZAAR_NETWORK:
+  MARKETPLACE_BAZAAR_MAX_USD_PRICE:
+  MARKETPLACE_REGISTRY_VERIFIED_MAX_USD:
+  MARKETPLACE_BAZAAR_TARGETS_JSON:
+
+x-operations-environment: &operations-environment
+  MARKETPLACE_WORKER_HEARTBEAT_TIMEOUT_SECONDS:
+  MARKETPLACE_WORKER_CYCLE_INTERVAL_SECONDS:
+  MARKETPLACE_WORKER_STAGE_TIMEOUT_SECONDS:
+  MARKETPLACE_REGISTRY_FRESHNESS_TIMEOUT_SECONDS:
+  MARKETPLACE_OFFERING_VERIFY_INTERVAL_SECONDS:
+  MARKETPLACE_OFFERING_VERIFY_BATCH_SIZE:
+  MARKETPLACE_ENDPOINT_VERIFY_TIMEOUT_SECONDS:
+  MARKETPLACE_ENDPOINT_VERIFY_ATTEMPTS:
+  MARKETPLACE_DOMAIN_VERIFY_INTERVAL_SECONDS:
+  MARKETPLACE_CORE_HEALTH_TIMEOUT_SECONDS:
+  MARKETPLACE_CORE_HEALTH_DEADLINE_SECONDS:
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: clink_marketplace_admin
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-}
+      POSTGRES_DB:
+      POSTGRES_MIGRATION_PASSWORD:
+      POSTGRES_API_PASSWORD:
+      POSTGRES_WORKER_PASSWORD:
+    volumes:
+      - marketplace-postgres:/var/lib/postgresql/data
+      - ./scripts/postgres-init-roles.sh:/docker-entrypoint-initdb.d/10-marketplace-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clink_marketplace_admin -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *marketplace-service
+    command: ["migrate"]
+    environment:
+      <<: *migration-database-environment
+      MARKETPLACE_DEPLOYMENT_MODE: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  marketplace-api:
+    <<: *marketplace-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["api"]
+    environment:
+      <<: [*api-database-environment, *redis-environment, *core-environment, *registry-environment, *operations-environment]
+      MARKETPLACE_DEPLOYMENT_MODE: production
+      MARKETPLACE_REGISTRY_HOST: 0.0.0.0
+      MARKETPLACE_REGISTRY_PORT: "8050"
+      MARKETPLACE_PUBLIC_BASE_URL:
+      MARKETPLACE_INTERNAL_API_TOKEN:
+      MARKETPLACE_SIWE_ALLOWED_DOMAINS:
+      MARKETPLACE_ADMIN_WALLETS:
+      MARKETPLACE_ADMIN_DISABLED:
+      MARKETPLACE_EIP3009_DOMAINS_JSON:
+      MARKETPLACE_NATIVE_PROVIDER_IDS:
+      MARKETPLACE_PURCHASE_PREVIEW_TTL_SECONDS:
+    ports:
+      - "127.0.0.1:${MARKETPLACE_API_PUBLISHED_PORT:-8050}:8050"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "/app/scripts/container-entrypoint.sh", "health-api"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  marketplace-worker:
+    <<: *marketplace-service
+    command: ["worker"]
+    environment:
+      <<: [*worker-database-environment, *redis-environment, *core-environment, *registry-environment, *operations-environment]
+      MARKETPLACE_DEPLOYMENT_MODE: production
+      MARKETPLACE_NATIVE_PROVIDER_IDS:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  marketplace-mcp:
+    <<: *marketplace-service
+    command: ["mcp"]
+    environment:
+      MARKETPLACE_DEPLOYMENT_MODE: production
+      MARKETPLACE_REGISTRY_HOST: marketplace-api
+      MARKETPLACE_REGISTRY_PORT: "8050"
+      MARKETPLACE_MCP_HOST: 0.0.0.0
+      MARKETPLACE_MCP_PORT: "9050"
+      MARKETPLACE_INTERNAL_API_TOKEN:
+    ports:
+      - "127.0.0.1:${MARKETPLACE_MCP_PUBLISHED_PORT:-9050}:9050"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      marketplace-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app/scripts/container-entrypoint.sh", "health-mcp"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  marketplace-postgres:

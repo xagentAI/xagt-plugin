@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "name": "get_open_interest",
+  "content": {
+    "symbol": "ETH/USDT",
+    "as_of_date": "2026-08-17",
+    "price": 1912.7,
+    "open_interest": 2398072.077,
+    "open_interest_usd": 4597247969.387198,
+    "long_short_ratio": 1.54056714,
+    "funding_rate": -0.00002045
+  }
+}

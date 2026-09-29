@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Abstain",
+  "slug": "faroukobayanju-abstain",
+  "sourceRepository": "https://github.com/faroukobayanju/abstain",
+  "reviewCommit": "4dc1509ba188d3c45c800f2ac98f0b8a62a15311",
+  "apiBaseUrl": "https://x-agent-six.vercel.app/v1",
+  "healthCheckUrl": "https://x-agent-six.vercel.app/health",
+  "deploymentProofUrl": "https://x-agent-six.vercel.app/.well-known/xagent-verification.json"
+}

@@ -1,0 +1,30 @@
+services:
+  review-api:
+    build:
+      context: .
+      args:
+        # Deliberately fail interpolation when SOURCE_COMMIT is empty. The
+        # Dockerfile validates the resulting value and bakes it into the image.
+        SOURCE_COMMIT: ${SOURCE_COMMIT:?SOURCE_COMMIT must be set to the exact 40-character source commit}
+    environment:
+      AGENTONOMY_API_TOKEN: ${AGENTONOMY_API_TOKEN:?AGENTONOMY_API_TOKEN must be set}
+      AGENTONOMY_DEMO_ORIGIN: ${AGENTONOMY_DEMO_ORIGIN:-}
+      AGENTONOMY_STATE_DIR: /data
+      AGENTONOMY_PROJECT_SLUG: hechooo-agentonomy-commerce
+      AGENTONOMY_HOST: 0.0.0.0
+      AGENTONOMY_PORT: "8080"
+      AGENTONOMY_MERCHANT_PORT: "18081"
+      AGENTONOMY_REQUESTS_PER_MINUTE: "60"
+    ports:
+      - "127.0.0.1:8080:8080"
+    expose:
+      - "8080"
+    volumes:
+      - review-data:/data
+    init: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  review-data:

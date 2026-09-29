@@ -1,0 +1,33 @@
+{
+  "provider": {
+    "name": "Example Wallet Intelligence",
+    "domain": "risk.example.com",
+    "source": "clink_manifest"
+  },
+  "offerings": [
+    {
+      "name": "Wallet Risk Screening",
+      "description": "Screen a destination wallet before an agent sends funds.",
+      "endpoint": "https://risk.example.com/v1/wallet/screen",
+      "method": "POST",
+      "tags": ["wallet", "risk", "compliance"],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "address": {"type": "string"},
+          "chain": {"type": "string"}
+        },
+        "required": ["address", "chain"]
+      },
+      "payment_options": [
+        {
+          "scheme": "exact",
+          "network": "eip155:137",
+          "asset": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+          "amount_atomic": "5000",
+          "pay_to": "0x1111111111111111111111111111111111111111"
+        }
+      ]
+    }
+  ]
+}

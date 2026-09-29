@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="description"
+    content="Review the identity, authority and activity controlled by your local Agentonomy environment."
+  >
+  <title>Agentonomy Console</title>
+  <link rel="icon" href="/static/agentonomy-mark.png" type="image/png">
+  <link rel="stylesheet" href="/static/landing.css">
+  <link rel="stylesheet" href="/static/console.css">
+</head>
+<body class="console-page">
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Agentonomy home">
+      <img
+        class="brand-mark"
+        src="/static/agentonomy-mark.png"
+        width="40"
+        height="40"
+        alt=""
+        aria-hidden="true"
+      >
+      <span>Agentonomy</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="/">Overview</a>
+      <a class="marketplace-link" href="/#marketplace-showcase">Marketplace</a>
+      <span class="console-status"><i></i> Local environment</span>
+    </nav>
+  </header>
+
+  <main class="console-main">
+    <section class="console-hero" aria-labelledby="console-title">
+      <div>
+        <p class="eyebrow">AGENTONOMY CONTROL CONSOLE</p>
+        <h1 id="console-title">Account and<br>activity.</h1>
+      </div>
+      <p class="console-lede">
+        Review the wallet-backed identity, bounded authority and redacted
+        activity projected by this local Agentonomy environment.
+      </p>
+    </section>
+
+    <nav class="view-switcher" aria-label="Console views" role="tablist">
+      <button
+        class="view-tab active"
+        id="account-tab"
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls="account-panel"
+        data-target="account"
+      >Account</button>
+      <button
+        class="view-tab"
+        id="activity-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="activity-panel"
+        tabindex="-1"
+        data-target="activity"
+      >Activity</button>
+    </nav>
+
+    <section
+      class="view active"
+      id="account-panel"
+      role="tabpanel"
+      aria-labelledby="account-tab"
+      data-view="account"
+    >
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">01 / IDENTITY</p>
+          <h2>Account and authority</h2>
+        </div>
+        <p>Wallet ownership, spending boundaries, networks and product scopes.</p>
+      </div>
+
+      <form class="account-selector" id="account-selector">
+        <label for="account-user-id">
+          <span class="label">ACCOUNT OWNER</span>
+          <span>Use the same user ID your Agent sends to Agentonomy.</span>
+        </label>
+        <input
+          id="account-user-id"
+          name="user_id"
+          autocomplete="username"
+          placeholder="telegram_demo_user"
+          required
+        >
+        <button id="refresh-account" class="secondary-action" type="submit">
+          Refresh account
+        </button>
+      </form>
+
+      <div class="account-handoff">
+        <p class="label">WALLET IDENTITY</p>
+        <h3>Choose your wallet in the secure account flow</h3>
+        <p>
+          Open the account link created for this identity. Choose the browser
+          wallet and exact address, then approve the ownership signature in
+          that wallet.
+        </p>
+      </div>
+
+      <div class="account-ledger">
+        <div class="ledger-row">
+          <span>Wallet identity</span>
+          <strong id="wallet-state">Not connected</strong>
+          <small>Authority controlled</small>
+        </div>
+        <div class="ledger-row">
+          <span>Spending mandate</span>
+          <strong id="mandate-state">Not authorized</strong>
+          <small>Per transaction / hour / day</small>
+        </div>
+        <div class="ledger-row">
+          <span>Business access</span>
+          <strong id="business-state">Not ready</strong>
+          <small>Marketplace + markets</small>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="view"
+      id="activity-panel"
+      role="tabpanel"
+      aria-labelledby="activity-tab"
+      data-view="activity"
+    >
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">02 / ACTIVITY</p>
+          <h2>Payments and decisions</h2>
+        </div>
+        <p>Successful purchases, trades and authorization decisions in one timeline.</p>
+      </div>
+      <div class="activity-table" role="table">
+        <div class="activity-header" role="row">
+          <span role="columnheader">Time</span>
+          <span role="columnheader">Action</span>
+          <span role="columnheader">Module</span>
+          <span role="columnheader">Amount</span>
+          <span role="columnheader">Status</span>
+        </div>
+        <div id="activity-rows">
+          <div class="empty-state">
+            <p>No completed activity yet.</p>
+            <span>Load an account to see its redacted activity.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer console-footer">
+    <a class="wordmark footer-wordmark" href="/">
+      <img
+        class="brand-mark"
+        src="/static/agentonomy-mark.png"
+        width="40"
+        height="40"
+        alt=""
+        aria-hidden="true"
+      >
+      <span>Agentonomy</span>
+    </a>
+    <p>Bounded authority for autonomous systems.</p>
+    <nav aria-label="Footer navigation">
+      <a href="/#marketplace-showcase">Marketplace</a>
+      <a href="/">Overview</a>
+    </nav>
+  </footer>
+  <script src="/static/console.js" defer></script>
+</body>
+</html>

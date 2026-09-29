@@ -1,0 +1,33 @@
+{
+  "base_url": "http://34.21.234.127",
+  "checked_at": "2026-09-22T06:11:01.004783+00:00",
+  "responses": {
+    "GET /health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "real_funds": false,
+        "settlement_mode": "simulated",
+        "service_transport": "http"
+      }
+    },
+    "GET /.well-known/xagent-verification.json": {
+      "status": 200,
+      "body": {
+        "schemaVersion": 1,
+        "slug": "hechooo-agentonomy-commerce",
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7"
+      }
+    },
+    "GET /v1/budget": {
+      "status": 426,
+      "body": null
+    },
+    "POST /v1/purchases": {
+      "status": 426,
+      "body": null
+    }
+  },
+  "passed": true
+}

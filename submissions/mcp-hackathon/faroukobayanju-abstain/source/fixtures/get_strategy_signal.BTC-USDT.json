@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "name": "get_strategy_signal",
+  "strategy_id": "str_515920d047ca",
+  "content": {
+    "symbol": "BTC/USDT",
+    "trade_intent": "HOLD",
+    "reasoning_log": "technical ta engine\u00d70.25, news narrative miner\u00d70.15, monetary sentinel\u00d70.10 signals aligned (neutral) via weighted_convergence.",
+    "timestamp": 1789682946,
+    "confidence": 0.0508
+  }
+}

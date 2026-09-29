@@ -1,0 +1,17 @@
+{
+  "name": "fenix-schemabridge-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir dist/cloudflare",
+    "wrangler": "wrangler",
+    "test": "node --test",
+    "start": "node tools/serve.mjs",
+    "demo": "node tools/demo.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.131.1"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clink.example.invalid/schemas/channel-metadata.schema.json",
+  "title": "Clink signed Linux release channel metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "channel",
+    "platform",
+    "version",
+    "bundle_url",
+    "bundle_sha256",
+    "minimum_installer_version",
+    "published_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "channel": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+    },
+    "platform": { "const": "linux-x86_64" },
+    "version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "bundle_url": {
+      "type": "string",
+      "pattern": "^https://",
+      "format": "uri"
+    },
+    "bundle_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "minimum_installer_version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

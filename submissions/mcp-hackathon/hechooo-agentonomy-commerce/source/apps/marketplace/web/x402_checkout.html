@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clink x402 Checkout</title>
+    <link rel="stylesheet" href="/assets/x402_checkout.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">CLINK SECURE CHECKOUT</p>
+        <h1>Review once.<br>Sign once.</h1>
+        <p class="lede">Clink locks the merchant, amount, asset, network and recipient before your wallet signs.</p>
+      </header>
+      <section class="payment" aria-live="polite">
+        <div><span>Purchase</span><strong id="purchase">Loading</strong></div>
+        <div><span>Amount</span><strong id="amount">Pending challenge</strong></div>
+        <div><span>Network</span><strong id="network">Pending challenge</strong></div>
+        <div><span>Recipient</span><strong id="recipient">Pending challenge</strong></div>
+      </section>
+      <button id="pay" type="button">Connect wallet and pay</button>
+      <p id="status" class="status">No payment has been signed.</p>
+      <p class="fine">The checkout token is one-time and expires with the purchase preview. Clink never receives your private key.</p>
+    </main>
+    <script src="/assets/x402_checkout.js" defer></script>
+  </body>
+</html>

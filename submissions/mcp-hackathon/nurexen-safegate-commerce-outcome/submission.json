@@ -1,0 +1,10 @@
+{
+    "schemaVersion":  1,
+    "name":  "SafeGate Commerce Outcome",
+    "slug":  "nurexen-safegate-commerce-outcome",
+    "sourceRepository":  "https://github.com/Nurexen-Labs/safegate-xagent-commerce-outcome",
+    "reviewCommit":  "b460b88ce800839e69839a5d31aac949dfe2543c",
+    "apiBaseUrl":  "https://safegate-xagent-commerce-outcome.vercel.app/v1",
+    "healthCheckUrl":  "https://safegate-xagent-commerce-outcome.vercel.app/health",
+    "deploymentProofUrl":  "https://safegate-xagent-commerce-outcome.vercel.app/.well-known/xagent-verification.json"
+}

@@ -1,0 +1,134 @@
+name: Commerce validation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: packaging/linux/installer/go.mod
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Install dependencies
+        run: |
+          python3 -m pip install -r requirements.lock
+          python3 -m pip install --no-deps -e apps/node
+      - run: make doctor
+      - run: make test-workspace
+      - run: make test-node
+      - run: make test-e2e
+      - run: make test-apps
+      - run: make test-hosted
+      - run: make test-commerce
+      - run: make test-review
+      - run: make test-submission
+      - run: make demo
+      - run: make test-go
+      - run: make test-contracts
+      - run: python3 -m compileall -q apps examples scripts tests
+
+  container-smoke:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_COMMIT: ${{ github.sha }}
+      AGENTONOMY_API_TOKEN: review-ci-token-${{ github.run_id }}-local-only
+      AGENTONOMY_DEMO_ORIGIN: http://127.0.0.1:8080
+      COMPOSE_PROJECT_NAME: agentonomy-review-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the review image
+        run: |
+          docker compose build --build-arg SOURCE_COMMIT="$SOURCE_COMMIT" review-api
+      - name: Start the review API
+        run: docker compose up -d review-api
+      - name: Verify the first purchase
+        run: |
+          set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 60); do
+            if python3 scripts/check_review_container.py \
+                --base-url http://127.0.0.1:8080 \
+                --expected-commit "$SOURCE_COMMIT"; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" -eq 1
+          python3 scripts/verify_review_api.py \
+            --base-url http://127.0.0.1:8080 \
+            --expected-commit "$SOURCE_COMMIT" \
+            --evidence-file /tmp/agentonomy-review-first.json
+          python3 - /tmp/agentonomy-review-first.json <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              evidence = json.load(handle)
+          for name in ("purchase_id", "preview_id"):
+              value = evidence[name]
+              if not isinstance(value, str) or not value:
+                  raise SystemExit(f"missing {name}")
+              print(f"{name}={value}")
+          PY
+      - name: Verify public visitor isolation
+        run: |
+          python3 scripts/verify_public_demo.py \
+            --base-url http://127.0.0.1:8080 \
+            --expected-commit "$SOURCE_COMMIT" \
+            --state-file /tmp/agentonomy-public-private.json
+      - name: Restart the same container and verify replay
+        run: |
+          set -euo pipefail
+          purchase_id="$(python3 -c 'import json; print(json.load(open("/tmp/agentonomy-review-first.json"))["purchase_id"])')"
+          preview_id="$(python3 -c 'import json; print(json.load(open("/tmp/agentonomy-review-first.json"))["preview_id"])')"
+          docker compose restart review-api
+          ready=0
+          for attempt in $(seq 1 60); do
+            if python3 scripts/check_review_container.py \
+                --base-url http://127.0.0.1:8080 \
+                --expected-commit "$SOURCE_COMMIT"; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" -eq 1
+          python3 scripts/verify_review_api.py \
+            --base-url http://127.0.0.1:8080 \
+            --expected-commit "$SOURCE_COMMIT" \
+            --purchase-id "$purchase_id" \
+            --preview-id "$preview_id" \
+            --evidence-file /tmp/agentonomy-review-after-restart.json
+          python3 - /tmp/agentonomy-review-first.json /tmp/agentonomy-review-after-restart.json <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              first = json.load(handle)
+          with open(sys.argv[2], encoding="utf-8") as handle:
+              after_restart = json.load(handle)
+          if first["purchase"] != after_restart["purchase"]:
+              raise SystemExit("purchase result changed after restart")
+          for field in ("used_amount_usdc", "settlement_submissions", "merchant_deliveries"):
+              if first["budget_after"][field] != after_restart["budget_before"][field]:
+                  raise SystemExit(f"budget field changed after restart: {field}")
+          if not after_restart["restart_check"]["charge_unchanged"]:
+              raise SystemExit("replay charged after restart")
+          PY
+      - name: Verify public session after container restart
+        run: |
+          python3 scripts/verify_public_demo.py \
+            --base-url http://127.0.0.1:8080 \
+            --expected-commit "$SOURCE_COMMIT" \
+            --state-file /tmp/agentonomy-public-private.json --resume
+      - name: Remove only this smoke test's resources
+        if: always()
+        run: docker compose down --volumes --remove-orphans

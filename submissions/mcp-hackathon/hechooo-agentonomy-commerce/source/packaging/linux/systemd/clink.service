@@ -1,0 +1,20 @@
+[Unit]
+Description=Clink Node personal service
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.clink/current/payload/bin/clink-launcher _run --systemd
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.clink
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+UMask=0077

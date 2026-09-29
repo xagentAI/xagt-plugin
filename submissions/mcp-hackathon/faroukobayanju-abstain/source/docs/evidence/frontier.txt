@@ -1,0 +1,19 @@
+Abstain — gate threshold frontier
+Every row replays all 19 recorded trades through the same runGate() the
+live API calls, varying exactly one threshold. Published in full so the
+shipped setting cannot be mistaken for a tuned one.
+
+  SETTING                        TAKEN  REFUSED       PNL   MAX DD
+  -----------------------------  -----  -------  --------  -------
+  no gate (every check off)         19        0   1845.52    5.40%
+  max_cluster_size = 2               3       16   2633.02    1.53%
+  max_cluster_size = 3               7       12   -921.71    3.84%
+  max_cluster_size = 4              16        3  -1429.55    5.60%
+  max_cluster_size = 5              19        0   1845.52    5.40%
+  max_drawdown_pct = 3              15        4  -5287.89    7.30%
+  max_drawdown_pct = 5              16        3  -2963.50    5.40%
+  max_drawdown_pct = 10             19        0   1845.52    5.40%
+  max_loss_streak = 2               14        5  -3532.13    5.40%
+  max_loss_streak = 3               15        4  -5089.11    6.17%
+  max_loss_streak = 4               19        0   1845.52    5.40%
+  shipped policy (all checks)        1       18  -1556.98    1.56%

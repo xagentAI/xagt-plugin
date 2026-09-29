@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: orin
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn orin.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ORIN_COMMIT
+        value: local-dev
+      - key: ORIN_SLUG
+        value: hillaryikhais-orin

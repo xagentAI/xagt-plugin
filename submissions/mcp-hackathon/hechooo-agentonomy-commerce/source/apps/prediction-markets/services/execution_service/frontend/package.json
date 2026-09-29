@@ -1,0 +1,16 @@
+{
+  "name": "clink-polymarket-order-signing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/order_signing.js --bundle --platform=browser --format=iife --target=es2020 --outfile=../static/polymarket_order_signing.bundle.js --legal-comments=none",
+    "test": "node --test ../../../tests/frontend/polymarket_order_signing.test.cjs"
+  },
+  "dependencies": {
+    "@polymarket/clob-client-v2": "1.1.0",
+    "viem": "2.55.19"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "name": "get_historical_funding",
+  "content": {
+    "symbol": "SOL/USDT",
+    "as_of_date": "2026-06-26",
+    "last_funding_rate": 0.00006096
+  }
+}

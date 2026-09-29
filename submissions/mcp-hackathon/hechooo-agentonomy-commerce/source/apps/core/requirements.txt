@@ -1,0 +1,25 @@
+# Agent layer
+langgraph>=0.3.0
+langchain-google-genai>=2.0.0
+
+# Service layer
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.9.0
+aiohttp>=3.9.0
+boto3>=1.34.0
+eth-keys>=0.5.0
+eth-utils>=2.3.0
+eth-hash[pycryptodome]>=0.7.0
+eth-account>=0.13.0
+asn1crypto>=1.5.1
+cryptography>=41.0.0
+PyJWT>=2.9,<3
+python-telegram-bot>=20.0
+
+# MCP
+mcp>=1.9.0
+sqlalchemy>=2.0,<3
+alembic>=1.14,<2
+psycopg[binary]>=3.2,<4
+redis>=5,<8

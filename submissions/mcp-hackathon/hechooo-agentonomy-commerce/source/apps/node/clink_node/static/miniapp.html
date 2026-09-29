@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+  >
+  <meta name="color-scheme" content="dark">
+  <title>Agentonomy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
+  <script src="/static/miniapp.js" defer></script>
+  <link rel="stylesheet" href="/static/miniapp.css">
+</head>
+<body>
+  <div class="miniapp-shell">
+    <header class="thread-header">
+      <div class="thread-identity">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <div>
+          <strong>Agentonomy</strong>
+          <span id="miniapp-identity">Connecting securely…</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button
+          id="miniapp-operations-toggle"
+          class="icon-action"
+          type="button"
+          aria-controls="miniapp-operations"
+          aria-expanded="false"
+        >
+          Operate
+        </button>
+        <button id="miniapp-logout" class="quiet-action" type="button">
+          Exit
+        </button>
+      </div>
+    </header>
+
+    <main
+      id="miniapp-transcript"
+      class="transcript"
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions text"
+      aria-label="Conversation with Agentonomy"
+      tabindex="0"
+    >
+      <section class="thread-intro" aria-label="Conversation status">
+        <span class="intro-pulse" aria-hidden="true"></span>
+        <div>
+          <p class="utility-label">ONE CONTINUOUS THREAD</p>
+          <h1>Continue with Agentonomy.</h1>
+          <p>
+            Your history stays with this Telegram identity. Open an operation,
+            finish it, and return here without starting over.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <section
+      id="miniapp-operations"
+      class="operation-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="operation-title"
+      hidden
+    >
+      <div class="drawer-heading">
+        <div>
+          <p class="utility-label">CONTROL SURFACES</p>
+          <h2 id="operation-title">Open an operation</h2>
+        </div>
+        <button
+          id="miniapp-operations-close"
+          class="icon-action"
+          type="button"
+          aria-label="Close operations"
+        >
+          Close
+        </button>
+      </div>
+      <div class="operation-list">
+        <button class="operation-row" type="button" data-operation="account">
+          <span>Wallet &amp; permissions</span>
+          <small>Identity, mandate and chain allowance</small>
+        </button>
+        <button
+          class="operation-row"
+          type="button"
+          data-operation-url="/#marketplace-showcase"
+        >
+          <span>Marketplace</span>
+          <small>Discover services available to Agentonomy</small>
+        </button>
+        <button class="operation-row" type="button" data-operation="polymarket">
+          <span>Polymarket account</span>
+          <small>Bind or review the account used for signed actions</small>
+        </button>
+      </div>
+      <p class="drawer-note">
+        Returning here rechecks authoritative state. A page return never means
+        a payment, order or allowance was confirmed.
+      </p>
+    </section>
+
+    <footer class="composer-dock">
+      <section
+        id="miniapp-tool-progress"
+        class="tool-progress"
+        aria-label="Operation progress"
+        hidden
+      >
+        <button
+          id="miniapp-tool-progress-toggle"
+          class="tool-progress-toggle"
+          type="button"
+          aria-controls="miniapp-tool-progress-list"
+          aria-expanded="false"
+        >
+          <span
+            id="miniapp-tool-progress-summary"
+            class="tool-progress-summary"
+            aria-live="polite"
+          ></span>
+        </button>
+        <ul id="miniapp-tool-progress-list" class="tool-progress-list" hidden></ul>
+      </section>
+      <div id="miniapp-status" class="connection-line" role="status">
+        Establishing your private thread…
+      </div>
+      <form id="miniapp-composer" class="composer">
+        <label class="sr-only" for="miniapp-input">Message Agentonomy</label>
+        <textarea
+          id="miniapp-input"
+          rows="1"
+          maxlength="16384"
+          enterkeyhint="send"
+          autocomplete="off"
+          placeholder="Message Agentonomy…"
+        ></textarea>
+        <button id="miniapp-send" type="submit">Send</button>
+      </form>
+    </footer>
+  </div>
+</body>
+</html>

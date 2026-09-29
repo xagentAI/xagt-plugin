@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "method": "Graceful GCE stop/start of the dedicated VM, followed by saved-order replay on loopback and authenticated domain HTTPS. External HTTPS status verified with normal CA/hostname validation.",
+  "checked_at": "2026-09-22T06:10:59.527700+00:00",
+  "source_commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+  "image_id": "sha256:1c3163661910425eaffbb1e938890ae2244012466d1245b8f7f9c3522d40ec5c",
+  "boot_id_before": "e488abc8-f19e-4835-8c79-6443554dbe14",
+  "boot_id_after": "4f802e25-cbe5-4010-b05a-0cd83c8bb997",
+  "same_purchase": true,
+  "budget_before": {
+    "after_used_amount_usdc": "0.30",
+    "before_used_amount_usdc": "0.30",
+    "merchant_deliveries": 1,
+    "remaining_amount_usdc": "0.70",
+    "settlement_submissions": 1
+  },
+  "budget_after": {
+    "after_used_amount_usdc": "0.30",
+    "before_used_amount_usdc": "0.30",
+    "merchant_deliveries": 1,
+    "remaining_amount_usdc": "0.70",
+    "settlement_submissions": 1
+  },
+  "real_funds": false,
+  "settlement_mode": "simulated",
+  "service_transport": "http"
+}

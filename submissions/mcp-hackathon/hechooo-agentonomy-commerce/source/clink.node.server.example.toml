@@ -1,0 +1,76 @@
+[node]
+profile = "server"
+host = "127.0.0.1"
+port = 8170
+mcp_host = "127.0.0.1"
+mcp_port = 9170
+multi_tenant = true
+
+[storage]
+backend = "postgres"
+
+[events]
+backend = "redis"
+
+# Hosted execution is configured through the deployment environment, not by
+# putting credentials in this file.  Keep these origins on the private service
+# network. Resolve every secret:// reference with the deployment secret manager
+# before starting the production Facilitator/Core pair. The enrollment identity
+# and credentials are shared; each production chain still has its own explicit
+# origin and trusted response key target.
+# CLINK_FACILITATOR_MODE=hosted
+# CLINK_HOSTED_FACILITATOR_NODE_ID=secret://clink/hosted/node-id
+# CLINK_HOSTED_FACILITATOR_TENANT_ID=secret://clink/hosted/tenant-id
+# CLINK_HOSTED_FACILITATOR_WALLET_BINDING_ID=secret://clink/hosted/wallet-binding-id
+# CLINK_HOSTED_FACILITATOR_ACCESS_TOKEN=secret://clink/hosted/access-token
+# CLINK_HOSTED_FACILITATOR_DEVICE_PRIVATE_KEY=secret://clink/hosted/device-private-key
+# CLINK_HOSTED_FACILITATOR_CHAIN_TARGETS='{"eip155:8453":{"origin":"https://base-facilitator.internal.example","server_public_jwk":"<resolved-base-response-jwk-json>"},"eip155:137":{"origin":"https://polygon-facilitator.internal.example","server_public_jwk":"<resolved-polygon-response-jwk-json>"}}'
+# A legacy scalar URL/JWK pair may be retained during migration; it is
+# materialized as an explicit eip155:8453 target and never used for Polygon.
+# CLINK_HOSTED_FACILITATOR_URL=https://facilitator.internal.example
+# CLINK_HOSTED_FACILITATOR_SERVER_PUBLIC_JWK=secret://clink/hosted/server-public-jwk
+# CLINK_CORE_AUTHORITY_ORIGIN=https://core.internal.example
+# CLINK_CORE_INTERNAL_API_TOKEN=secret://clink/core/internal-api-token
+
+[secrets]
+backend = "vault"
+vault_mount = "secret"
+vault_path_prefix = "clink"
+
+[interaction]
+mode = "self_hosted"
+session_ttl_seconds = 900
+
+[execution]
+# Safety defaults: a release must explicitly pass its own production gates
+# before enabling live Hosted funding or native execution.
+live_funding = false
+native_facilitator = false
+prediction_markets_live = false
+risk_provider = "misttrack"
+risk_mode = "shadow"
+
+[modules.core]
+mode = "external"
+endpoint = "http://core:8019"
+
+[modules.core.services]
+account = "http://core:8019"
+action = "http://core:8016"
+policy = "http://core:8015"
+audit = "http://core:8017"
+funding = "http://core:8018"
+
+[modules.marketplace]
+mode = "external"
+endpoint = "http://marketplace:8050"
+mcp_url = "http://marketplace:9050/mcp"
+
+[modules.prediction-markets]
+mode = "external"
+endpoint = "http://prediction-markets:8040"
+mcp_url = "http://prediction-markets:9040/mcp"
+
+[modules.prediction-markets.services]
+account_binding = "http://prediction-markets:8047"
+execution = "http://prediction-markets:8042"

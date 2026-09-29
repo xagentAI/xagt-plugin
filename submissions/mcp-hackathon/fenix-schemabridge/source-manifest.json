@@ -1,0 +1,170 @@
+{
+  "sourceRepository": "https://github.com/wiaikit/fenix-schemabridge",
+  "sourceCommit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "copiedAt": "2026-09-14T08:57:19.303Z",
+  "method": "Every tracked regular source file was read from this exact Git commit and compared byte-for-byte after copying. Stale paths were removed. The snapshot includes the original illustration, three font binaries, their licenses and provenance, lockfile, secret-free configuration, setup instructions and tests. No installed packages, build output, Git metadata or backup copies are included.",
+  "files": [
+    {
+      "path": ".gitignore",
+      "gitBlob": "7b087e78ce620779149286479d6d8f65f1ff8b9c",
+      "sha256": "6bf68734c2d99a6bcdc0ee758d6ef77b21abf476c5b42b07db43c784dd3171f9",
+      "bytes": 96
+    },
+    {
+      "path": "ASSETS.md",
+      "gitBlob": "e65e793ae043bf8c09a00a2f89fe0c17e8841048",
+      "sha256": "09cbf31c00c7075bec56a363b2568cee0dd9856c204ff92952a6848ab455df2f",
+      "bytes": 1640
+    },
+    {
+      "path": "README.md",
+      "gitBlob": "fed6a6e11cdceca63185bc63c2d10f1dc933c290",
+      "sha256": "3425367d81f7b3cc18fdd6c53f400344cadc41c7e9993fabbeb5562dfe86e226",
+      "bytes": 18840
+    },
+    {
+      "path": "VERIFICATION.md",
+      "gitBlob": "168746ad2538d42947e164217d0965ab2626ae2f",
+      "sha256": "3720276ac42b55a428bff0ba0864b05d18f52c5901a22f63f55d50df85f93e34",
+      "bytes": 5655
+    },
+    {
+      "path": "fixtures/csv-expected.json",
+      "gitBlob": "391a40b92b517bfd8a17d5ad3b59a9aa418982c5",
+      "sha256": "ac5ba2d0b2d0a9298d56dfc6613683065fa2f676272e7609c7a029a8eeb1fb50",
+      "bytes": 272
+    },
+    {
+      "path": "fixtures/csv-request.json",
+      "gitBlob": "a8651d74df5fce4c8df0c1ce709957e45e0ca39f",
+      "sha256": "666cbaa246330eea94d77236350731b1c40037a719cc765a3f87a851a04c5735",
+      "bytes": 387
+    },
+    {
+      "path": "fixtures/invalid-request.json",
+      "gitBlob": "ccd623fe488f5732973c45fff0be8c0128e75d74",
+      "sha256": "2075465e75eddc7c2e21fa30e595629cc466f38538d902353f4e364eb2e4909c",
+      "bytes": 233
+    },
+    {
+      "path": "fixtures/json-request.json",
+      "gitBlob": "b923aa92a7d7e2b36edff8f7d896ae110518bef4",
+      "sha256": "2d9d5f04e48e7f44853b40bb1e04119f46bd2c05519a39489e0de703fc87d5dc",
+      "bytes": 507
+    },
+    {
+      "path": "package-lock.json",
+      "gitBlob": "61b1a7745809a47d2f40a4575f030193d6376fe5",
+      "sha256": "76746a58ed1e0e20d7e20fe0b957c227434c60351ceaa6d4b45244319d08dcd5",
+      "bytes": 50185
+    },
+    {
+      "path": "package.json",
+      "gitBlob": "733d19f10d5e28023d6ea84823ff8d01c2b19717",
+      "sha256": "2e8a34c8811f607380aa49232fa7110ebcdedba26ba3369af0e6dad784d3afb5",
+      "bytes": 406
+    },
+    {
+      "path": "public/assets/fonts/Instrument-Sans-OFL.txt",
+      "gitBlob": "26bd2f954bfa282d235370728095db97d8a36f6f",
+      "sha256": "9e27a72ed30eb49a08678f6a5d6ed98ec7ba5368f541637ee0683ec9134ef966",
+      "bytes": 4403
+    },
+    {
+      "path": "public/assets/fonts/Instrument-Serif-OFL.txt",
+      "gitBlob": "669ce7917bec662fcf7244d37f49c4277f6fbd73",
+      "sha256": "129ed7618959716959f2941fdd5b49e0ad6e6c1d78726761786a00253d865521",
+      "bytes": 4405
+    },
+    {
+      "path": "public/assets/fonts/instrument-sans-latin.woff2",
+      "gitBlob": "8611e41b14c75cfc8360e50d0d22a22d20a1de50",
+      "sha256": "2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971",
+      "bytes": 30092
+    },
+    {
+      "path": "public/assets/fonts/instrument-serif-italic-latin.woff2",
+      "gitBlob": "197abca2553c84829217223cdbc6efbe2493d645",
+      "sha256": "5a51946dfffa82972bc98745359c46761515641fda557c25116459a9f83da4a7",
+      "bytes": 22128
+    },
+    {
+      "path": "public/assets/fonts/instrument-serif-latin.woff2",
+      "gitBlob": "0ad69719cac6f45ed3057825095b0cdffa7d3c99",
+      "sha256": "5eb09b5ac0e28b67c2f041c8ba6d244604ca0c0980d65912ab2d47fed84ddc31",
+      "bytes": 21032
+    },
+    {
+      "path": "public/assets/fonts/sources.json",
+      "gitBlob": "187933f9ac80a57650327a5d25238702ebb817e0",
+      "sha256": "e840406c6fa1bc7ba897b55d30b23b40fdf84ab4b21e276ce53ab0b948d214be",
+      "bytes": 779
+    },
+    {
+      "path": "public/assets/schema-sculpture.png",
+      "gitBlob": "2abf7f87584b114012dd17f404d072d84f203eef",
+      "sha256": "09b3cc0120ec2b1262af2f38494c21b567bf1a30a279da3372f09be6899517e9",
+      "bytes": 1946423
+    },
+    {
+      "path": "src/docs.mjs",
+      "gitBlob": "db2f330c1e51d121398379abba6d95cfbb7bfcb5",
+      "sha256": "a87724605e6aeb5e83c26cc127964be731dc6751dd6bf78640341410040649c9",
+      "bytes": 23202
+    },
+    {
+      "path": "src/homepage.mjs",
+      "gitBlob": "5abc4845433d56d917a1b9a7f792ee4e1d20d77a",
+      "sha256": "d70c329b33d0ef47362cad423e76d7181b2e1a6a969adfd0410135e9bc63088a",
+      "bytes": 28647
+    },
+    {
+      "path": "src/openapi.mjs",
+      "gitBlob": "a04e0e102cacd346b617bbd630d2e4e51978b67d",
+      "sha256": "a82502c83bbf60c672ab48adc248bfd08334973c41a73082d624a4126cd3873a",
+      "bytes": 5464
+    },
+    {
+      "path": "src/transform.mjs",
+      "gitBlob": "1bb21fe5ba1b13c8b8878d4c77cc9303db6e79d1",
+      "sha256": "769081a27657cd21775256729415ef0135297dea90a81e6fb8db73cc727d2b53",
+      "bytes": 8704
+    },
+    {
+      "path": "src/worker.mjs",
+      "gitBlob": "3db6fdd11ab3105767aa14ffc9c39811455ec996",
+      "sha256": "a6f9a1f2c957d033f53b1b6c92853637f46d1929398f6c0930361a46bd1b41de",
+      "bytes": 7223
+    },
+    {
+      "path": "test/worker.test.mjs",
+      "gitBlob": "b5ca2054bcaac1622cc1de879f2b670008849cc5",
+      "sha256": "1bb01ad2903790426e6c73ae047c958ab27c9b1ae6a074c43f1dea88d6af89e2",
+      "bytes": 25087
+    },
+    {
+      "path": "tools/demo.mjs",
+      "gitBlob": "5b7140bdd87f4ca7147086ae404abe242a1824b5",
+      "sha256": "63d6042008c63435a097d2f3e2fe31d757581a61fb1cb4fec1def54f631a9f91",
+      "bytes": 723
+    },
+    {
+      "path": "tools/serve.mjs",
+      "gitBlob": "5cdf73130536b062db1ced303d4851612376bae7",
+      "sha256": "8d1e442c91ff4116da0cd2c1d54253c8fa7b3cc48ec3980b066fd7cb324b4d69",
+      "bytes": 3552
+    },
+    {
+      "path": "tools/workerd-smoke.mjs",
+      "gitBlob": "c03410d5b0d435800b42ab6d25d3bafe432ce91d",
+      "sha256": "cd03a80c105467914dcf234ddecf71d5817596724c57aa101885f1493455780c",
+      "bytes": 7518
+    },
+    {
+      "path": "wrangler.jsonc",
+      "gitBlob": "7d356166a5c0aeb6a8228f2595fec51bc8f685c6",
+      "sha256": "8bf2aa88b0d74f2912ee6c434b33ee75faf1f161db2745f467f0a02a7dc5f365",
+      "bytes": 339
+    }
+  ]
+}

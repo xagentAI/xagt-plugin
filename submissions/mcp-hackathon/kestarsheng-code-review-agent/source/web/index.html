@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Review Agent — Review AI-Generated Code Before Merge</title>
+<meta name="description" content="Triple-engine code review for AI-generated code. 40 rules (6 AI-pattern rules) + AST analysis + LLM semantic review with cross-validation. Catches hallucinated imports, eval injections, shell=True, swallowed exceptions — patterns AI coding tools most commonly get wrong.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#FAF8F5;--paper-2:#F5F1EA;--paper-3:#EFEBE3;
+  --ink:#1C1917;--ink-2:#44403C;--ink-3:#78716C;--ink-4:#A8A29E;
+  --teal:#0F766E;--teal-2:#115E5A;--teal-3:#14B8A6;
+  --amber:#D97706;--amber-2:#B45309;
+  --red:#DC2626;--green:#059669;--blue:#1D4ED8;--purple:#7C3AED;
+  --border:#E7E2D8;--border-2:#D6D0C4;
+  --code-bg:#1A1A1A;--code-text:#E8E6E3;--code-dim:#6B6B6B;
+  --radius:3px;--radius-lg:6px;
+  --font:'Inter',-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --display:'Space Grotesk',var(--font);
+  --mono:'JetBrains Mono',"Cascadia Code",Consolas,monospace;
+  --shadow:0 1px 3px rgba(28,25,23,.06);--shadow-md:0 4px 16px rgba(28,25,23,.08);
+}
+[data-theme="dark"]{
+  --paper:#1A1A1A;--paper-2:#222222;--paper-3:#2A2A2A;
+  --ink:#E8E6E3;--ink-2:#B8B5B0;--ink-3:#8A8782;--ink-4:#6B6864;
+  --teal:#2DD4BF;--teal-2:#5EEAD4;--teal-3:#2DD4BF;
+  --amber:#FBBF24;--amber-2:#F59E0B;
+  --border:#333333;--border-2:#444444;
+  --code-bg:#0D0D0D;--code-text:#E8E6E3;--code-dim:#6B6B6B;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 16px rgba(0,0,0,.4);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--paper);color:var(--ink);line-height:1.65;overflow-x:hidden;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+code{font-family:var(--mono);font-size:.85em}
+
+/* ═══ Nav ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--paper);border-bottom:1px solid var(--border);transition:background .3s,border-color .3s}
+.nav-inner{max-width:1160px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:-.02em;color:var(--ink)}
+.nav-logo .dot{width:24px;height:24px;border-radius:var(--radius);background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--paper)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:.875rem;color:var(--ink-2);transition:color .2s;font-weight:500}
+.nav-links a:hover{color:var(--teal)}
+.nav-actions{display:flex;align-items:center;gap:8px}
+.theme-toggle,.lang-toggle{height:34px;border-radius:var(--radius);border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;color:var(--ink-2)}
+.theme-toggle{width:34px}
+.lang-toggle{padding:0 10px;font-weight:600;font-size:.78rem}
+.theme-toggle:hover,.lang-toggle:hover{border-color:var(--teal);color:var(--teal)}
+.nav-cta{font-size:.82rem;font-weight:600;padding:7px 16px;border-radius:var(--radius);background:var(--ink);color:var(--paper);border:0;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.nav-cta:hover{background:var(--teal)}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ═══ Hero ═══ */
+.hero{padding:120px 32px 80px;position:relative}
+.hero-grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:7fr 5fr;gap:64px;align-items:center}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:40px}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--paper-2);font-size:.75rem;color:var(--ink-3);margin-bottom:28px;font-family:var(--mono);font-weight:500}
+.hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:var(--display);font-size:clamp(2.2rem,4.5vw,3.4rem);font-weight:700;letter-spacing:-.03em;line-height:1.08;margin-bottom:20px;color:var(--ink)}
+.hero h1 .accent{color:var(--teal)}
+.hero p{font-size:1.05rem;color:var(--ink-2);max-width:520px;margin:0 0 32px;line-height:1.7}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius);background:var(--ink);color:var(--paper);font-weight:600;font-size:.875rem;border:0;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.btn-primary:hover{background:var(--teal);transform:translateY(-1px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius);border:1px solid var(--border-2);background:transparent;color:var(--ink);font-weight:600;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.btn-ghost:hover{border-color:var(--ink);background:var(--paper-2)}
+.hero-stats{display:flex;gap:48px;margin-top:48px;padding-top:32px;border-top:1px solid var(--border)}
+.hero-stat .num{font-family:var(--display);font-size:1.75rem;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.hero-stat .lbl{font-size:.72rem;color:var(--ink-3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+
+/* ═══ Terminal (hero right) ═══ */
+.terminal{background:var(--code-bg);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-md);font-family:var(--mono);font-size:.76rem;line-height:1.75}
+.terminal-head{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#252525;border-bottom:1px solid #333}
+.terminal-head .tdot{width:11px;height:11px;border-radius:50%}
+.terminal-head .tdot:nth-child(1){background:#FF5F57}
+.terminal-head .tdot:nth-child(2){background:#FEBC2E}
+.terminal-head .tdot:nth-child(3){background:#28C840}
+.terminal-head .ttitle{margin-left:8px;color:#999;font-size:.72rem}
+.terminal-body{padding:16px 18px;color:var(--code-text);white-space:pre;overflow-x:auto}
+.terminal-body .cmd{color:#FEBC2E}
+.terminal-body .ok{color:#28C840}
+.terminal-body .crit{color:#FF5F57}
+.terminal-body .maj{color:#FEBC2E}
+.terminal-body .mute{color:var(--code-dim)}
+.terminal-body .tealc{color:#2DD4BF}
+
+/* ═══ Section ═══ */
+section{padding:80px 32px}
+.section-inner{max-width:1160px;margin:0 auto}
+.section-head{margin-bottom:56px;max-width:680px}
+.section-head .label{font-family:var(--mono);font-size:.72rem;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px;display:block}
+.section-head h2{font-family:var(--display);font-size:clamp(1.6rem,3vw,2.1rem);font-weight:700;letter-spacing:-.02em;margin-bottom:12px;color:var(--ink)}
+.section-head p{color:var(--ink-2);font-size:.95rem;line-height:1.7}
+
+/* ═══ Features (vertical narrative) ═══ */
+.feature-list{display:flex;flex-direction:column}
+.feature-item{display:grid;grid-template-columns:72px 1fr;gap:32px;padding:36px 0;border-bottom:1px solid var(--border);align-items:start}
+.feature-item:last-child{border-bottom:none}
+.feature-num{font-family:var(--display);font-size:1.75rem;font-weight:700;color:var(--border-2);letter-spacing:-.02em;line-height:1}
+.feature-content h3{font-family:var(--display);font-size:1.15rem;font-weight:600;margin-bottom:8px;color:var(--ink);letter-spacing:-.01em}
+.feature-content p{font-size:.9rem;color:var(--ink-2);line-height:1.7;max-width:600px}
+.feature-content .code-snippet{margin-top:14px;background:var(--code-bg);color:var(--code-text);padding:12px 16px;border-radius:var(--radius);font-family:var(--mono);font-size:.74rem;line-height:1.7;overflow-x:auto;white-space:pre}
+.feature-content .code-snippet .mute{color:var(--code-dim)}
+.feature-content .code-snippet .tealc{color:#2DD4BF}
+.feature-content .code-snippet .crit{color:#FF5F57}
+.feature-content .code-snippet .maj{color:#FEBC2E}
+.feature-content .code-snippet .ok{color:#28C840}
+
+/* ═══ Demo ═══ */
+.demo-section{background:var(--paper-2)}
+.demo-card{max-width:960px;margin:0 auto;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--paper);overflow:hidden;box-shadow:var(--shadow-md)}
+.demo-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 4px;background:var(--paper-3)}
+.demo-tab{padding:12px 18px;font-size:.82rem;font-weight:600;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:var(--font)}
+.demo-tab:hover{color:var(--ink-2)}
+.demo-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.demo-body{padding:24px}
+.demo-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.demo-row input{flex:1;min-width:140px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:.85rem;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s;font-family:var(--font)}
+.demo-row input:focus{border-color:var(--teal)}
+textarea,pre.code{width:100%;min-height:200px;padding:14px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--mono);font-size:.82rem;resize:vertical;background:var(--code-bg);color:var(--code-text);outline:none;line-height:1.6;transition:border-color .2s}
+textarea:focus{border-color:var(--teal)}
+pre.code{background:var(--code-bg)!important;color:var(--code-text)!important;min-height:60px;white-space:pre-wrap;word-break:break-word;border:0;padding:12px;border-radius:var(--radius)}
+.demo-hint{background:var(--paper-2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:var(--ink-2)}
+.demo-hint b{color:var(--ink)}
+.demo-hint code{background:var(--paper-3);padding:2px 6px;border-radius:3px}
+.btn-run{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius);background:var(--teal);color:#fff;font-weight:600;font-size:.88rem;border:0;cursor:pointer;margin-top:12px;transition:all .2s;font-family:var(--font)}
+.btn-run:hover{background:var(--teal-2);transform:translateY(-1px)}
+.btn-run:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.demo-status{font-size:.8rem;color:var(--ink-3);margin-top:8px;font-family:var(--mono)}
+
+/* ═══ Report ═══ */
+.report-card{max-width:960px;margin:16px auto 0;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--paper);padding:24px;box-shadow:var(--shadow)}
+.report-empty{color:var(--ink-3);text-align:center;padding:40px 0;font-size:.9rem}
+.report-head{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.score-ring{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.score-ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--paper)}
+.score-ring .val{position:relative;z-index:1;font-size:1.4rem;font-weight:800;line-height:1;font-family:var(--display)}
+.score-ring .grade{position:relative;z-index:1;font-size:.72rem;color:var(--ink-3)}
+.report-meta{flex:1;min-width:200px}
+.report-meta h4{font-size:.95rem;font-weight:600;margin-bottom:4px;line-height:1.4}
+.report-meta .sub{font-size:.8rem;color:var(--ink-3)}
+.dim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.dim{background:var(--paper-2);border-radius:var(--radius);padding:10px 12px}
+.dim-top{display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;margin-bottom:5px}
+.dim-bar{height:5px;border-radius:99px;background:var(--border);overflow:hidden}
+.dim-bar i{display:block;height:100%;border-radius:99px;transition:width .8s ease}
+.eng-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+.eng{border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;background:var(--paper-2)}
+.eng .n{font-size:1.2rem;font-weight:800;font-family:var(--display)}
+.eng .l{font-size:.72rem;color:var(--ink-3);margin-top:2px}
+.eng.rule .n{color:var(--green)}.eng.llm .n{color:var(--teal)}.eng.conf .n{color:var(--purple)}
+.issue{border:1px solid var(--border);border-left:3px solid var(--ink-3);border-radius:0 var(--radius) var(--radius) 0;padding:12px 14px;margin:8px 0;background:var(--paper-2);cursor:pointer;transition:all .2s}
+.issue:hover{background:var(--paper-3);border-left-color:var(--teal)}
+.issue.open{background:var(--paper-3)}
+.issue-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.84rem;font-weight:600}
+.issue-body{display:none;margin-top:10px}
+.issue.open .issue-body{display:block}
+.issue-body p{margin:6px 0;font-size:.82rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--radius);font-size:.7rem;font-weight:700;font-family:var(--mono)}
+.b-critical{background:rgba(220,38,38,.12);color:var(--red)}.b-major{background:rgba(217,119,6,.12);color:var(--amber)}
+.b-minor{background:rgba(29,78,216,.12);color:var(--blue)}.b-info{background:rgba(120,113,108,.12);color:var(--ink-3)}
+.b-rule{background:rgba(5,150,105,.12);color:var(--green)}.b-llm{background:rgba(15,118,110,.12);color:var(--teal)}
+.b-confirmed{background:rgba(124,58,237,.12);color:var(--purple)}
+.b-ast{background:rgba(217,119,6,.12);color:var(--amber)}
+.tag{color:var(--ink-3);font-size:.76rem;font-family:var(--mono)}
+.fix-block{margin-top:8px}
+.copy-btn{background:var(--paper-3);color:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius);font-size:.74rem;padding:4px 10px;cursor:pointer;margin-top:6px;transition:all .2s;font-family:var(--font)}
+.copy-btn:hover{border-color:var(--teal);color:var(--teal)}
+.copy-btn.apply{background:var(--green);color:#fff;border-color:var(--green)}
+ul.plain{margin:8px 0;padding-left:18px}ul.plain li{margin:4px 0;font-size:.85rem}
+.report-section-title{font-size:.88rem;font-weight:700;margin:20px 0 8px;display:flex;align-items:center;gap:6px;font-family:var(--display)}
+
+/* ═══ API Section ═══ */
+.api-list{max-width:960px;margin:0 auto}
+.api-row{display:grid;grid-template-columns:64px 200px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);align-items:center;font-size:.85rem}
+.api-row:last-child{border-bottom:none}
+.api-method{display:inline-block;padding:2px 8px;border-radius:var(--radius);font-size:.7rem;font-weight:700;font-family:var(--mono);text-align:center}
+.api-get{background:rgba(5,150,105,.12);color:var(--green)}
+.api-post{background:rgba(15,118,110,.12);color:var(--teal)}
+.api-row .path{font-family:var(--mono);font-size:.82rem;color:var(--ink);font-weight:500}
+.api-row .desc{font-size:.82rem;color:var(--ink-2)}
+@media(max-width:700px){.api-row{grid-template-columns:60px 1fr;gap:8px}.api-row .path{grid-column:2}.api-row .desc{grid-column:1/3;grid-row:2;padding-left:68px}}
+
+/* ═══ Footer ═══ */
+footer{border-top:1px solid var(--border);padding:40px 32px;background:var(--paper)}
+.footer-inner{max-width:1160px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.footer-left{display:flex;align-items:center;gap:10px}
+.footer-left .dot{width:24px;height:24px;border-radius:var(--radius);background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--paper)}
+.footer-left span{font-family:var(--display);font-weight:700;font-size:.9rem}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:.82rem;color:var(--ink-3);transition:color .2s}
+.footer-links a:hover{color:var(--teal)}
+.footer-copy{font-size:.78rem;color:var(--ink-3);font-family:var(--mono)}
+
+/* ═══ Icons ═══ */
+.icon{width:1em;height:1em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.125em}
+
+/* ═══ Toast ═══ */
+#toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 18px;border-radius:var(--radius);font-size:.82rem;z-index:200;box-shadow:var(--shadow-md);opacity:0;transition:opacity .3s;font-family:var(--font)}
+
+/* ═══ Workbench ═══ */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.metric-group{background:var(--paper-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.metric-group h4{font-size:.72rem;font-weight:700;color:var(--ink-3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+.metric-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.8rem}
+.metric-label{flex:0 0 auto;min-width:80px;color:var(--ink-2)}
+.metric-val{flex:0 0 auto;font-weight:600;color:var(--ink);min-width:50px;text-align:right;font-family:var(--mono)}
+.metric-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.metric-fill{height:100%;background:var(--teal);border-radius:2px;transition:width .4s ease}
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.rule-lang{background:var(--paper-2);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+.rule-lang h4{font-size:.72rem;font-weight:700;color:var(--teal);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+.rule-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:.78rem;border-bottom:1px solid var(--border)}
+.rule-item:last-child{border-bottom:none}
+.rule-id{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);flex:0 0 70px}
+.rule-sev{font-size:.66rem;font-weight:700;padding:1px 6px;border-radius:3px;flex:0 0 auto;font-family:var(--mono)}
+.sev-critical{background:rgba(220,38,38,.12);color:var(--red)}
+.sev-major{background:rgba(217,119,6,.12);color:var(--amber)}
+.sev-minor{background:rgba(29,78,216,.12);color:var(--blue)}
+.sev-info{background:rgba(120,113,108,.12);color:var(--ink-3)}
+.rule-title{flex:1;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m4.93-15.07 1.41 1.41M5.34 18.66l1.41 1.41M2 12h2M20 12h2m-2.34-5.66-1.41 1.41M17.66 17.66l1.41 1.41"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+<symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-1.83.01-2.54a1.88 1.88 0 0 0-2.61 0c-.96.96-1.96 1.06-2.41.54"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 5.72-4.78 10-10 10Z"/><path d="M9 12h.01"/></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M15 20v2M2 15h2M20 15h2M9 2v2M9 20v2M2 9h2M20 9h2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></symbol>
+<symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-thumb" viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></symbol>
+<symbol id="i-loader" viewBox="0 0 24 24"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+</svg>
+
+<!-- ═══ Nav ═══ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><span class="dot"><svg class="icon"><use href="#i-search"/></svg></span> Code Review Agent</a>
+    <div class="nav-links">
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#demo" data-i18n="nav.demo">Try Online</a>
+      <a href="#workbench">Workbench</a>
+      <a href="#api">API</a>
+      <a href="https://github.com/kestarsheng/code-review-agent" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-actions">
+      <button class="lang-toggle" onclick="toggleLang()" id="lang-btn">中文</button>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn"><svg class="icon"><use href="#i-moon"/></svg></button>
+      <button class="nav-cta" onclick="document.getElementById('demo').scrollIntoView()" data-i18n="nav.cta">Try Now</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-badge"><span class="pulse"></span> <span data-i18n="hero.badge">6 AI-pattern rules · 40 total · 3 engines</span></div>
+      <h1 data-i18n-html="hero.title">Who reviews the code<br>your <span class="accent">AI agent</span> writes?</h1>
+      <p data-i18n="hero.desc">Claude Code, Codex, Cursor write code fast — but they hallucinate imports, use eval(), swallow exceptions. This agent catches those patterns: 6 dedicated AI-pattern rules + AST structural analysis + LLM semantic review with cross-validation. Every issue tagged with its source engine.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView()" data-i18n="hero.tryBtn"><svg class="icon"><use href="#i-rocket"/></svg> Try Online</button>
+        <button class="btn-ghost" onclick="copyCli()" data-i18n="hero.cliBtn"><svg class="icon"><use href="#i-clipboard"/></svg> Copy CLI Command</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="num">40</div><div class="lbl" data-i18n="hero.statRules">Rules</div></div>
+        <div class="hero-stat"><div class="num">9</div><div class="lbl" data-i18n="hero.statLangs">Languages</div></div>
+        <div class="hero-stat"><div class="num">93</div><div class="lbl" data-i18n="hero.statTests">Tests</div></div>
+        <div class="hero-stat"><div class="num">12</div><div class="lbl" data-i18n="hero.statEndpoints">Endpoints</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="terminal">
+        <div class="terminal-head"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span><span class="ttitle">cli.py — commit HEAD~1</span></div>
+        <div class="terminal-body"><span class="cmd">$</span> python cli.py --commit HEAD~1
+
+<span class="mute">Analyzing 2 files · 3 engines...</span>
+<span class="ok">✓</span> Review complete  <span class="mute">Score: 72/C  Issues: 4</span>
+
+ <span class="crit">● CRITICAL</span>  SQL Injection
+   line 2  <span class="mute">rule:sql_injection · confirmed</span>
+   <span class="tealc">→</span> Use parameterized query
+
+ <span class="maj">● MAJOR</span>     Hardcoded Secret
+   line 6  <span class="mute">rule:hardcoded_secret · confirmed</span>
+   <span class="tealc">→</span> Read from env variable
+
+ <span class="maj">● MAJOR</span>     eval() Usage
+   line 7  <span class="mute">ast:eval_usage</span>
+   <span class="tealc">→</span> Replace with json.loads
+
+<span class="mute">─── engines ───────────────────</span>
+ rule: 2   ast: 1   llm: 1   <span class="tealc">confirmed: 2</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Features ═══ -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="label">how it works</span>
+      <h2 data-i18n="features.title">Three engines. One verdict.</h2>
+      <p data-i18n="features.desc">A single rule engine finds known patterns. A single LLM hallucinates. AST analysis alone misses semantics. Running all three and cross-validating gives you determinism where it matters and depth where it counts.</p>
+    </div>
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-num">01</div>
+        <div class="feature-content">
+          <h3 data-i18n="features.f1t">Rule Engine — 40 patterns, zero API cost</h3>
+          <p data-i18n="features.f1d">Deterministic pattern matching across 9 languages. Security vulnerabilities, performance anti-patterns, AI hallucination signatures. Runs in milliseconds, works offline, never costs a token.</p>
+          <div class="code-snippet"><span class="mute"># matches in &lt;5ms, no LLM call</span>
+<span class="crit">sql_injection</span>      → CRITICAL  line 2
+<span class="maj">hardcoded_secret</span>   → MAJOR     line 6
+<span class="maj">eval_usage</span>         → CRITICAL  line 7</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">02</div>
+        <div class="feature-content">
+          <h3 data-i18n="features.f2t">AST Analyzer — structural analysis</h3>
+          <p data-i18n="features.f2d">Python ast.parse walks the syntax tree to catch what regex can't: undefined variables, unused imports, duplicate definitions, empty functions, syntax errors. Deterministic, precise, zero false positives on structural issues.</p>
+          <div class="code-snippet"><span class="mute"># ast_analyzer.py — structural only</span>
+undefined_var    → <span class="maj">MAJOR</span>   <span class="mute">'user_id' used before assignment</span>
+unused_import    → <span class="mute">INFO</span>    <span class="mute">'os' imported but never used</span>
+duplicate_def    → <span class="maj">MAJOR</span>   <span class="mute">'process_user' defined twice</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">03</div>
+        <div class="feature-content">
+          <h3 data-i18n="features.f3t">LLM Semantic — the deep review</h3>
+          <p data-i18n="features.f3d">Receives rule + AST pre-scan results, then does what deterministic engines can't: logic errors, architecture flaws, business boundary violations. Confirms or denies rule hits, eliminating false positives.</p>
+          <div class="code-snippet"><span class="mute">// LLM receives pre-scan context, then:</span>
+<span class="tealc">"User input flows into SQL query without</span>
+<span class="tealc"> sanitization — confirmed injection risk."</span>
+<span class="mute">→ issue.source = "confirmed"  // both agree</span>
+<span class="mute">→ issue.confidence = 0.95     // auto-boosted</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">04</div>
+        <div class="feature-content">
+          <h3 data-i18n="features.f4t">5-Dimension Scoring — quantified quality</h3>
+          <p data-i18n="features.f4d">Correctness, Security, Performance, Maintainability, Best Practice — each 0–100. Composite score weighted: security 30% + correctness 25%. Every issue links back to its source engine and rule ID.</p>
+          <div class="code-snippet"><span class="mute">security:     45/100  </span><span class="crit">████████░░░░░░</span> <span class="crit">D</span>
+<span class="mute">correctness:  72/100  </span><span class="maj">██████████████</span> <span class="maj">C</span>
+<span class="mute">performance:  85/100  </span><span class="ok">████████████████</span> <span class="ok">B</span>
+<span class="mute">overall:      68/C</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">05</div>
+        <div class="feature-content">
+          <h3 data-i18n="features.f5t">Fix Code — copy-paste ready</h3>
+          <p data-i18n="features.f5d">Every issue ships with a fix_code snippet. Rule engine auto-generates for 8 key patterns. LLM covers complex semantic fixes. One click applies directly to your input — no manual rewriting.</p>
+          <div class="code-snippet"><span class="mute">--- line 2</span>
+<span class="crit">- query = f"SELECT * FROM users WHERE id = {user_id}"</span>
+<span class="ok">+ query = "SELECT * FROM users WHERE id = ?"</span>
+<span class="ok">+ cursor.execute(query, (user_id,))</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">06</div>
+        <div class="feature-content">
+          <h3 data-i18n="features.f6t">MCP + REST + SARIF — integrate anywhere</h3>
+          <p data-i18n="features.f6d">10 MCP tools for AI agents. 12 REST endpoints for CI/CD. SARIF 2.1.0 export for GitHub Code Scanning and VS Code. PR URL review for GitHub pull requests. All on one server.</p>
+          <div class="code-snippet"><span class="tealc">POST</span> /v1/review        <span class="mute">→ REST (CI/CD)</span>
+<span class="tealc">MCP</span>  review_code       <span class="mute">→ Agent tool</span>
+<span class="tealc">MCP</span>  analyze_metrics   <span class="mute">→ Agent tool</span>
+<span class="tealc">POST</span> /v1/sarif         <span class="mute">→ GitHub Code Scanning</span>
+<span class="tealc">POST</span> /v1/review_pr      <span class="mute">→ GitHub PR URL</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Demo ═══ -->
+<section id="demo" class="demo-section">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="label">try it</span>
+      <h2 data-i18n="demo.title">Paste code. Get a review.</h2>
+      <p data-i18n="demo.desc">Paste code or diff, click review. Or use CLI: <code>python cli.py --commit HEAD~1</code></p>
+    </div>
+    <div class="demo-card">
+      <div class="demo-tabs">
+        <div class="demo-tab active" id="tab-code" onclick="switchTab('code')" data-i18n="demo.tabCode">Code Review</div>
+        <div class="demo-tab" id="tab-diff" onclick="switchTab('diff')" data-i18n="demo.tabDiff">Diff Review</div>
+        <div class="demo-tab" id="tab-files" onclick="switchTab('files')" data-i18n="demo.tabFiles">Multi-File</div>
+        <div class="demo-tab" id="tab-fix" onclick="switchTab('fix')" data-i18n="demo.tabFix">Auto Fix</div>
+      </div>
+      <div class="demo-body">
+        <div class="demo-row">
+          <input id="language" data-i18n-ph="demo.phLang" placeholder="Language (python / java / js / go)" value="python">
+          <input id="context" data-i18n-ph="demo.phCtx" placeholder="Task context (optional)" style="flex:2;">
+        </div>
+        <div id="single-block">
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px;font-family:var(--mono);color:var(--ink-2)" id="code-label" data-i18n="demo.lblCode">Source Code</label>
+          <textarea id="code" spellcheck="false">def get_user(user_id):
+    query = f"SELECT * FROM users WHERE id = {user_id}"
+    return db.execute(query).fetchone()
+
+def save_profile(user):
+    password = "hardcoded123456"
+    db.execute(f"UPDATE users SET bio = '{user['bio']}' WHERE id = {user['id']}")
+    db.commit()</textarea>
+        </div>
+        <div id="files-block" style="display:none;">
+          <div class="demo-hint" data-i18n="demo.hint"><svg class="icon"><use href="#i-bulb"/></svg> <b>CLI recommended:</b><code>python cli.py --staged</code> or <code>python cli.py --commit HEAD~1</code> to review git changes directly, no pasting needed.</div>
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px;font-family:var(--mono);color:var(--ink-2)" data-i18n="demo.lblFiles">Multi-file (separate with <code># == filename ==</code>)</label>
+          <textarea id="files-area" spellcheck="false"># == utils.py ==
+import os
+
+def load_config(path):
+    token = "sk-1234567890abcdef"
+    data = open(path).read()
+    return eval(data)
+
+# == main.py ==
+from utils import load_config
+
+def handler(event, context):
+    cfg = load_config("config.txt")
+    result = eval(event["body"])
+    return {"statusCode": 200, "body": result}</textarea>
+        </div>
+        <button class="btn-run" id="btn" data-i18n="demo.runBtn"><svg class="icon"><use href="#i-play"/></svg> Start Review</button>
+        <div class="demo-status" id="status"></div>
+      </div>
+    </div>
+    <div class="report-card" id="result-card">
+      <div class="report-empty" id="report" data-i18n="demo.emptyResult">Click "Start Review" to see results</div>
+    </div>
+    <div class="report-card" id="fix-card" style="display:none;">
+      <h3 style="font-size:.9rem;font-weight:700;margin-bottom:12px;font-family:var(--display)" data-i18n="demo.fixTitle"><svg class="icon"><use href="#i-wrench"/></svg> Fix Solution</h3>
+      <div id="fix-report"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Workbench (deterministic, free, instant) ═══ -->
+<section id="workbench" class="demo-section">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="label">workbench</span>
+      <h2>Live Workbench <span style="font-size:.7em;color:var(--teal);font-family:var(--mono)">— free &amp; instant</span></h2>
+      <p>Deterministic engines run server-side — no LLM, no API key, millisecond latency. Try metrics, SARIF export, rule catalog, or PR URL review.</p>
+    </div>
+    <div class="demo-card">
+      <div class="demo-tabs">
+        <div class="demo-tab active" id="wb-tab-metrics" onclick="wbTab('metrics')">Metrics</div>
+        <div class="demo-tab" id="wb-tab-sarif" onclick="wbTab('sarif')">SARIF Export</div>
+        <div class="demo-tab" id="wb-tab-rules" onclick="wbTab('rules')">Rule Catalog</div>
+        <div class="demo-tab" id="wb-tab-pr" onclick="wbTab('pr')">PR URL</div>
+      </div>
+      <div class="demo-body">
+        <div id="wb-input-block">
+          <div class="demo-row">
+            <input id="wb-lang" placeholder="Language (python / ts / c / go / shell)" value="python" style="flex:1">
+            <input id="wb-uri" placeholder="Artifact URI (e.g. src/main.py)" value="snippet.py" style="flex:2">
+          </div>
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px;font-family:var(--mono);color:var(--ink-2)">Source Code</label>
+          <textarea id="wb-code" spellcheck="false" style="min-height:180px">import os
+import unused_module
+
+def process_user(user_id):
+    query = f"SELECT * FROM users WHERE id = {user_id}"
+    result = db.execute(query)
+    password = "hardcoded123456"
+    return eval(result)
+
+def process_user(user_id):
+    return user_id
+
+def placeholder():
+    pass</textarea>
+        </div>
+        <div id="wb-pr-block" style="display:none">
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px;font-family:var(--mono);color:var(--ink-2)">GitHub PR or Commit URL</label>
+          <input id="wb-pr-url" placeholder="https://github.com/owner/repo/pull/123" style="width:100%;padding:8px 12px;background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);color:var(--ink);font-size:.85rem;font-family:var(--font)">
+          <div style="margin-top:8px;font-size:.78rem;color:var(--ink-3);font-family:var(--mono)">Public repos need no token. Private repos use GITHUB_TOKEN env var.</div>
+        </div>
+        <button class="btn-run" id="wb-btn"><svg class="icon"><use href="#i-play"/></svg> <span id="wb-btn-text">Run Metrics</span></button>
+        <div class="demo-status" id="wb-status"></div>
+      </div>
+    </div>
+    <div class="report-card">
+      <div class="report-empty" id="wb-result">Click a tab above and run — results appear here instantly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ API ═══ -->
+<section id="api">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="label">api</span>
+      <h2 data-i18n="api.title">12 endpoints. 10 MCP tools.</h2>
+      <p data-i18n="api.desc">REST API and MCP tools coexist on the same server. SARIF export for GitHub Code Scanning. PR URL review for pull requests.</p>
+    </div>
+    <div class="api-list">
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/review</span><span class="desc" data-i18n="api.r1">Review source code, return 5-dimension scores + issues + fix code</span></div>
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/review_diff</span><span class="desc" data-i18n="api.r2">Review Unified Diff, return change metadata + review report</span></div>
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/review_files</span><span class="desc" data-i18n="api.r3">Multi-file batch review, per-file scan + cross-file analysis</span></div>
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/review_pr</span><span class="desc">Review GitHub PR or commit URL by fetching diff remotely</span></div>
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/suggest_fix</span><span class="desc" data-i18n="api.r4">Generate complete fixed version (fixed_code + change notes)</span></div>
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/metrics</span><span class="desc">Code quality metrics: complexity, function lengths, comment ratio</span></div>
+      <div class="api-row"><span class="api-method api-post">POST</span><span class="path">/v1/sarif</span><span class="desc">Export SARIF 2.1.0 for GitHub Code Scanning / VS Code</span></div>
+      <div class="api-row"><span class="api-method api-get">GET</span><span class="path">/v1/rules</span><span class="desc" data-i18n="api.r5">List all 40 rule engine rules</span></div>
+      <div class="api-row"><span class="api-method api-get">GET</span><span class="path">/v1/rules/{rule_id}</span><span class="desc" data-i18n="api.r6">View single rule details and fix guidance</span></div>
+      <div class="api-row"><span class="api-method api-get">GET</span><span class="path">/mcp</span><span class="desc" data-i18n="api.r7">Remote MCP streamable HTTP endpoint (10 tools)</span></div>
+      <div class="api-row"><span class="api-method api-get">GET</span><span class="path">/health</span><span class="desc" data-i18n="api.r8">Health check, returns deployment commit</span></div>
+      <div class="api-row"><span class="api-method api-get">GET</span><span class="path">/.well-known/xagent-verification.json</span><span class="desc"><span style="display:inline-block">Deployment proof — signed commit for hackathon judges</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <span class="dot"><svg class="icon"><use href="#i-search"/></svg></span>
+      <span>Code Review Agent</span>
+    </div>
+    <div class="footer-links">
+      <a href="#features" data-i18n="footer.features">Features</a>
+      <a href="#demo" data-i18n="footer.demo">Try</a>
+      <a href="#api">API</a>
+      <a href="https://github.com/kestarsheng/code-review-agent" target="_blank">GitHub</a>
+      <a href="https://code-review-agent-ashy-six.vercel.app/docs" target="_blank">Swagger</a>
+    </div>
+    <div class="footer-copy">X-Agent Hackathon 2026 · kestarsheng</div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+<script>
+/* ═══ i18n ═══ */
+const I18N={
+  en:{
+    "nav.features":"Features","nav.demo":"Try Online","nav.cta":"Try Now",
+    "hero.badge":"6 AI-pattern rules · 40 total · 3 engines",
+    "hero.title":'Who reviews the code<br>your <span class="accent">AI agent</span> writes?',
+    "hero.desc":"Claude Code, Codex, Cursor write code fast — but they hallucinate imports, use eval(), swallow exceptions. This agent catches those patterns: 6 dedicated AI-pattern rules + AST structural analysis + LLM semantic review with cross-validation. Every issue tagged with its source engine.",
+    "hero.tryBtn":"<svg class='icon'><use href='#i-rocket'/></svg> Try Online","hero.cliBtn":"<svg class='icon'><use href='#i-clipboard'/></svg> Copy CLI Command",
+    "hero.statRules":"Rules","hero.statLangs":"Languages","hero.statTests":"Tests","hero.statEndpoints":"Endpoints",
+    "features.title":"Three engines. One verdict.","features.desc":"A single rule engine finds known patterns. A single LLM hallucinates. AST analysis alone misses semantics. Running all three and cross-validating gives you determinism where it matters and depth where it counts.",
+    "features.f1t":"Rule Engine — 40 patterns, zero API cost","features.f1d":"Deterministic pattern matching across 9 languages. Security vulnerabilities, performance anti-patterns, AI hallucination signatures. Runs in milliseconds, works offline, never costs a token.",
+    "features.f2t":"AST Analyzer — structural analysis","features.f2d":"Python ast.parse walks the syntax tree to catch what regex can't: undefined variables, unused imports, duplicate definitions, empty functions, syntax errors. Deterministic, precise, zero false positives on structural issues.",
+    "features.f3t":"LLM Semantic — the deep review","features.f3d":"Receives rule + AST pre-scan results, then does what deterministic engines can't: logic errors, architecture flaws, business boundary violations. Confirms or denies rule hits, eliminating false positives.",
+    "features.f4t":"5-Dimension Scoring — quantified quality","features.f4d":"Correctness, Security, Performance, Maintainability, Best Practice — each 0–100. Composite score weighted: security 30% + correctness 25%. Every issue links back to its source engine and rule ID.",
+    "features.f5t":"Fix Code — copy-paste ready","features.f5d":"Every issue ships with a fix_code snippet. Rule engine auto-generates for 8 key patterns. LLM covers complex semantic fixes. One click applies directly to your input — no manual rewriting.",
+    "features.f6t":"MCP + REST + SARIF — integrate anywhere","features.f6d":"10 MCP tools for AI agents. 12 REST endpoints for CI/CD. SARIF 2.1.0 export for GitHub Code Scanning and VS Code. PR URL review for GitHub pull requests. All on one server.",
+    "demo.title":"Paste code. Get a review.","demo.desc":"Paste code or diff, click review. Or use CLI: <code>python cli.py --commit HEAD~1</code>",
+    "demo.tabCode":"Code Review","demo.tabDiff":"Diff Review","demo.tabFiles":"Multi-File","demo.tabFix":"Auto Fix",
+    "demo.phLang":"Language (python / java / js / go)","demo.phCtx":"Task context (optional)",
+    "demo.lblCode":"Source Code","demo.lblFiles":"Multi-file (separate with <code># == filename ==</code>)",
+    "demo.hint":"<svg class='icon'><use href='#i-bulb'/></svg> <b>CLI recommended:</b><code>python cli.py --staged</code> or <code>python cli.py --commit HEAD~1</code> to review git changes directly, no pasting needed.",
+    "demo.runBtn":"<svg class='icon'><use href='#i-play'/></svg> Start Review","demo.emptyResult":'Click "Start Review" to see results',"demo.fixTitle":"<svg class='icon'><use href='#i-wrench'/></svg> Fix Solution",
+    "api.title":"12 endpoints. 10 MCP tools.","api.desc":"REST API and MCP tools coexist on the same server. SARIF export for GitHub Code Scanning. PR URL review for pull requests.",
+    "api.r1":"Review source code, return 5-dimension scores + issues + fix code","api.r2":"Review Unified Diff, return change metadata + review report",
+    "api.r3":"Multi-file batch review, per-file scan + cross-file analysis","api.r4":"Generate complete fixed version (fixed_code + change notes)",
+    "api.r5":"List all 40 rule engine rules","api.r6":"View single rule details and fix guidance",
+    "api.r7":"Remote MCP streamable HTTP endpoint (10 tools)","api.r8":"Health check, returns deployment commit",
+    "footer.features":"Features","footer.demo":"Try",
+    "dim.correctness":"Correctness","dim.security":"Security","dim.performance":"Performance","dim.maintainability":"Maintainability","dim.best_practice":"Best Practice",
+    "eng.rule":"<svg class='icon'><use href='#i-zap'/></svg> Rule Hits","eng.llm":"<svg class='icon'><use href='#i-cpu'/></svg> LLM Found","eng.conf":"<svg class='icon'><use href='#i-check'/></svg> Cross-Confirmed","eng.total":"<svg class='icon'><use href='#i-search'/></svg> Rules Run",
+    "issue.noIssues":"<svg class='icon'><use href='#i-check'/></svg> No issues found","issue.category":"Category:","issue.suggestion":"Suggestion:",
+    "issue.fixCode":"Fix code:","report.dims":"<svg class='icon'><use href='#i-chart'/></svg> Dimension Scores","report.issues":"<svg class='icon'><use href='#i-alert'/></svg> Issues","report.strengths":"<svg class='icon'><use href='#i-thumb'/></svg> Strengths","report.improvements":"<svg class='icon'><use href='#i-rocket'/></svg> Improvements",
+    "report.model":"Model:","report.issuesCount":"issues","report.grade":"grade",
+    "toast.copied":"Copied <svg class='icon'><use href='#i-check'/></svg>","toast.copyFail":"Copy failed","toast.cliCopied":"CLI command copied <svg class='icon'><use href='#i-check'/></svg>","toast.applied":"Applied to input box",
+    "demo.reviewing":"<svg class='icon'><use href='#i-loader'/></svg> Triple-engine reviewing (3-10s)...","demo.reviewingShort":"<svg class='icon'><use href='#i-loader'/></svg> Reviewing...","demo.done":"<svg class='icon'><use href='#i-check'/></svg> Review complete","demo.pasteFirst":"Please paste content first",
+    "demo.fixGenerated":"<svg class='icon'><use href='#i-check'/></svg> Fix solution generated","demo.fixDetected":"rule issues detected","demo.copyFix":"<svg class='icon'><use href='#i-clipboard'/></svg> Copy fix code",
+    "demo.applied":"Fix code applied to input box","demo.noFiles":"No files parsed",
+  },
+  zh:{
+    "nav.features":"功能","nav.demo":"在线试用","nav.cta":"立即试用",
+    "hero.badge":"6 条 AI 幻觉规则 · 共 40 条 · 3 引擎",
+    "hero.title":'谁 来审查<br><span class="accent">AI Agent</span> 写的代码？',
+    "hero.desc":"Claude Code、Codex、Cursor 写代码很快——但它们会幻觉导入、用 eval()、吞异常。本 Agent 专抓这些模式：6 条 AI 专用规则 + AST 结构分析 + LLM 语义评审 + 交叉验证。每个 issue 标注来源引擎。",
+    "hero.tryBtn":"<svg class='icon'><use href='#i-rocket'/></svg> 在线试用","hero.cliBtn":"<svg class='icon'><use href='#i-clipboard'/></svg> 复制 CLI 命令",
+    "hero.statRules":"规则","hero.statLangs":"语言","hero.statTests":"测试","hero.statEndpoints":"端点",
+    "features.title":"三个引擎，一个结论","features.desc":"单一规则引擎只发现已知模式，单一 LLM 会幻觉，AST 分析单独又缺语义。三个引擎交叉验证，在需要确定性的地方给确定性，在需要深度的地方给深度。",
+    "features.f1t":"规则引擎 — 40 条模式，零 API 成本","features.f1d":"跨 9 种语言的确定性模式匹配。安全漏洞、性能反模式、AI 幻觉特征。毫秒级返回，离线可跑，永远不花一个 token。",
+    "features.f2t":"AST 分析器 — 结构级分析","features.f2d":"Python ast.parse 遍历语法树，捕获正则抓不到的：未定义变量、未使用 import、重复定义、空函数、语法错误。确定性、精确、结构问题零误报。",
+    "features.f3t":"LLM 语义分析 — 深度评审","features.f3d":"接收规则 + AST 预检结果后做确定性引擎做不到的事：逻辑错误、架构缺陷、业务边界违规。确认或否定规则命中，消除误报。",
+    "features.f4t":"五维度评分 — 量化质量","features.f4d":"正确性、安全性、性能、可维护性、最佳实践各 0–100 分。综合分按安全 30% + 正确性 25% 加权。每个 issue 可溯源到来源引擎和规则 ID。",
+    "features.f5t":"修复代码 — 复制即用","features.f5d":"每个 issue 附带 fix_code 片段。规则引擎为 8 类关键模式自动生成，LLM 覆盖复杂语义修复。一键应用到输入框 — 无需手动改写。",
+    "features.f6t":"MCP + REST + SARIF — 处处可集成","features.f6d":"10 个 MCP 工具供 AI Agent 调用，12 个 REST 端点供 CI/CD 集成，SARIF 2.1.0 导出供 GitHub Code Scanning 和 VS Code，PR URL 评审 GitHub 拉取请求。全在一个服务器。",
+    "demo.title":"粘贴代码，获得评审","demo.desc":"粘贴代码或 diff，点击评审。也可用 CLI：<code>python cli.py --commit HEAD~1</code>",
+    "demo.tabCode":"代码评审","demo.tabDiff":"Diff 评审","demo.tabFiles":"多文件","demo.tabFix":"自动修复",
+    "demo.phLang":"语言 (python / java / js / go)","demo.phCtx":"任务上下文（可选）",
+    "demo.lblCode":"源代码","demo.lblFiles":"多文件（用 <code># == 文件名 ==</code> 分隔）",
+    "demo.hint":"<svg class='icon'><use href='#i-bulb'/></svg> <b>推荐用 CLI：</b><code>python cli.py --staged</code> 或 <code>python cli.py --commit HEAD~1</code> 直接评审 git 改动，无需手动粘贴。",
+    "demo.runBtn":"<svg class='icon'><use href='#i-play'/></svg> 开始评审","demo.emptyResult":"点击「开始评审」查看结果","demo.fixTitle":"<svg class='icon'><use href='#i-wrench'/></svg> 修复方案",
+    "api.title":"12 个端点，10 个 MCP 工具","api.desc":"REST API 与 MCP 工具共存于同一服务器。SARIF 导出供 GitHub Code Scanning，PR URL 评审拉取请求。",
+    "api.r1":"评审源代码，返回五维度评分 + 问题列表 + 修复代码","api.r2":"评审 Unified Diff，返回变更元数据 + 评审报告",
+    "api.r3":"多文件批量评审，per-file 扫描 + 跨文件架构分析","api.r4":"为问题代码生成完整修复版本（fixed_code + 变更说明）",
+    "api.r5":"列出全部 40 条规则引擎规则","api.r6":"查看单条规则详情与修复指引",
+    "api.r7":"远程 MCP streamable HTTP 端点（10 个工具）","api.r8":"健康检查，返回部署 commit",
+    "footer.features":"功能","footer.demo":"试用",
+    "dim.correctness":"正确性","dim.security":"安全性","dim.performance":"性能","dim.maintainability":"可维护性","dim.best_practice":"最佳实践",
+    "eng.rule":"<svg class='icon'><use href='#i-zap'/></svg> 规则命中","eng.llm":"<svg class='icon'><use href='#i-cpu'/></svg> LLM 发现","eng.conf":"<svg class='icon'><use href='#i-check'/></svg> 交叉确认","eng.total":"<svg class='icon'><use href='#i-search'/></svg> 规则执行",
+    "issue.noIssues":"<svg class='icon'><use href='#i-check'/></svg> 未发现问题","issue.category":"类别：","issue.suggestion":"建议：",
+    "issue.fixCode":"修复代码：","report.dims":"<svg class='icon'><use href='#i-chart'/></svg> 分维度评分","report.issues":"<svg class='icon'><use href='#i-alert'/></svg> 问题","report.strengths":"<svg class='icon'><use href='#i-thumb'/></svg> 优点","report.improvements":"<svg class='icon'><use href='#i-rocket'/></svg> 改进方向",
+    "report.model":"模型：","report.issuesCount":"个问题","report.grade":"级",
+    "toast.copied":"已复制 <svg class='icon'><use href='#i-check'/></svg>","toast.copyFail":"复制失败","toast.cliCopied":"已复制 CLI 命令 <svg class='icon'><use href='#i-check'/></svg>","toast.applied":"已应用到输入框",
+    "demo.reviewing":"<svg class='icon'><use href='#i-loader'/></svg> 三引擎评审中（3-10 秒）...","demo.reviewingShort":"<svg class='icon'><use href='#i-loader'/></svg> 评审中...","demo.done":"<svg class='icon'><use href='#i-check'/></svg> 评审完成","demo.pasteFirst":"请先粘贴内容",
+    "demo.fixGenerated":"<svg class='icon'><use href='#i-check'/></svg> 修复方案已生成","demo.fixDetected":"个规则问题","demo.copyFix":"<svg class='icon'><use href='#i-clipboard'/></svg> 复制修复代码",
+    "demo.applied":"已应用修复代码到输入框","demo.noFiles":"未解析到文件",
+  }
+};
+let LANG='en';
+function t(key){return(I18N[LANG]||I18N.en)[key]||key}
+function applyLang(lang){
+  LANG=lang;
+  document.documentElement.lang=lang==='zh'?'zh-CN':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.innerHTML=t(el.dataset.i18n)});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=t(el.dataset.i18nPh)});
+  document.getElementById('lang-btn').textContent=lang==='en'?'中文':'EN';
+  try{localStorage.setItem('cr-lang',lang)}catch(e){}
+}
+function toggleLang(){applyLang(LANG==='en'?'zh':'en')}
+
+/* ═══ Theme ═══ */
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('theme-btn').innerHTML=next==='dark'?'<svg class="icon"><use href="#i-sun"/></svg>':'<svg class="icon"><use href="#i-moon"/></svg>';
+  try{localStorage.setItem('cr-theme',next)}catch(e){}
+}
+(function(){try{const s=localStorage.getItem('cr-theme')||'light';document.documentElement.setAttribute('data-theme',s);document.getElementById('theme-btn').innerHTML=s==='dark'?'<svg class="icon"><use href="#i-sun"/></svg>':'<svg class="icon"><use href="#i-moon"/></svg>'}catch(e){}})();
+
+/* ═══ CLI copy ═══ */
+function copyCli(){
+  navigator.clipboard.writeText('python cli.py --commit HEAD~1 --remote').then(()=>toast(t('toast.cliCopied'))).catch(()=>toast(t('toast.copyFail')))
+}
+let toastT=null;
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.style.opacity='1';clearTimeout(toastT);toastT=setTimeout(()=>e.style.opacity='0',1800)}
+
+/* ═══ Demo logic ═══ */
+let mode='code';
+const btn=document.getElementById('btn');
+const statusEl=document.getElementById('status');
+const reportEl=document.getElementById('report');
+const fixReportEl=document.getElementById('fix-report');
+const fixCard=document.getElementById('fix-card');
+const codeEl=document.getElementById('code');
+const filesBlock=document.getElementById('files-block');
+const singleBlock=document.getElementById('single-block');
+
+function switchTab(tab){
+  mode=tab;
+  ['code','diff','files','fix'].forEach(tt=>document.getElementById('tab-'+tt).classList.toggle('active',tt===tab));
+  const isFiles=tab==='files';
+  filesBlock.style.display=isFiles?'block':'none';
+  singleBlock.style.display=(tab==='fix')?'block':(isFiles?'none':'block');
+  fixCard.style.display='none';
+  const label=document.getElementById('code-label');
+  if(tab==='diff'){label.textContent='Unified Diff';codeEl.placeholder=LANG==='zh'?'粘贴 git diff 输出...':'Paste git diff output...'}
+  else if(tab==='fix'){label.innerHTML=t('demo.lblCode');codeEl.placeholder=LANG==='zh'?'粘贴有问题的代码...':'Paste problematic code...'}
+  else{label.innerHTML=t('demo.lblCode');codeEl.placeholder=LANG==='zh'?'粘贴要评审的代码...':'Paste code to review...'}
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function attrEsc(s){return esc(s).replace(/"/g,'&quot;')}
+function gradeColor(g){return{'A':'#059669','B':'#0F766E','C':'#D97706','D':'#DC2626'}[g]||'#78716C'}
+
+function hl(code,lang){
+  let text=String(code||'');
+  if(window.hljs&&text.trim()){try{const w=(lang||'python').toLowerCase();return hljs.highlight(text,{language:hljs.getLanguage(w)?w:'python'}).value}catch(e){}try{return hljs.highlightAuto(text).value}catch(e){}}
+  let html=esc(text);
+  html=html.replace(/(#[^\n]*)/g,'<span style="color:#64748b">$1</span>');
+  html=html.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span style="color:#D97706">$1</span>');
+  html=html.replace(/\b(def|class|import|from|return|if|elif|else|for|while|try|except|with|async|await|const|let|var|function)\b/g,'<span style="color:#0F766E">$1</span>');
+  return html;
+}
+
+function renderDims(dim){
+  if(!dim)return'';
+  const labels={correctness:t('dim.correctness'),security:t('dim.security'),performance:t('dim.performance'),maintainability:t('dim.maintainability'),best_practice:t('dim.best_practice')};
+  return'<div class="dim-grid">'+Object.keys(labels).map(k=>{
+    const v=dim[k]??0;const c=v>=85?'#059669':v>=70?'#0F766E':v>=50?'#D97706':'#DC2626';
+    return`<div class="dim"><div class="dim-top"><span>${labels[k]}</span><span style="color:${c}">${v}</span></div><div class="dim-bar"><i style="width:${v}%;background:${c}"></i></div></div>`;
+  }).join('')+'</div>';
+}
+
+function renderEng(info){
+  if(!info||!info.engines)return'';
+  return`<div class="eng-grid">
+    <div class="eng rule"><div class="n">${info.rule_count||0}</div><div class="l">${t('eng.rule')}</div></div>
+    <div class="eng llm"><div class="n">${info.llm_count||0}</div><div class="l">${t('eng.llm')}</div></div>
+    <div class="eng conf"><div class="n">${info.confirmed_count||0}</div><div class="l">${t('eng.conf')}</div></div>
+    <div class="eng"><div class="n">${info.total_rules_run||0}</div><div class="l">${t('eng.total')}</div></div>
+  </div>`;
+}
+
+function renderIssues(report){
+  if(!report.issues||!report.issues.length)return`<p style="color:var(--ink-3)">${t('issue.noIssues')}</p>`;
+  return report.issues.map((i,idx)=>{
+    const line=i.line?` · ${i.line}`:'';
+    const src=i.source?`<span class="badge b-${i.source}">${i.source}</span>`:'';
+    const rid=i.rule_id?`<span class="tag">${esc(i.rule_id)}</span>`:'';
+    const conf=(i.confidence!=null)?`<span class="tag">${(i.confidence*100|0)}%</span>`:'';
+    const fix=i.fix_code?`<div class="fix-block"><p style="color:var(--ink-3);font-size:.78rem;margin-bottom:4px">${t('issue.fixCode')}</p><pre class="code"><code>${hl(i.fix_code)}</code></pre><button class="copy-btn" onclick="copyText(this.dataset.c)" data-c="${attrEsc(i.fix_code)}"><svg class='icon'><use href='#i-clipboard'/></svg> ${LANG==='zh'?'复制':'Copy'}</button><button class="copy-btn apply" onclick="applyFix(${idx})"><svg class='icon'><use href='#i-zap'/></svg> ${LANG==='zh'?'应用':'Apply'}</button></div>`:'';
+    return`<div class="issue" onclick="this.classList.toggle('open')"><div class="issue-top"><span class="badge b-${i.severity}">${i.severity}</span>${src}${esc(i.title)}${line}${rid}${conf}</div><div class="issue-body"><p><b>${t('issue.category')}</b>${esc(i.category)}</p><p>${esc(i.description)}</p><p style="color:var(--ink-3)"><b>${t('issue.suggestion')}</b>${esc(i.suggestion)}</p>${fix}</div></div>`;
+  }).join('');
+}
+
+function renderReport(r,model){
+  const sc=gradeColor(r.grade);
+  return`<div class="report-head">
+    <div class="score-ring" style="background:conic-gradient(${sc} ${r.score*3.6}deg,var(--border) 0)">
+      <span class="val" style="color:${sc}">${r.score}</span><span class="grade">${r.grade}${t('report.grade')}</span>
+    </div>
+    <div class="report-meta"><h4>${esc(r.summary)}</h4><div class="sub">${t('report.model')}${esc(model||'')} · ${(r.issues||[]).length} ${t('report.issuesCount')}</div></div>
+  </div>${renderEng(r.engine_info)}<div class="report-section-title">${t('report.dims')}</div>${renderDims(r.dimension_scores)}<div class="report-section-title">${t('report.issues')} (${(r.issues||[]).length})</div>${renderIssues(r)}${(r.strengths&&r.strengths.length)?`<div class="report-section-title">${t('report.strengths')}</div><ul class="plain">${r.strengths.map(s=>'<li>'+esc(s)+'</li>').join('')}</ul>`:''}${(r.improvements&&r.improvements.length)?`<div class="report-section-title">${t('report.improvements')}</div><ul class="plain">${r.improvements.map(s=>'<li>'+esc(s)+'</li>').join('')}</ul>`:''}`;
+}
+
+function copyText(t2){navigator.clipboard.writeText(t2||'').then(()=>toast(t('toast.copied'))).catch(()=>toast(t('toast.copyFail')))}
+function applyFix(i){codeEl.value=(i.fix_code||'');statusEl.textContent=t('demo.applied');toast(t('toast.applied'))}
+
+function parseFilesArea(text){
+  const blocks=(text||'').split(/^#\s*==(.+?)==\s*$/m);
+  const files=[];for(let i=1;i<blocks.length;i+=2){const n=blocks[i].trim(),c=(blocks[i+1]||'').replace(/^\n+/,'').replace(/\n+$/,'');if(n&&c)files.push({filename:n,content:c,language:''})}
+  if(!files.length)files.push({filename:'untitled.txt',content:(text||'').replace(/^#.*\n/g,''),language:''});
+  files.forEach(f=>{const m=f.filename.toLowerCase().match(/\.(py|js|ts|java|go|rs|rb|php|c|cpp|sh)$/);if(m)f.language={py:'python',js:'javascript',ts:'javascript',java:'java',go:'go',rs:'rust',rb:'ruby',php:'php',c:'c',cpp:'c',sh:'shell'}[m[1]]||''});
+  return files;
+}
+
+async function run(){
+  const language=document.getElementById('language').value.trim();
+  const context=document.getElementById('context').value.trim();
+  const pick=mode==='files'?document.getElementById('files-area'):codeEl;
+  const content=pick.value.trim();
+  if(!content){statusEl.textContent=t('demo.pasteFirst');return}
+  btn.disabled=true;fixCard.style.display='none';
+  statusEl.textContent=t('demo.reviewing');
+  reportEl.className='';reportEl.innerHTML=`<div class="report-empty">${t('demo.reviewingShort')}</div>`;
+  const body={language,context};
+  try{
+    let endpoint;
+    if(mode==='files'){endpoint='/v1/review_files';body.files=parseFilesArea(content);if(!body.files.length)throw new Error(t('demo.noFiles'))}
+    else if(mode==='diff'){endpoint='/v1/review_diff';body.diff=content}
+    else if(mode==='fix'){endpoint='/v1/suggest_fix';body.code=content}
+    else{endpoint='/v1/review';body.code=content}
+    const resp=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await resp.json();
+    if(!resp.ok){reportEl.innerHTML=`<div class="report-empty" style="color:var(--red)"><svg class='icon'><use href='#i-x'/></svg> ${esc(data.error||resp.statusText)}</div>`;statusEl.textContent='';return}
+    if(mode==='fix'){
+      const res=data.result||{};fixCard.style.display='block';
+      reportEl.innerHTML=`<p style="color:var(--ink-2);font-size:.85rem">${esc(res.explanation||'')}</p>`;
+      fixReportEl.innerHTML=`<p style="color:var(--ink-3);font-size:.8rem">${res.found_issues||0} ${t('demo.fixDetected')}</p><pre class="code"><code>${hl(res.fixed_code,language)}</code></pre><button class="copy-btn" onclick="copyText(this.dataset.c)" data-c="${attrEsc(res.fixed_code||'')}">${t('demo.copyFix')}</button>${(res.changes&&res.changes.length)?`<ul class="plain" style="margin-top:8px">${res.changes.map(c=>'<li>'+esc(c)+'</li>').join('')}</ul>`:''}`;
+      statusEl.textContent=t('demo.fixGenerated');return;
+    }
+    const r=data.report||data.overall_report||{};
+    let extra='';
+    if(data.files_changed)extra=`<div class="sub">${LANG==='zh'?'变更':'Changes'}: ${esc(data.files_changed.join(', '))} · +${data.added_lines} -${data.removed_lines}</div>`;
+    reportEl.innerHTML=renderReport(r,data.model)+(extra?`<div style="margin-top:12px">${extra}</div>`:'');
+    statusEl.textContent=t('demo.done');
+  }catch(e){reportEl.innerHTML=`<div class="report-empty" style="color:var(--red)"><svg class='icon'><use href='#i-x'/></svg> ${esc(e.message)}</div>`;statusEl.textContent=''}
+  finally{btn.disabled=false}
+}
+btn.addEventListener('click',run);
+
+/* ═══ Workbench (deterministic engines) ═══ */
+let wbMode='metrics';
+const wbBtn=document.getElementById('wb-btn');
+const wbBtnText=document.getElementById('wb-btn-text');
+const wbStatus=document.getElementById('wb-status');
+const wbResult=document.getElementById('wb-result');
+const wbCodeEl=document.getElementById('wb-code');
+const wbLabels={metrics:'Run Metrics',sarif:'Export SARIF',rules:'List Rules',pr:'Review PR'};
+
+function wbTab(tab){
+  wbMode=tab;
+  document.querySelectorAll('[id^="wb-tab-"]').forEach(e=>e.classList.remove('active'));
+  document.getElementById('wb-tab-'+tab).classList.add('active');
+  wbBtnText.textContent=wbLabels[tab];
+  document.getElementById('wb-input-block').style.display=tab==='pr'?'none':'block';
+  document.getElementById('wb-pr-block').style.display=tab==='pr'?'block':'none';
+  wbResult.className='report-empty';
+  wbResult.textContent='Click "'+wbLabels[tab]+'" — results appear here instantly.';
+  wbStatus.textContent='';
+}
+
+function renderMetrics(m){
+  const L=m.lines||{},F=m.functions||{},C=m.complexity||{};
+  const bar=(label,val,max,unit='')=>{
+    const pct=Math.min(100,(val/(max||1))*100);
+    return `<div class="metric-row"><span class="metric-label">${label}</span><span class="metric-val">${val}${unit}</span><div class="metric-bar"><div class="metric-fill" style="width:${pct}%"></div></div></div>`;
+  };
+  return `<div class="metrics-grid">
+    <div class="metric-group"><h4>Lines</h4>
+      ${bar('Total',L.total||0,L.total||1)}
+      ${bar('Code',L.code||0,L.total||1)}
+      ${bar('Comment',L.comment||0,L.total||1)}
+      ${bar('Blank',L.blank||0,L.total||1)}
+      ${bar('Long (>120)',m.long_lines||0,L.total||1)}
+    </div>
+    <div class="metric-group"><h4>Functions</h4>
+      ${bar('Count',F.count||0,20)}
+      ${bar('Avg length',F.average_length||0,40)}
+      ${bar('Max length',F.max_length||0,60)}
+    </div>
+    <div class="metric-group"><h4>Complexity (McCabe)</h4>
+      ${bar('Average',C.average||0,10)}
+      ${bar('Max',C.max||0,15)}
+    </div>
+    <div class="metric-group"><h4>Ratios</h4>
+      ${bar('Comment ratio',((m.comment_ratio||0)*100).toFixed(1),100,'%')}
+    </div>
+    ${F.longest&&F.longest.length?`<div class="metric-group"><h4>Longest Functions</h4>${F.longest.map(f=>`<div class="metric-row"><span class="metric-label">${esc(f.name)}:${f.line}</span><span class="metric-val">${f.length} lines</span></div>`).join('')}</div>`:''}
+    ${C.most_complex&&C.most_complex.length?`<div class="metric-group"><h4>Most Complex</h4>${C.most_complex.map(f=>`<div class="metric-row"><span class="metric-label">${esc(f.name)}:${f.line}</span><span class="metric-val">CC=${f.complexity}</span></div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function renderRules(data){
+  const rules=data.rules||[];
+  const byLang={};
+  rules.forEach(r=>{byLang[r.language]=byLang[r.language]||[];byLang[r.language].push(r)});
+  return `<div style="margin-bottom:8px;font-size:.85rem;color:var(--ink-2)">${data.total} rules across ${Object.keys(byLang).length} languages</div>
+    <div class="rules-grid">${Object.entries(byLang).map(([lang,rs])=>`<div class="rule-lang"><h4>${esc(lang)}</h4>${rs.map(r=>`<div class="rule-item"><span class="rule-id">${esc(r.id)}</span><span class="rule-sev sev-${r.severity}">${esc(r.severity)}</span><span class="rule-title">${esc(r.title)}</span></div>`).join('')}</div>`).join('')}</div>`;
+}
+
+async function wbRun(){
+  wbBtn.disabled=true;wbStatus.textContent='Running…';
+  wbResult.className='';wbResult.innerHTML=`<div class="report-empty">Fetching…</div>`;
+  try{
+    let endpoint,body;
+    if(wbMode==='metrics'){endpoint='/v1/metrics';body={code:wbCodeEl.value,language:document.getElementById('wb-lang').value}}
+    else if(wbMode==='sarif'){endpoint='/v1/sarif';body={code:wbCodeEl.value,language:document.getElementById('wb-lang').value,context:document.getElementById('wb-uri').value}}
+    else if(wbMode==='rules'){endpoint='/v1/rules';body=null}
+    else if(wbMode==='pr'){endpoint='/v1/review_pr';body={url:document.getElementById('wb-pr-url').value}}
+    const opts=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{};
+    const resp=await fetch(endpoint,opts);
+    const data=await resp.json();
+    if(!resp.ok){wbResult.innerHTML=`<div class="report-empty" style="color:var(--red)"><svg class='icon'><use href='#i-x'/></svg> ${esc(data.error||resp.statusText)}</div>`;wbStatus.textContent='';return}
+    if(wbMode==='metrics'){wbResult.innerHTML=renderMetrics(data.metrics||{});wbStatus.textContent='Done ✓'}
+    else if(wbMode==='sarif'){wbResult.innerHTML=`<div style="font-size:.8rem;color:var(--ink-3);margin-bottom:8px;font-family:var(--mono)">SARIF 2.1.0 — ${data.runs[0].results.length} results, ${data.runs[0].tool.driver.rules.length} rules</div><pre class="code"><code>${hl(JSON.stringify(data,null,2),'json')}</code></pre>`;wbStatus.textContent='Done ✓'}
+    else if(wbMode==='rules'){wbResult.innerHTML=renderRules(data);wbStatus.textContent='Done ✓'}
+    else if(wbMode==='pr'){const r=data.report||{};wbResult.innerHTML=renderReport(r,data.model);wbStatus.textContent='Done ✓'}
+  }catch(e){wbResult.innerHTML=`<div class="report-empty" style="color:var(--red)"><svg class='icon'><use href='#i-x'/></svg> ${esc(e.message)}</div>`;wbStatus.textContent=''}
+  finally{wbBtn.disabled=false}
+}
+wbBtn.addEventListener('click',wbRun);
+
+/* ═══ Init lang ═══ */
+(function(){try{const l=localStorage.getItem('cr-lang')||'en';applyLang(l)}catch(e){applyLang('en')}})();
+</script>
+</body>
+</html>

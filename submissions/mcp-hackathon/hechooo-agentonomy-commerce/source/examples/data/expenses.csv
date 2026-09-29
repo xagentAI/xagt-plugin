@@ -1,0 +1,5 @@
+transaction_id,date,description,amount,currency,category
+synthetic-001,2026-09-01,Synthetic example: client payment,1250.00,USD,income
+synthetic-002,2026-09-02,Synthetic example: team lunch,-42.50,USD,meals
+synthetic-003,2026-09-03,Synthetic example: office supplies,-18.75,USD,office
+synthetic-004,2026-09-04,Synthetic example: client refund,25.00,USD,income

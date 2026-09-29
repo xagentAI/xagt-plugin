@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "name": "get_historical_funding",
+  "content": {
+    "symbol": "ETH/USDT",
+    "as_of_date": "2026-06-19",
+    "last_funding_rate": -2.7e-7
+  }
+}

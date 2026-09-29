@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clink.example.invalid/schemas/release-metadata.schema.json",
+  "title": "Clink Linux release metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "platform",
+    "entrypoint",
+    "source_date_epoch",
+    "created_at",
+    "files"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "platform": { "const": "linux-x86_64" },
+    "entrypoint": {
+      "type": "string",
+      "pattern": "^payload/[A-Za-z0-9._/-]+$"
+    },
+    "source_date_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20000,
+      "items": { "$ref": "#/$defs/file" },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": { "path": { "const": "payload/LICENSE" } },
+            "required": ["path"]
+          },
+          "minContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": { "path": { "const": "payload/NOTICE" } },
+            "required": ["path"]
+          },
+          "minContains": 1
+        }
+      ]
+    },
+    "hosted_enrollment": {
+      "$ref": "#/$defs/hosted_enrollment"
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "size", "mode"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^payload/(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 536870912
+        },
+        "mode": {
+          "enum": ["0644", "0755"]
+        }
+      }
+    },
+    "hosted_enrollment": {
+      "$comment": "This schema validates JSON shape only. Release build and install paths must run the Python/Go semantic validator for canonical HTTPS paths, production target bindings, valid P-256 points, and response_key_id thumbprints. The Ed25519 release signature is the trust root; response keys are not self-authenticating.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "enrollment_endpoint", "targets"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "enrollment_endpoint": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[^@?#]+$"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/hosted_target" },
+          "allOf": [
+            {
+              "contains": {
+                "type": "object",
+                "properties": { "chain_id": { "const": 8453 } },
+                "required": ["chain_id"]
+              },
+              "minContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": { "chain_id": { "const": 137 } },
+                "required": ["chain_id"]
+              },
+              "minContains": 1
+            }
+          ]
+        }
+      }
+    },
+    "hosted_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chain_id",
+        "chain",
+        "token",
+        "origin",
+        "response_public_jwk",
+        "response_key_id",
+        "executor_contract"
+      ],
+      "properties": {
+        "chain_id": { "enum": [8453, 137] },
+        "chain": { "type": "string", "enum": ["eip155:8453", "eip155:137"] },
+        "token": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{40}$"
+        },
+        "origin": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[^@?#/]+/?$"
+        },
+        "response_public_jwk": { "$ref": "#/$defs/p256_jwk" },
+        "response_key_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        },
+        "executor_contract": {
+          "type": "string",
+          "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "chain_id": { "const": 8453 } } },
+          "then": {
+            "properties": {
+              "chain": { "const": "eip155:8453" },
+              "token": { "const": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "chain_id": { "const": 137 } } },
+          "then": {
+            "properties": {
+              "chain": { "const": "eip155:137" },
+              "token": { "const": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359" }
+            }
+          }
+        }
+      ]
+    },
+    "p256_jwk": {
+      "$comment": "Shape validation cannot prove that x/y is an on-curve P-256 point or that response_key_id is its canonical thumbprint; the executable Python/Go semantic validator must enforce both.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kty", "crv", "x", "y"],
+      "properties": {
+        "kty": { "const": "EC" },
+        "crv": { "const": "P-256" },
+        "x": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+        "y": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "review_commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+  "real_funds": false,
+  "settlement_mode": "simulated",
+  "first_run": {
+    "base_url": "http://127.0.0.1:18280",
+    "public": {
+      "health": {
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "real_funds": false,
+        "service_transport": "http",
+        "settlement_mode": "simulated",
+        "status": "ok"
+      },
+      "proof": {
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "schemaVersion": 1,
+        "slug": "hechooo-agentonomy-commerce"
+      }
+    },
+    "unauthorized_status": 401,
+    "preview_id": "preview_6c504bf99931",
+    "purchase_id": "purchase_6c504bf99931",
+    "purchase": {
+      "purchase_id": "purchase_6c504bf99931",
+      "preview_id": "preview_6c504bf99931",
+      "state": "delivered",
+      "real_funds": false,
+      "settlement_mode": "simulated",
+      "service_transport": "http",
+      "service_result": {
+        "unique_transaction_count": 2,
+        "duplicate_ids": [
+          "t1"
+        ],
+        "net_totals": {
+          "USD": "27.50"
+        }
+      }
+    },
+    "budget_before": {
+      "budget_usdc": "1.00",
+      "used_amount_usdc": "0.00",
+      "remaining_amount_usdc": "1.00",
+      "settlement_submissions": 0,
+      "merchant_deliveries": 0,
+      "real_funds": false,
+      "settlement_mode": "simulated",
+      "service_transport": "http"
+    },
+    "budget_after": {
+      "budget_usdc": "1.00",
+      "used_amount_usdc": "0.30",
+      "remaining_amount_usdc": "0.70",
+      "settlement_submissions": 1,
+      "merchant_deliveries": 1,
+      "real_funds": false,
+      "settlement_mode": "simulated",
+      "service_transport": "http"
+    },
+    "replay": {
+      "purchase": {
+        "purchase_id": "purchase_6c504bf99931",
+        "preview_id": "preview_6c504bf99931",
+        "state": "delivered",
+        "real_funds": false,
+        "settlement_mode": "simulated",
+        "service_transport": "http",
+        "service_result": {
+          "unique_transaction_count": 2,
+          "duplicate_ids": [
+            "t1"
+          ],
+          "net_totals": {
+            "USD": "27.50"
+          }
+        }
+      },
+      "budget_after_replay": {
+        "budget_usdc": "1.00",
+        "used_amount_usdc": "0.30",
+        "remaining_amount_usdc": "0.70",
+        "settlement_submissions": 1,
+        "merchant_deliveries": 1,
+        "real_funds": false,
+        "settlement_mode": "simulated",
+        "service_transport": "http"
+      },
+      "same_result": true,
+      "charge_unchanged": true
+    }
+  },
+  "after_restart": {
+    "base_url": "http://127.0.0.1:18280",
+    "public": {
+      "health": {
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "real_funds": false,
+        "service_transport": "http",
+        "settlement_mode": "simulated",
+        "status": "ok"
+      },
+      "proof": {
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "schemaVersion": 1,
+        "slug": "hechooo-agentonomy-commerce"
+      }
+    },
+    "unauthorized_status": 401,
+    "preview_id": "preview_6c504bf99931",
+    "purchase_id": "purchase_6c504bf99931",
+    "purchase": {
+      "purchase_id": "purchase_6c504bf99931",
+      "preview_id": "preview_6c504bf99931",
+      "state": "delivered",
+      "real_funds": false,
+      "settlement_mode": "simulated",
+      "service_transport": "http",
+      "service_result": {
+        "unique_transaction_count": 2,
+        "duplicate_ids": [
+          "t1"
+        ],
+        "net_totals": {
+          "USD": "27.50"
+        }
+      }
+    },
+    "budget_before": {
+      "budget_usdc": "1.00",
+      "used_amount_usdc": "0.30",
+      "remaining_amount_usdc": "0.70",
+      "settlement_submissions": 1,
+      "merchant_deliveries": 1,
+      "real_funds": false,
+      "settlement_mode": "simulated",
+      "service_transport": "http"
+    },
+    "restart_check": {
+      "same_result": true,
+      "charge_unchanged": true,
+      "budget_after_replay": {
+        "budget_usdc": "1.00",
+        "used_amount_usdc": "0.30",
+        "remaining_amount_usdc": "0.70",
+        "settlement_submissions": 1,
+        "merchant_deliveries": 1,
+        "real_funds": false,
+        "settlement_mode": "simulated",
+        "service_transport": "http"
+      }
+    }
+  },
+  "restart_preserved_result": true,
+  "restart_preserved_budget": true,
+  "runtime_state": ".runtime/acceptance-hgw5pamt"
+}
