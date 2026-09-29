@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "strategy-increment",
+  "main": "runtime/worker-bundle/src/worker.py",
+  "compatibility_date": "2026-09-25",
+  "compatibility_flags": [
+    "python_workers"
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "web",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SESSIONS",
+        "class_name": "SessionStore"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "SessionStore"
+      ]
+    }
+  ],
+  "vars": {
+    "PUBLIC_ORIGIN": "",
+    "COOKIE_SECURE": "true"
+  },
+  "observability": {
+    "enabled": false
+  }
+}

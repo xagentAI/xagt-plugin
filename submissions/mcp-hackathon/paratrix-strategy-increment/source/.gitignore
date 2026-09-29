@@ -1,0 +1,29 @@
+# Python runtime and local data
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.env
+.env.*
+!.env.example
+runtime/
+*.sqlite
+*.sqlite3
+# Frontend build/dependencies
+node_modules/
+dist/
+build/
+coverage/
+# Local outputs
+*.log
+.DS_Store
+
+# Cloudflare local tooling and secrets
+.venv-workers/
+.wrangler/
+python_modules/
+.dev.vars
+.dev.vars.*

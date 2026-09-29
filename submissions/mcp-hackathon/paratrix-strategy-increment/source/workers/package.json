@@ -1,0 +1,7 @@
+{
+  "name": "strategy-increment-worker-toolchain",
+  "private": true,
+  "version": "0.1.0",
+  "devDependencies": {"wrangler": "4.140.0"},
+  "engines": {"node": ">=22"}
+}
