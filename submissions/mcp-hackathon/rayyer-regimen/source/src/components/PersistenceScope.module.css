@@ -1,0 +1,170 @@
+/* The CRT: a large-radius outer bezel wrapping a slightly smaller-radius inner screen,
+   with a 1px graticule inset ring between them. */
+
+.crt {
+  position: relative;
+  border-radius: var(--r6);
+  padding: 10px;
+  background: linear-gradient(168deg, #1b2632 0%, #0e141c 44%, #141c26 72%, #243140 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(157, 179, 199, 0.16),
+    inset 0 -1px 0 rgba(5, 7, 10, 0.9),
+    0 40px 120px -40px rgba(0, 0, 0, 0.9);
+}
+
+.crt::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: calc(var(--r6) - 4px);
+  border: 1px solid var(--graticule);
+  pointer-events: none;
+}
+
+/* The glass grows with its content rather than clipping it: the claim is never cut off,
+   and the canvas fills whatever height the type needs. */
+.screen {
+  position: relative;
+  display: flex;
+  border-radius: var(--r5);
+  overflow: hidden;
+  background: radial-gradient(118% 100% at 50% 44%, #0e141c 0%, #070a0f 58%, #05070a 100%);
+  min-height: clamp(520px, 78vh, 720px);
+  touch-action: manipulation;
+  cursor: crosshair;
+  isolation: isolate;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 7, 10, 0.9) 0%,
+    rgba(5, 7, 10, 0.72) 46%,
+    rgba(5, 7, 10, 0.18) 82%,
+    rgba(5, 7, 10, 0) 100%
+  );
+}
+
+@media (min-width: 860px) {
+  .scrim {
+    background: linear-gradient(
+      100deg,
+      rgba(5, 7, 10, 0.96) 0%,
+      rgba(5, 7, 10, 0.9) 38%,
+      rgba(5, 7, 10, 0.46) 64%,
+      rgba(5, 7, 10, 0) 92%
+    );
+  }
+}
+
+.scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.04;
+  background: repeating-linear-gradient(to bottom, #c8d6e2 0 1px, transparent 1px 3px);
+}
+
+.vig {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(112% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+.stack {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--v5);
+  padding: var(--v6) 16px var(--v10);
+  width: 100%;
+  max-width: 740px;
+  pointer-events: none;
+}
+
+@media (min-width: 860px) {
+  .stack {
+    padding: var(--v7) var(--v7) var(--v9);
+  }
+}
+
+.stack > * {
+  pointer-events: auto;
+}
+
+/* The freeze control is a real button so it is reachable and operable by keyboard,
+   and it doubles as the affordance label. The screen itself also accepts a press. */
+.holdButton {
+  position: absolute;
+  right: var(--v4);
+  bottom: var(--v4);
+  z-index: 5;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--void-700);
+  background: rgba(9, 13, 19, 0.78);
+  border: 1px solid var(--void-400);
+  border-radius: var(--r1);
+  padding: 7px var(--v3);
+  display: flex;
+  align-items: center;
+  gap: var(--v2);
+  cursor: pointer;
+  text-align: left;
+  flex-wrap: wrap;
+  max-width: calc(100% - var(--v6));
+  transition: color 0.12s linear, border-color 0.12s linear;
+}
+
+/* On a phone the keyboard half of the affordance is noise, and the full sentence is
+   wider than the glass. The press-and-hold gesture still works on the glass itself. */
+.holdWhy {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .holdWhy {
+    display: inline;
+  }
+}
+
+@media (min-width: 860px) {
+  .holdButton {
+    right: var(--v5);
+    bottom: var(--v5);
+  }
+}
+
+.holdButton b {
+  color: var(--void-900);
+  font-weight: 400;
+}
+
+.holdButton[aria-pressed='true'] {
+  color: var(--p1-green);
+  border-color: rgba(87, 242, 168, 0.5);
+}
+
+.holdButton[aria-pressed='true'] b {
+  color: var(--p1-green);
+}
+

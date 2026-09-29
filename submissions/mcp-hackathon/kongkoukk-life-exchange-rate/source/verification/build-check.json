@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "wheel": "life_exchange_rate_mcp-0.2.0-py3-none-any.whl",
+  "sha256": "3a4b358a61583d5af31d6d6fd7e21167da069f130f9076b1e9d1248a7ad35664",
+  "fixture_paths": [
+    "life_exchange_rate/providers/data/policy_rate.json",
+    "life_exchange_rate/providers/data/energy.json"
+  ],
+  "packaged_fixture_execution": "passed for both providers",
+  "docker_build": "not_run_docker_unavailable"
+}

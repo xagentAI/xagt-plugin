@@ -1,0 +1,15 @@
+# Every path in the public repository and official source submission must be listed here.
+.dockerignore
+.gitignore
+CHANGELOG.md
+Dockerfile
+LICENSE
+PUBLIC_RELEASE_ALLOWLIST.txt
+README.md
+README.zh.md
+REVIEW-codex-pass.md
+SECURITY.md
+app.py
+opportunity_lens.py
+pyproject.toml
+tests/test_api.py

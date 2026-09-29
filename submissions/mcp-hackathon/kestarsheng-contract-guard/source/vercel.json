@@ -1,0 +1,17 @@
+{
+  "services": {
+    "contract-guard": {
+      "root": ".",
+      "entrypoint": "api/index.py"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "contract-guard"
+      }
+    }
+  ]
+}

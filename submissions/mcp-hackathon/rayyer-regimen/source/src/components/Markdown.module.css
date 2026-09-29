@@ -1,0 +1,159 @@
+.h1 {
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 84, 'wght' 700, 'opsz' 48;
+  font-size: clamp(30px, 4.6vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -0.026em;
+  color: var(--void-950);
+  margin: 0 0 var(--v5);
+  text-wrap: balance;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 88, 'wght' 600, 'opsz' 32;
+  font-size: clamp(21px, 2.2vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.016em;
+  color: var(--void-950);
+  margin: var(--v8) 0 var(--v4);
+  padding-top: var(--v4);
+  border-top: 1px solid var(--void-300);
+  scroll-margin-top: var(--v5);
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 92, 'wght' 600, 'opsz' 20;
+  font-size: 18px;
+  color: var(--void-900);
+  margin: var(--v6) 0 var(--v3);
+  scroll-margin-top: var(--v5);
+}
+
+.p {
+  margin: 0 0 var(--v4);
+  color: var(--void-800);
+  font-size: 17px;
+  line-height: 1.62;
+  max-width: 68ch;
+}
+
+.p strong {
+  color: var(--void-950);
+  font-weight: 600;
+}
+
+.p em {
+  color: var(--void-900);
+  font-style: italic;
+}
+
+.inlineCode {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--p1-green);
+  background: rgba(87, 242, 168, 0.08);
+  border: 1px solid rgba(87, 242, 168, 0.18);
+  border-radius: var(--r1);
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+/* Formulae. The document's code fences hold mathematics, so they are centred like
+   display equations rather than left-aligned like a shell transcript. */
+.pre {
+  margin: 0 0 var(--v5);
+  padding: var(--v5) var(--v4);
+  background: var(--void-0);
+  border: 1px solid var(--void-300);
+  border-left: 2px solid var(--sky-cyan);
+  border-radius: var(--r2);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--void-900);
+  text-align: center;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.pre code {
+  font-family: inherit;
+  white-space: pre;
+}
+
+.ul {
+  list-style: none;
+  margin: 0 0 var(--v5);
+  padding: 0;
+  display: grid;
+  gap: var(--v4);
+}
+
+.ul li {
+  position: relative;
+  padding-left: var(--v5);
+  color: var(--void-800);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 68ch;
+}
+
+.ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.66em;
+  width: 12px;
+  height: 1px;
+  background: var(--sky-cyan);
+}
+
+.ul li strong {
+  color: var(--void-950);
+  font-weight: 600;
+}
+
+.tableWrap {
+  margin: 0 0 var(--v5);
+  overflow-x: auto;
+  border: 1px solid var(--void-300);
+  border-radius: var(--r2);
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 420px;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--void-600);
+  font-weight: 400;
+  padding: var(--v3) var(--v4);
+  background: var(--void-50);
+  border-bottom: 1px solid var(--void-300);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--v3) var(--v4);
+  border-bottom: 1px solid var(--void-200);
+  color: var(--void-800);
+  vertical-align: top;
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.table td:first-child {
+  white-space: nowrap;
+}

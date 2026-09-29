@@ -1,0 +1,16 @@
+{
+  "schema": "bhrigu_temporal_precommit_v0_1",
+  "window_id": "SEP_17_2026",
+  "boundary_utc": "2026-09-17T00:00:00Z",
+  "captured_at_utc": "2026-09-10T04:49:49.136Z",
+  "btcusdt_last_price": 78348.09,
+  "btcusdt_24h_change_pct": -0.983,
+  "btcusdt_24h_high": 79760,
+  "btcusdt_24h_low": 77770,
+  "bitcoin_tip_height": 966302,
+  "source_runtime_commit": "05a455ba1407f7b07de226f6c78eefda15b24880",
+  "market_crosscheck_last_price_usdt": 78348.10,
+  "retroactive_rewrite": "forbidden",
+  "price_target": false,
+  "trading_signal": false
+}

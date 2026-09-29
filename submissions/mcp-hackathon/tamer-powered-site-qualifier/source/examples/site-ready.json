@@ -1,0 +1,18 @@
+{
+  "country_state": "Example jurisdiction",
+  "available_mw": 24,
+  "power_ready_now": true,
+  "energization_rfs_date": "2026-10-15",
+  "voltage": "138 kV",
+  "utility_interconnection_status": "interconnected",
+  "grid_or_gas_to_power": "grid",
+  "power_price_usd_kwh": 0.045,
+  "land_size_acres": 120,
+  "lease_sale_jv": "lease",
+  "fiber_availability": "on-site",
+  "water_availability": "municipal",
+  "gas_availability": "nearby",
+  "permitting_status": "approved",
+  "expansion_capacity_mw": 40,
+  "intended_use": "both"
+}

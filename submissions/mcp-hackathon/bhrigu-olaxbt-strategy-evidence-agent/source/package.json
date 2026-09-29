@@ -1,0 +1,14 @@
+{
+  "name": "bhrigu-olaxbt-strategy-evidence-agent",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Read-only OlaXBT strategy-evidence agent with inherited Bitcoin temporal evidence for X-Agent.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node tests/acceptance.mjs && node tests/temporal.mjs && node tests/mcp.mjs && node tests/integrity.mjs && node tests/strategy-evidence.mjs && node tests/olaxbt-mcp.mjs",
+    "check": "npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
