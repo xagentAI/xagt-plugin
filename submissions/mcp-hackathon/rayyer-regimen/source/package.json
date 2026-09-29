@@ -1,0 +1,37 @@
+{
+  "name": "regimen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Statistical validation desk for OlaXBT Nexus trading strategies.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "tsx scripts/run-eval.ts",
+    "conformance": "npx -y @modelcontextprotocol/conformance@alpha server --url $MCP_URL"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.7.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "5.0.1"
+  }
+}

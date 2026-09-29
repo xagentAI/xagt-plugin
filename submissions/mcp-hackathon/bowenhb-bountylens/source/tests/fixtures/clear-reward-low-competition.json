@@ -1,0 +1,54 @@
+{
+  "fixtureVersion": 1,
+  "sanitized": true,
+  "scenario": "clear-reward-low-competition",
+  "sourceUrl": "https://github.com/QubesOS/qubes-issues/issues/9562",
+  "capturedAt": "2026-09-17",
+  "context": {
+    "issue": {
+      "title": "Attaching USB gamepad device to qube does not work",
+      "body": "### Qubes OS release\n\n4.2.3, 4.2.4, 4.3.0\n\n### Brief summary\n\nAttaching an Xbox One S USB gamepad to a gaming qube does not work, while other USB devices do.\n\n### Steps to reproduce\n\n1. Plug the gamepad into the host using USB.\n2. Run `qvm-usb attach gaming sys-usb:id`.\n3. Check for the device inside the gaming qube.\n\n### Expected behavior\n\nThe gamepad is attached and detected by software in the qube.\n\n### Actual behavior\n\nThe device is not present in `lsusb`, and the GUI can show an inconsistent attached state.",
+      "state": "open",
+      "labels": [
+        "P: default",
+        "bounty",
+        "hardware support",
+        "needs diagnosis",
+        "C: input proxy",
+        "affects-4.2",
+        "affects-4.3"
+      ],
+      "assignees": [],
+      "author": "reporter",
+      "createdAt": "2024-11-06T18:49:03Z",
+      "updatedAt": "2026-09-16T09:16:24Z"
+    },
+    "comments": [
+      {
+        "author": "reporter",
+        "body": "I would like to put a 50 USD bounty on this issue.",
+        "createdAt": "2026-06-06T07:36:02Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "automation",
+        "body": "An unofficial bounty has been added by a community member. It is not sponsored, guaranteed, or paid by the project; contributors should confirm payment and acceptance terms with the person offering it.",
+        "createdAt": "2026-06-07T13:21:46Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "candidate-1",
+        "body": "Before investigating, is the $50 bounty still active and unclaimed, and what result triggers payment?",
+        "createdAt": "2026-07-28T11:10:00Z",
+        "authorAssociation": "NONE"
+      }
+    ],
+    "repository": {
+      "fullName": "QubesOS/qubes-issues",
+      "pushedAt": "2026-07-08T02:09:10Z",
+      "updatedAt": "2026-09-14T02:27:10Z",
+      "openIssuesCount": 1930,
+      "languages": {}
+    }
+  }
+}

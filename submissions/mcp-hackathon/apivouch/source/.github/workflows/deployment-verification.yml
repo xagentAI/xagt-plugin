@@ -1,0 +1,68 @@
+name: deployment-verification
+
+on:
+  schedule:
+    - cron: "43 6 * * *"
+  workflow_dispatch:
+    inputs:
+      live:
+        description: Also check public providers (exit 2 remains non-success)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployment-verification
+  cancel-in-progress: false
+
+jobs:
+  deterministic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DEPLOYMENT_URL: ${{ vars.APIVOUCH_DEPLOYMENT_URL }}
+      EXPECTED_COMMIT: ${{ vars.APIVOUCH_EXPECTED_COMMIT }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Require explicit deployment configuration
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re
+          from urllib.parse import urlsplit
+          value = os.environ['DEPLOYMENT_URL']
+          try:
+              url = urlsplit(value)
+              valid = (url.scheme == 'https' and url.hostname and not url.username
+                       and not url.password and not url.query and not url.fragment
+                       and url.path == '' and url.port in (None, 443)
+                       and not any(c.isspace() for c in value))
+          except ValueError:
+              valid = False
+          if not valid or not re.fullmatch(r'[0-9a-f]{40}', os.environ['EXPECTED_COMMIT']):
+              raise SystemExit('Configure APIVOUCH_DEPLOYMENT_URL (HTTPS origin) and APIVOUCH_EXPECTED_COMMIT (exact SHA) repository variables')
+          PY
+      - run: python -m pip install -r backend/requirements.txt
+      - name: Required deterministic deployment gate
+        shell: bash
+        run: |
+          mkdir -p verification-artifacts
+          timeout 240s python scripts/verify_deployment.py --base-url "$DEPLOYMENT_URL" --expected-commit "$EXPECTED_COMMIT" --mode deterministic --require-signed > verification-artifacts/deterministic.json
+      - name: Optional live gate
+        if: ${{ success() && inputs.live }}
+        shell: bash
+        run: |
+          timeout 240s python scripts/verify_deployment.py --base-url "$DEPLOYMENT_URL" --expected-commit "$EXPECTED_COMMIT" --mode live --require-signed > verification-artifacts/live.json
+      - name: Retain sanitized bounded verifier reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-verification-${{ github.run_id }}
+          path: verification-artifacts/*.json
+          if-no-files-found: warn
+          retention-days: 7

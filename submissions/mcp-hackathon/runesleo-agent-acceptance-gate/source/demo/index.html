@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent 验收门禁 Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7f4;
+      --panel: #ffffff;
+      --ink: #171717;
+      --muted: #666b72;
+      --line: #d9d7d0;
+      --green: #157347;
+      --yellow: #9a6700;
+      --red: #b42318;
+      --blue: #145ea8;
+      --soft-green: #e9f6ef;
+      --soft-yellow: #fff4d8;
+      --soft-red: #fdecea;
+      --soft-blue: #eaf3ff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: #f0f0ec;
+      padding: 22px;
+    }
+
+    .brand {
+      margin-bottom: 24px;
+    }
+
+    .brand h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .case-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .case-button {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      padding: 12px;
+      text-align: left;
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      gap: 7px;
+    }
+
+    .case-button:hover,
+    .case-button.active {
+      border-color: #222222;
+    }
+
+    .case-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .case-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .main {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+
+    .toolbar h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .toolbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 124px;
+      height: 42px;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-weight: 800;
+      font-size: 14px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .verdict.pass {
+      color: var(--green);
+      background: var(--soft-green);
+      border-color: #b7dec7;
+    }
+
+    .verdict.needs_review {
+      color: var(--yellow);
+      background: var(--soft-yellow);
+      border-color: #ead08d;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .score-box,
+    .summary-box,
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .score-box {
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .score-number {
+      font-size: 42px;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .score-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .summary-box h3,
+    .section h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .summary-box p {
+      margin: 0;
+      color: #2c2f34;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      color: #30343a;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .next-gate {
+      border-color: #bdd5ef;
+      background: var(--soft-blue);
+    }
+
+    .next-gate p {
+      color: #173b61;
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .flag {
+      border: 1px solid var(--line);
+      background: #fafafa;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #30343a;
+      white-space: nowrap;
+    }
+
+    .dimensions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .dimension {
+      display: grid;
+      grid-template-columns: 165px minmax(0, 1fr) 34px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+      color: #30343a;
+    }
+
+    .bar {
+      height: 8px;
+      border-radius: 999px;
+      background: #e3e1dc;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      background: var(--blue);
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .case-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar,
+      .score-row,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .main,
+      .sidebar {
+        padding: 16px;
+      }
+
+      .case-list {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        display: grid;
+      }
+
+      .dimension {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Agent 验收门禁</h1>
+        <p>Agent 接任务、花预算、交付、放款或争议前，先判断交易能不能继续。</p>
+      </div>
+      <div id="caseList" class="case-list"></div>
+    </aside>
+
+    <main class="main">
+      <header class="toolbar">
+        <div>
+          <h2 id="caseTitle"></h2>
+          <p id="caseSubtitle"></p>
+        </div>
+        <div id="verdict" class="verdict"></div>
+      </header>
+
+      <section class="score-row">
+        <div class="score-box">
+          <div id="score" class="score-number"></div>
+          <div class="score-label">验收分</div>
+        </div>
+        <div class="summary-box">
+          <h3>买家结论</h3>
+          <p id="buyerSummary"></p>
+        </div>
+      </section>
+
+      <section class="section next-gate">
+        <h3>下一步</h3>
+        <p id="nextGate"></p>
+      </section>
+
+      <section class="grid">
+        <div class="section">
+          <h3>不能直接接受的原因</h3>
+          <ul id="risks"></ul>
+        </div>
+        <div class="section">
+          <h3>需要补的证据</h3>
+          <ul id="missing"></ul>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="section">
+          <h3>支持接受的证据</h3>
+          <ul id="positive"></ul>
+        </div>
+        <div class="section">
+          <h3>要问 Seller 的问题</h3>
+          <ul id="questions"></ul>
+        </div>
+      </section>
+
+      <section class="section">
+        <h3>评分维度</h3>
+        <div id="dimensions" class="dimensions"></div>
+      </section>
+
+      <section class="section">
+        <h3>机器 flags</h3>
+        <div id="flags" class="flags"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const cases = [
+      {
+        title: 'PMQuant 文案改名',
+        subtitle: '本地完成，但发布前需要 owner 复核',
+        audit: {
+          verdict: 'needs_review',
+          score: 84,
+          dimension_scores: {
+            delivery_completeness: 30,
+            validation_and_evidence: 24,
+            safety_and_hard_gates: 22,
+            buyer_usability: 8,
+            dispute_readiness: 10
+          },
+          missing: ['release build'],
+          risks: [
+            'Build is deferred, so the delivery is not release-ready.',
+            'Repo or delivery state is dirty and needs owner decision before release.',
+            'Public release gate remains open.'
+          ],
+          positive_evidence: [
+            'Artifact or evidence path is named.',
+            'Changed files or touched surface are declared.',
+            'Validation checks are listed.',
+            'Hard gates are explicitly declared.'
+          ],
+          questions_for_seller: ['What exact owner or buyer decision is needed before acceptance?'],
+          next_gate: 'Leo reviews copy risk, then explicitly approves or rejects push/deploy.',
+          buyer_summary: 'pm-quant-article-rename-20260702: useful delivery, but needs review before acceptance. Main gap: release build.',
+          machine_flags: ['buyer_decision_required', 'deferred_build', 'dirty_state', 'hard_gates_declared', 'public_release_gate']
+        }
+      },
+      {
+        title: 'T310 网站治理更新',
+        subtitle: '内容做了，但策略与 release gate 未放行',
+        audit: {
+          verdict: 'needs_review',
+          score: 80,
+          dimension_scores: {
+            delivery_completeness: 30,
+            validation_and_evidence: 24,
+            safety_and_hard_gates: 20,
+            buyer_usability: 9,
+            dispute_readiness: 10
+          },
+          missing: ['release build', 'visual smoke or screenshot validation'],
+          risks: [
+            'Build is deferred, so the delivery is not release-ready.',
+            'Visual regression risk remains unresolved.',
+            'Protocol fit is unresolved and needs owner review.'
+          ],
+          positive_evidence: [
+            'Single touched surface is declared.',
+            'Validation result is stated.',
+            'No generated public files were touched.',
+            'Hard gates are explicitly declared.'
+          ],
+          questions_for_seller: [],
+          next_gate: 'Owner reviews governance copy, protocol tension, and release validation before any commit or deploy.',
+          buyer_summary: 't310-governance-update-20260701: useful delivery, but needs review before acceptance. Main gap: release build.',
+          machine_flags: ['deferred_build', 'deferred_visual_smoke', 'dirty_state', 'needs_reaudit', 'protocol_tension', 'public_release_gate']
+        }
+      },
+      {
+        title: 'Alkanes red-stop',
+        subtitle: '任务失败日志，但安全停止行为正确',
+        audit: {
+          verdict: 'pass',
+          score: 96,
+          dimension_scores: {
+            delivery_completeness: 30,
+            validation_and_evidence: 22,
+            safety_and_hard_gates: 25,
+            buyer_usability: 9,
+            dispute_readiness: 10
+          },
+          missing: [],
+          risks: [],
+          positive_evidence: [
+            'The red guard triggered at the stated window.',
+            'The next window did not start after red decision.',
+            'Repair window was verified clean.',
+            'Boundary excludes wallet, signing, broadcasting, and destructive cleanup.'
+          ],
+          questions_for_seller: [],
+          next_gate: 'Accept the safety stop, then require owner approval before any continuation.',
+          buyer_summary: 'alkanes-full-index-campaign-red-stop-20260701: acceptable as a safe-stop delivery. The task did not continue because the guard worked.',
+          machine_flags: ['guard_triggered', 'hard_gates_declared', 'task_failed_safely']
+        }
+      },
+      {
+        title: 'Dashboard 大分支验收',
+        subtitle: '验收包可用，但不是 release packet',
+        audit: {
+          verdict: 'needs_review',
+          score: 84,
+          dimension_scores: {
+            delivery_completeness: 30,
+            validation_and_evidence: 24,
+            safety_and_hard_gates: 23,
+            buyer_usability: 8,
+            dispute_readiness: 10
+          },
+          missing: ['release build', 'visual smoke or screenshot validation'],
+          risks: [
+            'Build is deferred, so the delivery is not release-ready.',
+            'Visual regression risk remains unresolved.',
+            'Repo or delivery state is dirty and needs owner decision before release.'
+          ],
+          positive_evidence: [
+            'Branch scope is summarized.',
+            'Dirty files are named.',
+            'Six validation checks are listed as passed.',
+            'Hard gates are listed.'
+          ],
+          questions_for_seller: ['What exact owner or buyer decision is needed before acceptance?'],
+          next_gate: 'Leo chooses whether to include dirty copy edits and run release-grade build/visual smoke.',
+          buyer_summary: 'leo-dashboard-owned-media-curation-20260701: useful delivery, but needs review before acceptance. Main gap: release build.',
+          machine_flags: ['buyer_decision_required', 'deferred_build', 'deferred_visual_smoke', 'dirty_state', 'read_only_delivery']
+        }
+      },
+      {
+        title: 'Claude Science 只读观察',
+        subtitle: '边界清楚的只读研究交付',
+        audit: {
+          verdict: 'pass',
+          score: 93,
+          dimension_scores: {
+            delivery_completeness: 30,
+            validation_and_evidence: 19,
+            safety_and_hard_gates: 25,
+            buyer_usability: 9,
+            dispute_readiness: 10
+          },
+          missing: ['actual validation result'],
+          risks: [],
+          positive_evidence: [
+            'Read-only boundary is explicitly documented.',
+            'No private files or account mutation were performed.',
+            'Observed mechanics are concrete.',
+            'Next live test gate is declared.'
+          ],
+          questions_for_seller: [],
+          next_gate: 'If Leo wants live test later, explicitly approve one small public-source project.',
+          buyer_summary: 'claude-science-hands-on-example-20260701: acceptable within the declared scope. Remaining notes are not acceptance blockers.',
+          machine_flags: ['hard_gates_declared', 'read_only_delivery']
+        }
+      }
+    ];
+
+    const labels = {
+      delivery_completeness: '交付完整性',
+      validation_and_evidence: '验证与证据',
+      safety_and_hard_gates: '安全与 hard gates',
+      buyer_usability: '买家可用性',
+      dispute_readiness: '争议可用性'
+    };
+
+    const maxScores = {
+      delivery_completeness: 30,
+      validation_and_evidence: 25,
+      safety_and_hard_gates: 25,
+      buyer_usability: 10,
+      dispute_readiness: 10
+    };
+
+    let selected = 0;
+
+    function renderCaseList() {
+      const list = document.getElementById('caseList');
+      list.innerHTML = '';
+      cases.forEach((item, index) => {
+        const button = document.createElement('button');
+        button.className = `case-button${index === selected ? ' active' : ''}`;
+        button.type = 'button';
+        button.innerHTML = `
+          <div class="case-title">${item.title}</div>
+          <div class="case-meta">
+            <span>${formatVerdict(item.audit.verdict)}</span>
+            <span>${item.audit.score}/100</span>
+          </div>
+        `;
+        button.addEventListener('click', () => {
+          selected = index;
+          render();
+        });
+        list.appendChild(button);
+      });
+    }
+
+    function render() {
+      renderCaseList();
+      const item = cases[selected];
+      const audit = item.audit;
+      document.getElementById('caseTitle').textContent = item.title;
+      document.getElementById('caseSubtitle').textContent = item.subtitle;
+      const verdict = document.getElementById('verdict');
+      verdict.className = `verdict ${audit.verdict}`;
+      verdict.textContent = formatVerdict(audit.verdict);
+      document.getElementById('score').textContent = audit.score;
+      document.getElementById('buyerSummary').textContent = audit.buyer_summary;
+      document.getElementById('nextGate').textContent = audit.next_gate;
+      renderList('risks', audit.risks);
+      renderList('missing', audit.missing);
+      renderList('positive', audit.positive_evidence);
+      renderList('questions', audit.questions_for_seller);
+      renderDimensions(audit.dimension_scores);
+      renderFlags(audit.machine_flags);
+    }
+
+    function renderList(id, items) {
+      const el = document.getElementById(id);
+      el.innerHTML = '';
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = '无阻塞项';
+        el.replaceWith(empty);
+        empty.id = id;
+        return;
+      }
+      if (el.tagName !== 'UL') {
+        const ul = document.createElement('ul');
+        ul.id = id;
+        el.replaceWith(ul);
+      }
+      const list = document.getElementById(id);
+      for (const item of items) {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      }
+    }
+
+    function renderDimensions(scores) {
+      const el = document.getElementById('dimensions');
+      el.innerHTML = '';
+      Object.entries(scores).forEach(([key, value]) => {
+        const max = maxScores[key];
+        const row = document.createElement('div');
+        row.className = 'dimension';
+        row.innerHTML = `
+          <span>${labels[key]}</span>
+          <div class="bar"><span style="width:${Math.round((value / max) * 100)}%"></span></div>
+          <strong>${value}</strong>
+        `;
+        el.appendChild(row);
+      });
+    }
+
+    function renderFlags(flags) {
+      const el = document.getElementById('flags');
+      el.innerHTML = '';
+      for (const flag of flags) {
+        const span = document.createElement('span');
+        span.className = 'flag';
+        span.textContent = flag;
+        el.appendChild(span);
+      }
+    }
+
+    function formatVerdict(verdict) {
+      if (verdict === 'pass') return 'Accept';
+      if (verdict === 'needs_review') return 'Needs Review';
+      return 'Reject';
+    }
+
+    render();
+  </script>
+</body>
+</html>

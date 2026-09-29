@@ -1,0 +1,3 @@
+# Two trailing spaces are a Markdown hard line break (used in the header blocks
+# of ARCHITECTURE.md and SETTLE_PRODUCT_BRIEF.md); do not flag them.
+*.md whitespace=-blank-at-eol

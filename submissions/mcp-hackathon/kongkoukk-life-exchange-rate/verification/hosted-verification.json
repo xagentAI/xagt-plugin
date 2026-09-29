@@ -1,0 +1,125 @@
+{
+  "recorded_at": "2026-09-16T18:37:20.874728+00:00",
+  "status": "passed",
+  "origin": "https://life-exchange-rate-mcp.vercel.app",
+  "expected_commit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+  "expected_slug": "kongkoukk-life-exchange-rate",
+  "sdk_version": "2.2.0",
+  "timeout_seconds": 10,
+  "health_and_proof_redirects_allowed": false,
+  "mcp_redirect_policy": "SDK 2.2.0: same-origin, method-preserving redirects only",
+  "live_provider_calls": false,
+  "profile_origin": "Synthetic judging inputs; no market observations claimed.",
+  "stage": "complete",
+  "health": {
+    "status": "passed",
+    "http_status": 200,
+    "elapsed_ms": 3015,
+    "response_bytes": 101,
+    "status_value": "ok",
+    "commit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+    "mcp": "enabled"
+  },
+  "deployment_proof": {
+    "status": "passed",
+    "http_status": 200,
+    "elapsed_ms": 157,
+    "response_bytes": 366,
+    "slug": "kongkoukk-life-exchange-rate",
+    "commit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+    "origin_matches": true,
+    "mcp_url_matches": true
+  },
+  "modes": [
+    {
+      "mode": "auto",
+      "protocol_version": "2026-07-28",
+      "initialize": "passed",
+      "tool_names": [
+        "compare_event_scenarios",
+        "convert_to_life_units",
+        "get_energy_event",
+        "get_live_fx_event",
+        "get_macro_events",
+        "get_official_macro_headlines",
+        "get_policy_rate_event",
+        "rank_events_for_user",
+        "translate_event_to_life"
+      ],
+      "calls": [
+        {
+          "tool": "get_macro_events",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        },
+        {
+          "tool": "get_macro_events",
+          "status": "invalid_input_rejected"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "invalid_input_rejected"
+        }
+      ],
+      "fixture_result": {
+        "event_id": "demo-jpy-sek-8pct",
+        "direct_effect_home": 1739.13,
+        "currency": "SEK",
+        "work_hours": 8.7,
+        "calculation_trace_present": true
+      }
+    },
+    {
+      "mode": "legacy",
+      "protocol_version": "2025-11-25",
+      "initialize": "passed",
+      "tool_names": [
+        "compare_event_scenarios",
+        "convert_to_life_units",
+        "get_energy_event",
+        "get_live_fx_event",
+        "get_macro_events",
+        "get_official_macro_headlines",
+        "get_policy_rate_event",
+        "rank_events_for_user",
+        "translate_event_to_life"
+      ],
+      "calls": [
+        {
+          "tool": "get_macro_events",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        },
+        {
+          "tool": "get_macro_events",
+          "status": "invalid_input_rejected"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "invalid_input_rejected"
+        }
+      ],
+      "fixture_result": {
+        "event_id": "demo-jpy-sek-8pct",
+        "direct_effect_home": 1739.13,
+        "currency": "SEK",
+        "work_hours": 8.7,
+        "calculation_trace_present": true
+      }
+    }
+  ]
+}

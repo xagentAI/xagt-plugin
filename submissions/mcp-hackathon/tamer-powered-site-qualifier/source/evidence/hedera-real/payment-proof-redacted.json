@@ -1,0 +1,15 @@
+{
+  "network": "hedera:testnet",
+  "buyer_account_id": "0.0.10488940",
+  "seller_account_id": "0.0.10489770",
+  "fee_payer": "0.0.7162784",
+  "amount_tinybars": 100000,
+  "amount_hbar": "0.001",
+  "initial_http_status": 402,
+  "blocky402_verify": "success (isValid=true)",
+  "blocky402_settle": "success (success=true)",
+  "final_http_status": 200,
+  "qualification_classification": "READY",
+  "transaction_id": "0.0.7162784@1789186391.831327025",
+  "consensus_timestamp": "2026-09-12T04:13:18Z"
+}

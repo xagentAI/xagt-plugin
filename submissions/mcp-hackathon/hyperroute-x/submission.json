@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "HyperRoute X",
+  "slug": "hyperroute-x",
+  "sourceRepository": "https://github.com/AlexBrian3/xagt-plugin",
+  "reviewCommit": "e8be87499fdf6f977051fa3b2d1fb0d916322e8d",
+  "apiBaseUrl": "https://alexbrian3-hyperroute-x.onrender.com/api/v1",
+  "healthCheckUrl": "https://alexbrian3-hyperroute-x.onrender.com/health",
+  "deploymentProofUrl": "https://alexbrian3-hyperroute-x.onrender.com/.well-known/xagent-verification.json"
+}

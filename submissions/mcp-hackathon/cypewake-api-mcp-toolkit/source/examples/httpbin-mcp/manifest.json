@@ -1,0 +1,1204 @@
+{
+  "schema_version": "2.0",
+  "generated_by": "MCPForge/2.1.0",
+  "generated_at": "2026-09-16T16:08:14.747312+00:00",
+  "listing": {
+    "name": "httpbin-mcp",
+    "display_name": "Httpbin Mcp",
+    "category": "api-tool",
+    "description": "httpbin-mcp API turned into MCP by MCPForge in one pass, 73 callable tools.",
+    "endpoint": "https://httpbin.org",
+    "auth": {
+      "required": false,
+      "schemes": [],
+      "credential_env": null
+    },
+    "capabilities": {
+      "tool_count": 73,
+      "paginated_tools": 0,
+      "deprecated_tools": 0
+    }
+  },
+  "tools": [
+    {
+      "operation_id": "get__absolute-redirect_{n}",
+      "method": "GET",
+      "path": "/absolute-redirect/{n}",
+      "summary": "Absolutely 302 Redirects n times.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n"
+        ]
+      }
+    },
+    {
+      "operation_id": "delete__anything",
+      "method": "DELETE",
+      "path": "/anything",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__anything",
+      "method": "GET",
+      "path": "/anything",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "patch__anything",
+      "method": "PATCH",
+      "path": "/anything",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "post__anything",
+      "method": "POST",
+      "path": "/anything",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "put__anything",
+      "method": "PUT",
+      "path": "/anything",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "delete__anything_{anything}",
+      "method": "DELETE",
+      "path": "/anything/{anything}",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "anything": {
+            "type": "string",
+            "description": "Automatically added"
+          }
+        },
+        "required": [
+          "anything"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__anything_{anything}",
+      "method": "GET",
+      "path": "/anything/{anything}",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "anything": {
+            "type": "string",
+            "description": "Automatically added"
+          }
+        },
+        "required": [
+          "anything"
+        ]
+      }
+    },
+    {
+      "operation_id": "patch__anything_{anything}",
+      "method": "PATCH",
+      "path": "/anything/{anything}",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "anything": {
+            "type": "string",
+            "description": "Automatically added"
+          }
+        },
+        "required": [
+          "anything"
+        ]
+      }
+    },
+    {
+      "operation_id": "post__anything_{anything}",
+      "method": "POST",
+      "path": "/anything/{anything}",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "anything": {
+            "type": "string",
+            "description": "Automatically added"
+          }
+        },
+        "required": [
+          "anything"
+        ]
+      }
+    },
+    {
+      "operation_id": "put__anything_{anything}",
+      "method": "PUT",
+      "path": "/anything/{anything}",
+      "summary": "Returns anything passed in request data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "anything": {
+            "type": "string",
+            "description": "Automatically added"
+          }
+        },
+        "required": [
+          "anything"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__base64_{value}",
+      "method": "GET",
+      "path": "/base64/{value}",
+      "summary": "Decodes base64url-encoded string.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__basic-auth_{user}_{passwd}",
+      "method": "GET",
+      "path": "/basic-auth/{user}/{passwd}",
+      "summary": "Prompts the user for authorization using HTTP Basic Auth.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": ""
+          },
+          "passwd": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "user",
+          "passwd"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__bearer",
+      "method": "GET",
+      "path": "/bearer",
+      "summary": "Prompts the user for authorization using bearer authentication.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__brotli",
+      "method": "GET",
+      "path": "/brotli",
+      "summary": "Returns Brotli-encoded data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__bytes_{n}",
+      "method": "GET",
+      "path": "/bytes/{n}",
+      "summary": "Returns n random bytes generated with given seed",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__cache",
+      "method": "GET",
+      "path": "/cache",
+      "summary": "Returns a 304 if an If-Modified-Since header or If-None-Match is present. Returns the same as a GET otherwise.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__cache_{value}",
+      "method": "GET",
+      "path": "/cache/{value}",
+      "summary": "Sets a Cache-Control header for n seconds.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__cookies",
+      "method": "GET",
+      "path": "/cookies",
+      "summary": "Returns cookie data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__cookies_delete",
+      "method": "GET",
+      "path": "/cookies/delete",
+      "summary": "Deletes cookie(s) as provided by the query string and redirects to cookie list.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "freeform": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__cookies_set",
+      "method": "GET",
+      "path": "/cookies/set",
+      "summary": "Sets cookie(s) as provided by the query string and redirects to cookie list.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "freeform": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__cookies_set_{name}_{value}",
+      "method": "GET",
+      "path": "/cookies/set/{name}/{value}",
+      "summary": "Sets a cookie and redirects to cookie list.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": ""
+          },
+          "value": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__deflate",
+      "method": "GET",
+      "path": "/deflate",
+      "summary": "Returns Deflate-encoded data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "delete__delay_{delay}",
+      "method": "DELETE",
+      "path": "/delay/{delay}",
+      "summary": "Returns a delayed response (max of 10 seconds).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "delay": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "delay"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__delay_{delay}",
+      "method": "GET",
+      "path": "/delay/{delay}",
+      "summary": "Returns a delayed response (max of 10 seconds).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "delay": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "delay"
+        ]
+      }
+    },
+    {
+      "operation_id": "patch__delay_{delay}",
+      "method": "PATCH",
+      "path": "/delay/{delay}",
+      "summary": "Returns a delayed response (max of 10 seconds).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "delay": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "delay"
+        ]
+      }
+    },
+    {
+      "operation_id": "post__delay_{delay}",
+      "method": "POST",
+      "path": "/delay/{delay}",
+      "summary": "Returns a delayed response (max of 10 seconds).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "delay": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "delay"
+        ]
+      }
+    },
+    {
+      "operation_id": "put__delay_{delay}",
+      "method": "PUT",
+      "path": "/delay/{delay}",
+      "summary": "Returns a delayed response (max of 10 seconds).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "delay": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "delay"
+        ]
+      }
+    },
+    {
+      "operation_id": "delete__delete",
+      "method": "DELETE",
+      "path": "/delete",
+      "summary": "The request's DELETE parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__deny",
+      "method": "GET",
+      "path": "/deny",
+      "summary": "Returns page denied by robots.txt rules.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__digest-auth_{qop}_{user}_{passwd}",
+      "method": "GET",
+      "path": "/digest-auth/{qop}/{user}/{passwd}",
+      "summary": "Prompts the user for authorization using Digest Auth.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "qop": {
+            "type": "string",
+            "description": "auth or auth-int"
+          },
+          "user": {
+            "type": "string",
+            "description": ""
+          },
+          "passwd": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "qop",
+          "user",
+          "passwd"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__digest-auth_{qop}_{user}_{passwd}_{algorithm}",
+      "method": "GET",
+      "path": "/digest-auth/{qop}/{user}/{passwd}/{algorithm}",
+      "summary": "Prompts the user for authorization using Digest Auth + Algorithm.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "qop": {
+            "type": "string",
+            "description": "auth or auth-int"
+          },
+          "user": {
+            "type": "string",
+            "description": ""
+          },
+          "passwd": {
+            "type": "string",
+            "description": ""
+          },
+          "algorithm": {
+            "type": "string",
+            "description": "MD5, SHA-256, SHA-512"
+          }
+        },
+        "required": [
+          "qop",
+          "user",
+          "passwd",
+          "algorithm"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__digest-auth_{qop}_{user}_{passwd}_{algorithm}_{stale_after}",
+      "method": "GET",
+      "path": "/digest-auth/{qop}/{user}/{passwd}/{algorithm}/{stale_after}",
+      "summary": "Prompts the user for authorization using Digest Auth + Algorithm.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "qop": {
+            "type": "string",
+            "description": "auth or auth-int"
+          },
+          "user": {
+            "type": "string",
+            "description": ""
+          },
+          "passwd": {
+            "type": "string",
+            "description": ""
+          },
+          "algorithm": {
+            "type": "string",
+            "description": "MD5, SHA-256, SHA-512"
+          },
+          "stale_after": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "qop",
+          "user",
+          "passwd",
+          "algorithm",
+          "stale_after"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__drip",
+      "method": "GET",
+      "path": "/drip",
+      "summary": "Drips data over a duration after an optional initial delay.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number",
+            "description": "The amount of time (in seconds) over which to drip each byte"
+          },
+          "numbytes": {
+            "type": "integer",
+            "description": "The number of bytes to respond with"
+          },
+          "code": {
+            "type": "integer",
+            "description": "The response code that will be returned"
+          },
+          "delay": {
+            "type": "number",
+            "description": "The amount of time (in seconds) to delay before responding"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__encoding_utf8",
+      "method": "GET",
+      "path": "/encoding/utf8",
+      "summary": "Returns a UTF-8 encoded body.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__etag_{etag}",
+      "method": "GET",
+      "path": "/etag/{etag}",
+      "summary": "Assumes the resource has the given etag and responds to If-None-Match and If-Match headers appropriately.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "etag": {
+            "type": "string",
+            "description": "Automatically added"
+          }
+        },
+        "required": [
+          "etag"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__get",
+      "method": "GET",
+      "path": "/get",
+      "summary": "The request's query parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__gzip",
+      "method": "GET",
+      "path": "/gzip",
+      "summary": "Returns GZip-encoded data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__headers",
+      "method": "GET",
+      "path": "/headers",
+      "summary": "Return the incoming request's HTTP headers.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__hidden-basic-auth_{user}_{passwd}",
+      "method": "GET",
+      "path": "/hidden-basic-auth/{user}/{passwd}",
+      "summary": "Prompts the user for authorization using HTTP Basic Auth.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": ""
+          },
+          "passwd": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "user",
+          "passwd"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__html",
+      "method": "GET",
+      "path": "/html",
+      "summary": "Returns a simple HTML document.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__image",
+      "method": "GET",
+      "path": "/image",
+      "summary": "Returns a simple image of the type suggest by the Accept header.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__image_jpeg",
+      "method": "GET",
+      "path": "/image/jpeg",
+      "summary": "Returns a simple JPEG image.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__image_png",
+      "method": "GET",
+      "path": "/image/png",
+      "summary": "Returns a simple PNG image.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__image_svg",
+      "method": "GET",
+      "path": "/image/svg",
+      "summary": "Returns a simple SVG image.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__image_webp",
+      "method": "GET",
+      "path": "/image/webp",
+      "summary": "Returns a simple WEBP image.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__ip",
+      "method": "GET",
+      "path": "/ip",
+      "summary": "Returns the requester's IP Address.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__json",
+      "method": "GET",
+      "path": "/json",
+      "summary": "Returns a simple JSON document.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__links_{n}_{offset}",
+      "method": "GET",
+      "path": "/links/{n}/{offset}",
+      "summary": "Generate a page containing n links to other pages which do the same.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          },
+          "offset": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n",
+          "offset"
+        ]
+      }
+    },
+    {
+      "operation_id": "patch__patch",
+      "method": "PATCH",
+      "path": "/patch",
+      "summary": "The request's PATCH parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "post__post",
+      "method": "POST",
+      "path": "/post",
+      "summary": "The request's POST parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "put__put",
+      "method": "PUT",
+      "path": "/put",
+      "summary": "The request's PUT parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__range_{numbytes}",
+      "method": "GET",
+      "path": "/range/{numbytes}",
+      "summary": "Streams n random bytes generated with given seed, at given chunk size per packet.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "numbytes": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "numbytes"
+        ]
+      }
+    },
+    {
+      "operation_id": "delete__redirect-to",
+      "method": "DELETE",
+      "path": "/redirect-to",
+      "summary": "302/3XX Redirects to the given URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__redirect-to",
+      "method": "GET",
+      "path": "/redirect-to",
+      "summary": "302/3XX Redirects to the given URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": ""
+          },
+          "status_code": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "operation_id": "patch__redirect-to",
+      "method": "PATCH",
+      "path": "/redirect-to",
+      "summary": "302/3XX Redirects to the given URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "post__redirect-to",
+      "method": "POST",
+      "path": "/redirect-to",
+      "summary": "302/3XX Redirects to the given URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "description": "request body (JSON)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "put__redirect-to",
+      "method": "PUT",
+      "path": "/redirect-to",
+      "summary": "302/3XX Redirects to the given URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "description": "request body (JSON)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__redirect_{n}",
+      "method": "GET",
+      "path": "/redirect/{n}",
+      "summary": "302 Redirects n times.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__relative-redirect_{n}",
+      "method": "GET",
+      "path": "/relative-redirect/{n}",
+      "summary": "Relatively 302 Redirects n times.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__response-headers",
+      "method": "GET",
+      "path": "/response-headers",
+      "summary": "Returns a set of response headers from the query string.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "freeform": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "post__response-headers",
+      "method": "POST",
+      "path": "/response-headers",
+      "summary": "Returns a set of response headers from the query string.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "freeform": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__robots.txt",
+      "method": "GET",
+      "path": "/robots.txt",
+      "summary": "Returns some robots.txt rules.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "delete__status_{codes}",
+      "method": "DELETE",
+      "path": "/status/{codes}",
+      "summary": "Return status code or random status code if more than one are given",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "codes"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__status_{codes}",
+      "method": "GET",
+      "path": "/status/{codes}",
+      "summary": "Return status code or random status code if more than one are given",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "codes"
+        ]
+      }
+    },
+    {
+      "operation_id": "patch__status_{codes}",
+      "method": "PATCH",
+      "path": "/status/{codes}",
+      "summary": "Return status code or random status code if more than one are given",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "codes"
+        ]
+      }
+    },
+    {
+      "operation_id": "post__status_{codes}",
+      "method": "POST",
+      "path": "/status/{codes}",
+      "summary": "Return status code or random status code if more than one are given",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "codes"
+        ]
+      }
+    },
+    {
+      "operation_id": "put__status_{codes}",
+      "method": "PUT",
+      "path": "/status/{codes}",
+      "summary": "Return status code or random status code if more than one are given",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "codes"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__stream-bytes_{n}",
+      "method": "GET",
+      "path": "/stream-bytes/{n}",
+      "summary": "Streams n random bytes generated with given seed, at given chunk size per packet.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__stream_{n}",
+      "method": "GET",
+      "path": "/stream/{n}",
+      "summary": "Stream n JSON responses",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "description": ""
+          }
+        },
+        "required": [
+          "n"
+        ]
+      }
+    },
+    {
+      "operation_id": "get__user-agent",
+      "method": "GET",
+      "path": "/user-agent",
+      "summary": "Return the incoming requests's User-Agent header.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__uuid",
+      "method": "GET",
+      "path": "/uuid",
+      "summary": "Return a UUID4.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "get__xml",
+      "method": "GET",
+      "path": "/xml",
+      "summary": "Returns a simple XML document.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ],
+  "pricing": {
+    "tier": "free",
+    "billing_model": "free",
+    "included_calls": 1000,
+    "price_per_1k_calls": 0.0,
+    "currency": "USD",
+    "all_tiers": {
+      "free": {
+        "price_per_1k_calls": 0.0,
+        "included_calls": 1000
+      },
+      "basic": {
+        "price_per_1k_calls": 2.0,
+        "included_calls": 10000
+      },
+      "pro": {
+        "price_per_1k_calls": 8.0,
+        "included_calls": 50000
+      },
+      "enterprise": {
+        "price_per_1k_calls": 25.0,
+        "included_calls": 500000
+      }
+    }
+  },
+  "compliance": {
+    "note": "produced as an engineering portfolio piece to demonstrate API→MCP wrapping and metering.",
+    "contains_security_audit_capability": false,
+    "crypto_token_speculation": false
+  }
+}

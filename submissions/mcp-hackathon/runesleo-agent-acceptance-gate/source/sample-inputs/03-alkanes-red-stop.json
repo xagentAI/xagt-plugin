@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1",
+  "mode": "quick",
+  "task": {
+    "task_id": "alkanes-full-index-campaign-red-stop-20260701",
+    "buyer_goal": "Run or verify a compact-only campaign while stopping safely if materialized storage budget exceeds red limit.",
+    "surface": "data",
+    "allowed_actions": [
+      "approved campaign verification",
+      "repair window verification",
+      "writeback"
+    ],
+    "forbidden_actions": [
+      "wallet action",
+      "broadcast",
+      "API key mutation",
+      "proxy mutation",
+      "service mutation",
+      "destructive cleanup",
+      "out-of-scope writes"
+    ],
+    "acceptance_criteria": [
+      "Campaign stops on red guard",
+      "No next window starts after red decision",
+      "Repair window is verified",
+      "Boundary is declared"
+    ]
+  },
+  "delivery": {
+    "writeback_text": "Campaign stopped on materialized_budget red guard at window 892500..892999. Next window did not start. Post-red coverage count is zero. Repair window 881000..881499 is already clean. Evidence files for campaign execution, red journal, and repair executor are provided.",
+    "artifact_paths": [
+      "/Users/zhangxu/Documents/Codex/worker-writebacks/2026-07-01/alkanes-full-index-campaign-red-stop-readout-2026-07-01.md",
+      "/Users/zhangxu/Documents/Codex/worker-writebacks/2026-07-01/alkanes-campaign-backfill-execution-880500-955803-resumed-post-batch4-2026-07-01.json",
+      "/Users/zhangxu/Documents/Codex/worker-writebacks/2026-07-01/alkanes-storage-gate-executor-892500-892999-2026-07-01.jsonl"
+    ],
+    "changed_files": [],
+    "validation": [
+      "campaign_status stopped_on_guard",
+      "next_window_started false",
+      "repair_window coverage_complete true",
+      "boundary declared"
+    ],
+    "validation_output": "Materialized budget 846.32 MiB exceeded red limit 750.00 MiB, so postrun failed on gate with returncode 2.",
+    "rollback_plan": "No additional data write performed during clean repair verification.",
+    "hard_gates_declared": [
+      "wallet",
+      "signing",
+      "broadcasting",
+      "account",
+      "API key",
+      "proxy",
+      "VPS runtime",
+      "service scheduler mutation",
+      "raw trace write",
+      "destructive cleanup"
+    ],
+    "next_gate": "Treat the campaign as stopped; do not continue without new budget decision."
+  },
+  "context": {
+    "repo_state": "not_applicable",
+    "public_publish_requested": false,
+    "payments_or_wallets_in_scope": false,
+    "credentials_in_scope": false,
+    "notes": "A failing postrun is the correct behavior because the guard stopped the job."
+  }
+}
+

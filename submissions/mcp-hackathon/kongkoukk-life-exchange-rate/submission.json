@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Life Exchange Rate MCP",
+  "slug": "kongkoukk-life-exchange-rate",
+  "sourceRepository": "https://github.com/KongkouKK/life-exchange-rate-mcp",
+  "reviewCommit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+  "apiBaseUrl": "https://life-exchange-rate-mcp.vercel.app",
+  "healthCheckUrl": "https://life-exchange-rate-mcp.vercel.app/health",
+  "deploymentProofUrl": "https://life-exchange-rate-mcp.vercel.app/.well-known/xagent-verification.json"
+}

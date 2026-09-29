@@ -1,0 +1,40 @@
+{
+  "task": {
+    "buyer_goal": "Review a read-only agent delivery before acceptance.",
+    "surface": "repo",
+    "acceptance_criteria": [
+      "Version binding is explicit",
+      "Tests pass",
+      "No public action occurred"
+    ]
+  },
+  "delivery_summary": "Prepared a local-only, commit-bound X-Agent review surface without publishing, deploying, or changing the existing paid route.",
+  "artifacts": [
+    "worker/index.mjs",
+    "openapi.yaml",
+    "DEPLOYMENT.md"
+  ],
+  "changed_files": [
+    "worker/index.mjs",
+    "openapi.yaml",
+    "DEPLOYMENT.md"
+  ],
+  "validation": [
+    "npm test",
+    "npm run worker:check",
+    "official offline submission validator"
+  ],
+  "validation_output": "npm test exit_code=0; worker:check exit_code=0; focused X-Agent tests exit_code=0.",
+  "rollback_plan": "Before deployment, discard the isolated branch. After an approved deployment, redeploy the previous verified commit and disable XAGENT_REVIEW_ENABLED.",
+  "hard_gates": [
+    "No public push, deployment, account change, or official PR without owner approval."
+  ],
+  "next_gate": "Owner explicitly approves public push and deployment.",
+  "context": {
+    "repo_state": "clean",
+    "public_publish_requested": false,
+    "payments_or_wallets_in_scope": false,
+    "credentials_in_scope": false,
+    "notes": "Read-only deterministic audit; no outbound calls on this route."
+  }
+}

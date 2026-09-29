@@ -1,0 +1,28 @@
+{
+  "name": "docket-resolve",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "AI-assisted proportional settlement recommendations for agent-to-agent work.",
+  "scripts": {
+    "start": "node --env-file=.env.local src/server.js",
+    "mcp": "node --env-file=.env.local src/mcp/stdio.js",
+    "demo:agent": "node scripts/agent-workflow.js",
+    "demo:mcp:production": "node scripts/production-mcp-workflow.js",
+    "test": "node --test",
+    "test:e2e": "node --test test/e2e.test.js",
+    "test:ai": "node --test test/ai.test.js",
+    "test:mcp": "node --test test/mcp.test.js",
+    "check": "node --check public/app.js && node --check public/retrieval-status.js && node --check src/evaluate.js && node --check src/http.js && node --check src/server.js && node --check api/index.js && node --check src/ai/providers.js && node --check src/ai/review.js && node --check src/auth.js && node --check src/evidence/fixture.js && node --check src/evidence/retrieve.js && node --check src/mcp/server.js && node --check src/mcp/stdio.js && node --check src/persistence/store.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "4.6.5"
+  }
+}
