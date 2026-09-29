@@ -1,0 +1,13 @@
+{
+  "name": "bhrigu-bitcoin-research-state-api",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "IP-safe read-only Bitcoin research state API for X-Agent Open Innovation.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node tests/acceptance.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

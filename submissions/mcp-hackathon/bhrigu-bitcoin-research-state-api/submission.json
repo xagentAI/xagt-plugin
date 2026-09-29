@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "BHRIGU Bitcoin Research State API",
+  "slug": "bhrigu-bitcoin-research-state-api",
+  "sourceRepository": "https://github.com/AiBhrigu/bhrigu-bitcoin-research-state-api",
+  "reviewCommit": "05a455ba1407f7b07de226f6c78eefda15b24880",
+  "apiBaseUrl": "https://bhrigu-bitcoin-research-state-api.vercel.app/v1",
+  "healthCheckUrl": "https://bhrigu-bitcoin-research-state-api.vercel.app/health",
+  "deploymentProofUrl": "https://bhrigu-bitcoin-research-state-api.vercel.app/.well-known/xagent-verification.json"
+}
