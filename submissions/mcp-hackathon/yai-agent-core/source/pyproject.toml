@@ -1,0 +1,50 @@
+[project]
+name = "yai-agent-core"
+version = "0.1.0"
+description = "YAI Agent Core — an embeddable, self-adaptive agent kernel for host applications"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Gi-Tuu" }]
+keywords = ["agent", "llm", "tool-calling", "mcp", "runtime", "embedded", "kernel"]
+dependencies = []
+
+[project.optional-dependencies]
+# 真实模型接入（OpenAI 兼容：DeepSeek / 通义千问 / OpenAI 等）
+llm = ["openai>=1.40"]
+# FastAPI Battery：在线 API、健康端点、X-Agent 部署验证端点
+server = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+]
+# MCP Client 集成：接入外部 MCP Server 的工具（v2 稳定线，内核本体不依赖）
+mcp = ["mcp>=2.0,<3"]
+# OpenAPI 发现：把任意 OpenAPI 3 REST API 自动注册为工具（httpx 调用、pyyaml 解析 YAML 描述）
+openapi = ["httpx>=0.27", "pyyaml>=6.0"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "httpx>=0.27",
+]
+# 构建 docs/walkthrough 讲义 Word（PDF 导出走 LibreOffice UNO，无需 pip 包）
+docs = ["python-docx>=1.1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/yai_core"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

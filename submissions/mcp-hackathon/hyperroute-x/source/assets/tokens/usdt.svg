@@ -1,0 +1,9 @@
+<!--
+  USDT Token Icon (Tether USD Official Asset)
+  NOTE FOR USER: To swap in an official brand asset file, replace this file:
+  source/assets/tokens/usdt.svg
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%">
+  <circle cx="16" cy="16" r="16" fill="#26A17B"/>
+  <path fill="#FFFFFF" d="M17.92 14.77v-1.63h4.94V10.5H9.14v2.64h4.94v1.63c-4.47.2-7.83 1.08-7.83 2.14 0 1.07 3.36 1.95 7.83 2.15v5.82h3.84v-5.82c4.46-.2 7.82-1.08 7.82-2.15 0-1.06-3.36-1.94-7.82-2.15zm0 3.52v-.01c-.4.03-1.25.07-1.92.07-.64 0-1.42-.04-1.92-.07v.01c-3.64-.17-6.38-.82-6.38-1.59 0-.77 2.74-1.42 6.38-1.59v2.24c.5.04 1.27.08 1.92.08.68 0 1.51-.04 1.92-.08v-2.24c3.63.17 6.37.82 6.37 1.59 0 .77-2.74 1.42-6.37 1.59z"/>
+</svg>

@@ -1,0 +1,14 @@
+{
+  "name": "bhrigu-bitcoin-research-state-api",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "IP-safe read-only Bitcoin temporal-evidence API and MCP server for X-Agent Open Innovation.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node tests/acceptance.mjs && node tests/temporal.mjs && node tests/mcp.mjs && node tests/integrity.mjs",
+    "check": "npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

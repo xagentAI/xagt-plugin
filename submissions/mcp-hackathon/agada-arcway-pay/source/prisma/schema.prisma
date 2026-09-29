@@ -1,0 +1,241 @@
+// Arcway — Phase 0/1 schema.
+//
+// The full Phase 1 shape is modelled here in one go so the project migrates
+// once rather than twice (see BUILD_PLAN.md). Auth and company scoping are
+// NOT wired yet: for now every payee hangs off a single default Company row,
+// and the User model is created but unused until Phase 1.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Pooled connection (PgBouncer) — used by the app at runtime.
+  url       = env("DATABASE_URL")
+  // Unpooled connection — Prisma Migrate needs a direct session to take
+  // advisory locks. Against the pooler, migrations hang rather than error.
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  EMPLOYER
+  PAYEE
+}
+
+/// Values are lowercase to map 1:1 onto the `PayeeStatus` union already
+/// declared in lib/types.ts, so no translation layer is needed.
+enum PayeeStatus {
+  pending
+  sending
+  sent
+  failed
+}
+
+/// Whether the recipient has been told about a payment. Tracked separately
+/// from the transfer itself: a notification that fails must never imply the
+/// money did, and must be retryable on its own.
+enum NotificationStatus {
+  pending
+  sent
+  failed
+  skipped
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users   User[]
+  payees  Payee[]
+  payouts Payout[]
+  runs    PayoutRun[]
+  apiKeys ApiKey[]
+}
+
+/// `companyId` is meaningful for EMPLOYERs — it is the company whose dashboard
+/// they administer. Payees are NOT resolved through this column: a payee signs
+/// in with their email and is matched against `Payee` rows, and the same person
+/// may exist as a Payee under several different companies at once. A PAYEE row
+/// here therefore normally carries a null `companyId`.
+model User {
+  id          String   @id @default(cuid())
+  privyUserId String   @unique
+  email       String   @unique
+  companyId   String?
+  role        Role
+  createdAt   DateTime @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+}
+
+/// The person: their wallet, their standing amount, and the current queue
+/// state. Mutable. Actual transfers are recorded in `Payout`, not here.
+model Payee {
+  id            String      @id @default(cuid())
+  companyId     String
+  name          String
+  email         String
+  /// Stored as an exact decimal, not a float — this is money. USDC carries 6
+  /// decimals, so Decimal(20, 6) covers the full token precision with room to
+  /// spare. lib/store.ts converts to/from `number` at the boundary so the
+  /// `Payee` type in lib/types.ts and all its callers stay unchanged.
+  amountUsdc    Decimal     @db.Decimal(20, 6)
+  walletAddress String
+  /// Set once the payee has signed in and claimed their embedded wallet.
+  /// Null means unclaimed — the amber "Not yet" state in the dashboard.
+  privyUserId   String?
+  status        PayeeStatus @default(pending)
+  transferId    String?
+  failureReason String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payouts     Payout[]
+  withdrawals Withdrawal[]
+
+  // One payee per email per company — Company A and Company B may both pay
+  // the same person, but neither can list them twice.
+  @@unique([companyId, email])
+  @@index([companyId])
+  @@index([status])
+}
+
+/// An immutable ledger of transfers actually attempted. One row per recipient
+/// per payout run, so a payee can be paid many times over — which is what both
+/// the employer's run history and the payee's payment history read from.
+/// Rows are appended and their terminal status set; they are never recycled.
+/// One confirmed payout run — the click that moved money.
+///
+/// Replaces an earlier heuristic that reconstructed a run from payouts sharing
+/// a creation timestamp. That was exact locally but would split one run into
+/// two, or merge two into one, as soon as cold starts or real Circle latency
+/// stretched a run past the window — and it would do so silently, producing a
+/// receipt that was quietly wrong. Membership is now recorded, not inferred.
+model PayoutRun {
+  id        String   @id @default(cuid())
+  companyId String
+  createdAt DateTime @default(now())
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payouts Payout[]
+
+  @@index([companyId])
+}
+
+model Payout {
+  id            String      @id @default(cuid())
+  companyId     String
+  /// Every payout belongs to exactly one run. Required, so a payout can never
+  /// exist outside the run that authorised it.
+  runId         String
+  payeeId       String
+  amountUsdc    Decimal     @db.Decimal(20, 6)
+  status        PayeeStatus @default(pending)
+  transferId    String?
+  failureReason String?
+  createdAt     DateTime    @default(now())
+  /// Set when the transfer reaches a settled state, so the receipt can show
+  /// when the money actually landed rather than when the run was started.
+  sentAt        DateTime?
+
+  /// Notification state, deliberately independent of `status` above. Money
+  /// moving and the recipient being told are two different events, and the
+  /// second one failing is recoverable without touching the first.
+  notifyStatus  NotificationStatus @default(pending)
+  /// When delivery last SUCCEEDED — what the employer quotes to the payee
+  /// ("it went out at 14:32, check spam").
+  notifiedAt    DateTime?
+  notifyError   String?
+  /// How many times a send has been attempted, successful or not. Support
+  /// signal: a payee whose count keeps climbing has a delivery problem.
+  notifyAttempts Int      @default(0)
+  /// When a send was last ATTEMPTED, regardless of outcome. Distinct from
+  /// `notifiedAt`: rate limiting must also throttle repeated failures, which
+  /// never set a success timestamp.
+  lastNotifyAttemptAt DateTime?
+
+  company Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payee   Payee     @relation(fields: [payeeId], references: [id], onDelete: Cascade)
+  run     PayoutRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([runId])
+  @@index([payeeId])
+  @@index([status])
+}
+
+/// Money leaving the payee's wallet, by their own hand.
+///
+/// Deliberately separate from `Payout`: different actor (the payee, not the
+/// employer), opposite direction, and it carries a destination the payee chose
+/// plus an on-chain transaction hash rather than a Circle transfer id. Folding
+/// the two together would make "balance" ambiguous.
+model Withdrawal {
+  id                 String      @id @default(cuid())
+  payeeId            String
+  /// What the payee receives at the destination.
+  amountUsdc         Decimal     @db.Decimal(20, 6)
+  /// The network fee charged for this withdrawal, recorded rather than
+  /// recomputed: a receipt reopened months later must show the fee that was
+  /// actually charged, not whatever the current estimate happens to be.
+  feeUsdc            Decimal     @default(0) @db.Decimal(20, 6)
+  /// Where the payee sent it. Free-form on purpose — it is an address on some
+  /// chain, not a record we control.
+  destinationAddress String
+  status             PayeeStatus @default(pending)
+  txHash             String?
+  failureReason      String?
+  createdAt          DateTime    @default(now())
+  sentAt             DateTime?
+
+  payee Payee @relation(fields: [payeeId], references: [id], onDelete: Cascade)
+
+  @@index([payeeId])
+  @@index([status])
+}
+
+/// A service credential for agent callers of POST /api/capability/pay-by-email.
+///
+/// Agents cannot complete Privy's interactive email login, so the capability
+/// endpoint authenticates by key instead of by session. A key resolves to
+/// exactly one company, and every read and write the endpoint performs is
+/// scoped to it — the same {id, companyId} rule the rest of the store follows.
+model ApiKey {
+  id        String   @id @default(cuid())
+  companyId String
+  /// SHA-256 of the presented key. The raw value is shown once at creation and
+  /// never stored.
+  ///
+  /// SHA-256 rather than bcrypt/argon2 deliberately: a key is 32 bytes of
+  /// CSPRNG output, so there is no low-entropy secret for a slow KDF to
+  /// protect. Brute-forcing 2^256 is not on the table, and a per-request KDF
+  /// would buy nothing while adding latency to a payments endpoint.
+  hashedKey String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime?
+  /// Set when revoked. Revoked keys authenticate exactly like unknown ones:
+  /// a uniform 401 that reveals nothing about whether the key ever existed.
+  revokedAt DateTime?
+
+  /// Requests allowed per minute for this key. Lower on the public reviewer
+  /// key than on a company's own keys.
+  rateLimitPerMinute Int      @default(60)
+  /// Rolling window state, updated in the SAME write as lastUsedAt so an
+  /// authenticated call costs one row update rather than two.
+  windowStartedAt    DateTime?
+  windowCount        Int      @default(0)
+
+  /// Largest single payout this key may make. Null means uncapped; the public
+  /// reviewer key sets it so a leaked key cannot drain the treasury in one call.
+  maxAmountUsdc Decimal? @db.Decimal(20, 6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}

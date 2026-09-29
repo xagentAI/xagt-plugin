@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-09-02T07:34:15.625Z",
+  "apiBase": "https://api.finfold.app",
+  "sourceUrl": "https://www.finfold.app/en",
+  "runs": 20,
+  "successes": 19,
+  "successRate": 0.95,
+  "p95Ms": 14394,
+  "syncGatePassed": true,
+  "results": [
+    { "run": 1, "status": 201, "durationMs": 14331 },
+    { "run": 2, "status": 201, "durationMs": 12714 },
+    { "run": 3, "status": 201, "durationMs": 14394 },
+    { "run": 4, "status": 201, "durationMs": 9654 },
+    { "run": 5, "status": 201, "durationMs": 11096 },
+    { "run": 6, "status": 201, "durationMs": 13502 },
+    { "run": 7, "status": 201, "durationMs": 12449 },
+    { "run": 8, "status": 201, "durationMs": 10224 },
+    { "run": 9, "status": 201, "durationMs": 9019 },
+    { "run": 10, "status": 201, "durationMs": 13025 },
+    { "run": 11, "status": 201, "durationMs": 10572 },
+    { "run": 12, "status": 201, "durationMs": 11121 },
+    { "run": 13, "status": 201, "durationMs": 11928 },
+    { "run": 14, "status": 201, "durationMs": 9566 },
+    { "run": 15, "status": 201, "durationMs": 8910 },
+    { "run": 16, "status": 0, "durationMs": 35002, "errorCode": "TimeoutError" },
+    { "run": 17, "status": 201, "durationMs": 10275 },
+    { "run": 18, "status": 201, "durationMs": 10283 },
+    { "run": 19, "status": 201, "durationMs": 12240 },
+    { "run": 20, "status": 201, "durationMs": 9995 }
+  ]
+}

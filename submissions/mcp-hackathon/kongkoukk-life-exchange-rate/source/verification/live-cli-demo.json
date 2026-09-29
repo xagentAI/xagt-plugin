@@ -1,0 +1,308 @@
+{
+  "mode": "live_official_structured_events",
+  "profile_source": "Explicit synthetic demonstration inputs; not inferred user finances or local prices.",
+  "profile": {
+    "home_currency": "SEK",
+    "home_country": "SE",
+    "net_monthly_income": 32000.0,
+    "monthly_work_hours": 160.0,
+    "travel_budget_home": 20000.0,
+    "travel_target_currency": "JPY",
+    "mortgage": {
+      "principal": 2500000.0,
+      "remaining_years": 25.0,
+      "current_annual_rate_pct": 3.8,
+      "currency": "SEK"
+    },
+    "savings_balance": 100000.0,
+    "commute": {
+      "monthly_fuel_liters": 65.0,
+      "fuel_price_per_liter": 18.5
+    },
+    "life_units": [
+      {
+        "name": "beer",
+        "price": 80.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "coffee",
+        "price": 45.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "lunch",
+        "price": 140.0,
+        "currency": "SEK"
+      }
+    ]
+  },
+  "radar": [
+    {
+      "event": {
+        "event_id": "fx-SEK-JPY-2026-09-07-2026-09-14",
+        "event_type": "fx_move",
+        "title": "SEK/JPY moved -1.79% from 2026-09-07 to 2026-09-14",
+        "source": "Frankfurter / ECB",
+        "observed_at": "2026-09-14T00:00:00Z",
+        "old_value": 16.1127,
+        "new_value": 15.8248,
+        "unit": "JPY per SEK",
+        "change_pct": -1.7867893028480686,
+        "base_currency": "SEK",
+        "quote_currency": "JPY",
+        "affected_currencies": [
+          "SEK",
+          "JPY"
+        ],
+        "jurisdiction": null,
+        "evidence_url": "https://frankfurter.dev/providers/ecb/",
+        "window_start": "2026-09-07T00:00:00Z",
+        "window_end": "2026-09-14T00:00:00Z",
+        "confidence": "observed",
+        "provenance": {
+          "provider": "Frankfurter (ECB reference-rate provider)",
+          "source_type": "structured_intermediary_official_provider",
+          "retrieved_at": "2026-09-14T15:02:26.602492Z",
+          "series_id": "ECB:SEK/JPY",
+          "source_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-16&to=2026-09-14&base=SEK&quotes=JPY",
+          "notes": [
+            "Query uses the dedicated ECB provider route; observations are daily reference rates, not executable quotes.",
+            "Up to seven calendar days of provider backfill before the query start are retained and counted separately.",
+            "Observation timestamps represent source dates at 00:00 UTC, not publication times.",
+            "Requested 7 calendar days; actual observed window is 2026-09-07 through 2026-09-14.",
+            "Anomaly reference windows end on or before the event start; overlapping reference windows are descriptive, not independent trials."
+          ]
+        },
+        "metadata": {
+          "old_date": "2026-09-07",
+          "new_date": "2026-09-14",
+          "provider": "ECB",
+          "requested_lookback_days": 7,
+          "target_old_date": "2026-09-07",
+          "actual_calendar_days": 7,
+          "anchor_gap_days": 0,
+          "latest_observation_age_days": 0,
+          "query_start_date": "2025-08-16",
+          "query_end_date": "2026-09-14",
+          "history_start_date": "2025-08-15",
+          "pre_query_observation_count": 1,
+          "query_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-16&to=2026-09-14&base=SEK&quotes=JPY",
+          "history_observation_count": 276,
+          "identical_duplicates_removed": 0,
+          "anomaly": {
+            "method": "preceding_equal_calendar_horizon_log_return_z_score",
+            "formula": "(event_log_return - reference_mean_log_return) / reference_sample_stddev",
+            "horizon_calendar_days": 7,
+            "sample_count": 252,
+            "minimum_sample_count": 30,
+            "maximum_sample_count": 252,
+            "reference_window_start": "2025-08-28",
+            "reference_window_end": "2026-09-07",
+            "reference_windows_may_overlap": true,
+            "event_excluded_from_reference": true,
+            "missing_endpoint_policy": "skip_window_without_exact_calendar_horizon_endpoints",
+            "event_log_return": -0.018029451191580836,
+            "reference_mean_log_return": 0.0007798034164666606,
+            "reference_sample_stddev": 0.011199713290856535,
+            "z_score": -1.6794407249160035,
+            "fallback_reason": null
+          },
+          "z_score": -1.6794407249160035
+        }
+      },
+      "market_significance": 42.0,
+      "user_relevance": 100.0,
+      "priority_score": 73.9,
+      "significance_method": "provider_z_score",
+      "relevance_reasons": [
+        "FX pair includes the user's home currency",
+        "FX pair includes the user's travel target currency",
+        "User supplied a travel budget"
+      ]
+    },
+    {
+      "event": {
+        "event_id": "ecb-deposit-rate-2026-08-15-2026-09-14",
+        "event_type": "interest_rate_change",
+        "title": "Euro-area deposit facility rate moved +0.0 basis points",
+        "source": "European Central Bank",
+        "observed_at": "2026-09-14T00:00:00Z",
+        "old_value": 2.25,
+        "new_value": 2.25,
+        "unit": "percent",
+        "change_pct": null,
+        "base_currency": null,
+        "quote_currency": null,
+        "affected_currencies": [
+          "EUR"
+        ],
+        "jurisdiction": "EA",
+        "evidence_url": "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV",
+        "window_start": "2026-08-15T00:00:00Z",
+        "window_end": "2026-09-14T00:00:00Z",
+        "confidence": "observed",
+        "provenance": {
+          "provider": "European Central Bank",
+          "source_type": "official_structured",
+          "retrieved_at": "2026-09-14T15:02:27.652854Z",
+          "series_id": "FM.D.U2.EUR.4F.KR.DFR.LEV",
+          "source_url": "https://data-api.ecb.europa.eu/service/data/FM/D.U2.EUR.4F.KR.DFR.LEV",
+          "notes": [
+            "ECB daily deposit facility levels, percent per annum; signed basis-point change is 100 × (new − old).",
+            "Daily levels measure the requested window; this does not identify a specific monetary-policy announcement."
+          ]
+        },
+        "metadata": {
+          "requested_lookback_days": 30,
+          "requested_as_of": "2026-09-14",
+          "target_start_date": "2026-08-15",
+          "old_date": "2026-08-15",
+          "new_date": "2026-09-14",
+          "actual_window_days": 30,
+          "observation_lag_days": 0,
+          "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+          "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+          "provider": "ECB",
+          "synthetic": false,
+          "mode": "live",
+          "fallback_used": false,
+          "change_basis_points": 0.0,
+          "change_percentage_points": 0.0,
+          "scope": "Euro area; EUR exposures only",
+          "rate_name": "deposit facility"
+        }
+      },
+      "market_significance": 0.0,
+      "user_relevance": 0.0,
+      "priority_score": 0.0,
+      "significance_method": "fallback_policy_rate_basis_points",
+      "relevance_reasons": [
+        "Policy-rate currency scope does not support a direct home-currency impact"
+      ]
+    }
+  ],
+  "selected_event_id": "fx-SEK-JPY-2026-09-07-2026-09-14",
+  "impact": {
+    "event_provenance": {
+      "provider": "Frankfurter (ECB reference-rate provider)",
+      "source_type": "structured_intermediary_official_provider",
+      "retrieved_at": "2026-09-14T15:02:26.602492Z",
+      "series_id": "ECB:SEK/JPY",
+      "source_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-16&to=2026-09-14&base=SEK&quotes=JPY",
+      "notes": [
+        "Query uses the dedicated ECB provider route; observations are daily reference rates, not executable quotes.",
+        "Up to seven calendar days of provider backfill before the query start are retained and counted separately.",
+        "Observation timestamps represent source dates at 00:00 UTC, not publication times.",
+        "Requested 7 calendar days; actual observed window is 2026-09-07 through 2026-09-14.",
+        "Anomaly reference windows end on or before the event start; overlapping reference windows are descriptive, not independent trials."
+      ]
+    },
+    "event_observed_at": "2026-09-14T00:00:00Z",
+    "event_id": "fx-SEK-JPY-2026-09-07-2026-09-14",
+    "headline": "SEK/JPY moved -1.79% from 2026-09-07 to 2026-09-14",
+    "direct_effect_home": 363.86,
+    "home_currency": "SEK",
+    "direction": "cost_increase",
+    "impact_horizon": "one_off_travel_budget",
+    "work_hours_equivalent": 1.82,
+    "life_units": [
+      {
+        "unit": "beer",
+        "quantity": 4.55,
+        "currency": "SEK",
+        "unit_price": 80.0
+      },
+      {
+        "unit": "coffee",
+        "quantity": 8.09,
+        "currency": "SEK",
+        "unit_price": 45.0
+      },
+      {
+        "unit": "lunch",
+        "quantity": 2.6,
+        "currency": "SEK",
+        "unit_price": 140.0
+      }
+    ],
+    "explanation": "To preserve the same JPY purchasing power for the trip, the user would need about 363.86 SEK more than before.",
+    "confidence": "observed",
+    "assumptions": [
+      "Rates in the trace are destination-currency units per home-currency unit.",
+      "Reference-rate comparison excludes retail exchange fees and spreads."
+    ],
+    "warnings": [],
+    "calculation_trace": [
+      {
+        "label": "old destination purchasing power",
+        "formula": "travel_budget_home × old_fx_rate",
+        "inputs": {
+          "travel_budget_home": 20000.0,
+          "old_fx_rate": 16.1127
+        },
+        "result": 322254.0
+      },
+      {
+        "label": "new destination purchasing power",
+        "formula": "travel_budget_home × new_fx_rate",
+        "inputs": {
+          "travel_budget_home": 20000.0,
+          "new_fx_rate": 15.8248
+        },
+        "result": 316496.0
+      },
+      {
+        "label": "budget required to restore old purchasing power",
+        "formula": "travel_budget_home × old_fx_rate / new_fx_rate",
+        "inputs": {
+          "travel_budget_home": 20000.0,
+          "old_fx_rate": 16.1127,
+          "new_fx_rate": 15.8248
+        },
+        "result": 20363.86
+      },
+      {
+        "label": "personal impact",
+        "formula": "restore_budget - travel_budget_home",
+        "inputs": {
+          "restore_budget": 20363.86,
+          "travel_budget_home": 20000.0
+        },
+        "result": 363.86
+      }
+    ],
+    "details": {
+      "old_target_purchasing_power": 322254.0,
+      "new_target_purchasing_power": 316496.0,
+      "target_currency": "JPY",
+      "travel_budget_home": 20000.0
+    }
+  },
+  "life_conversion": {
+    "amount": 363.86,
+    "currency": "SEK",
+    "work_hours_equivalent": 1.82,
+    "life_units": [
+      {
+        "unit": "beer",
+        "quantity": 4.55,
+        "currency": "SEK",
+        "unit_price": 80.0
+      },
+      {
+        "unit": "coffee",
+        "quantity": 8.09,
+        "currency": "SEK",
+        "unit_price": 45.0
+      },
+      {
+        "unit": "lunch",
+        "quantity": 2.6,
+        "currency": "SEK",
+        "unit_price": 140.0
+      }
+    ]
+  },
+  "boundary": "Only structured old/new observations drive arithmetic; headlines never supply values."
+}

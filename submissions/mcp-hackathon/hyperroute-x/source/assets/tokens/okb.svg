@@ -1,0 +1,13 @@
+<!--
+  OKB Token Icon (Official OKX Ecosystem Asset)
+  NOTE FOR USER: To swap in an official brand asset file, replace this file:
+  source/assets/tokens/okb.svg
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%">
+  <circle cx="16" cy="16" r="16" fill="#2B64F5"/>
+  <g fill="#FFFFFF">
+    <circle cx="11.5" cy="16" r="3"/>
+    <circle cx="20.5" cy="16" r="3"/>
+    <path d="M16 8.5C11.86 8.5 8.5 11.86 8.5 16s3.36 7.5 7.5 7.5 7.5-3.36 7.5-7.5S20.14 8.5 16 8.5zm0 12.2c-2.6 0-4.7-2.1-4.7-4.7s2.1-4.7 4.7-4.7 4.7 2.1 4.7 4.7-2.1 4.7-4.7 4.7z"/>
+  </g>
+</svg>

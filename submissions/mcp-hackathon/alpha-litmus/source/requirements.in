@@ -1,0 +1,8 @@
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+httpx>=0.27,<1
+pydantic>=2.9,<3
+mcp==1.30.0
+sse-starlette==2.3.6
+# Preserve MCP's Windows-only dependency marker in the compiled output.
+pywin32; sys_platform == "win32"

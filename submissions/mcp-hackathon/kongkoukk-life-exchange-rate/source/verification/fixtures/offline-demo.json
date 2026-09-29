@@ -1,0 +1,299 @@
+{
+  "mode": "synthetic_offline_fixture",
+  "profile_source": "Explicit synthetic demonstration inputs; not inferred user finances or local prices.",
+  "profile": {
+    "home_currency": "SEK",
+    "home_country": "SE",
+    "net_monthly_income": 32000.0,
+    "monthly_work_hours": 160.0,
+    "travel_budget_home": 20000.0,
+    "travel_target_currency": "JPY",
+    "mortgage": {
+      "principal": 2500000.0,
+      "remaining_years": 25.0,
+      "current_annual_rate_pct": 3.8,
+      "currency": "SEK"
+    },
+    "savings_balance": 100000.0,
+    "commute": {
+      "monthly_fuel_liters": 65.0,
+      "fuel_price_per_liter": 18.5
+    },
+    "life_units": [
+      {
+        "name": "beer",
+        "price": 80.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "coffee",
+        "price": 45.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "lunch",
+        "price": 140.0,
+        "currency": "SEK"
+      }
+    ]
+  },
+  "radar": [
+    {
+      "event": {
+        "event_id": "demo-jpy-sek-8pct",
+        "event_type": "fx_move",
+        "title": "JPY strengthens sharply against SEK",
+        "source": "synthetic judging fixture",
+        "observed_at": "2026-09-10T16:00:00Z",
+        "old_value": 15.0,
+        "new_value": 13.8,
+        "unit": "JPY per SEK",
+        "change_pct": -7.9999999999999964,
+        "base_currency": "SEK",
+        "quote_currency": "JPY",
+        "affected_currencies": [
+          "SEK",
+          "JPY"
+        ],
+        "jurisdiction": null,
+        "evidence_url": null,
+        "window_start": "2026-09-03T16:00:00Z",
+        "window_end": "2026-09-10T16:00:00Z",
+        "confidence": "scenario",
+        "provenance": {
+          "provider": "demo-fixture",
+          "source_type": "fixture",
+          "retrieved_at": "2026-09-10T16:00:00Z",
+          "series_id": null,
+          "source_url": null,
+          "notes": [
+            "Synthetic scenario; values and z-score are illustrative, not official observations."
+          ]
+        },
+        "metadata": {
+          "demo": true,
+          "z_score": -3.2
+        }
+      },
+      "market_significance": 80.0,
+      "user_relevance": 100.0,
+      "priority_score": 91.0,
+      "significance_method": "provider_z_score",
+      "relevance_reasons": [
+        "FX pair includes the user's home currency",
+        "FX pair includes the user's travel target currency",
+        "User supplied a travel budget"
+      ]
+    },
+    {
+      "event": {
+        "event_id": "demo-brent-15pct",
+        "event_type": "oil_move",
+        "title": "Brent crude rises 15% over the observation window",
+        "source": "demo-fixture",
+        "observed_at": "2026-09-10T16:00:00Z",
+        "old_value": 80.0,
+        "new_value": 92.0,
+        "unit": "USD per barrel",
+        "change_pct": 14.999999999999991,
+        "base_currency": null,
+        "quote_currency": null,
+        "affected_currencies": [],
+        "jurisdiction": null,
+        "evidence_url": null,
+        "window_start": null,
+        "window_end": null,
+        "confidence": "scenario",
+        "provenance": {
+          "provider": "demo-fixture",
+          "source_type": "fixture",
+          "retrieved_at": "2026-09-10T16:00:00Z",
+          "series_id": null,
+          "source_url": null,
+          "notes": [
+            "Synthetic scenario; values and z-score are illustrative, not official observations."
+          ]
+        },
+        "metadata": {
+          "demo": true,
+          "z_score": 2.4
+        }
+      },
+      "market_significance": 60.0,
+      "user_relevance": 100.0,
+      "priority_score": 82.0,
+      "significance_method": "provider_z_score",
+      "relevance_reasons": [
+        "User supplied monthly fuel use and pump price",
+        "User has direct driving exposure"
+      ]
+    },
+    {
+      "event": {
+        "event_id": "demo-se-policy-rate-25bp",
+        "event_type": "interest_rate_change",
+        "title": "Swedish policy rate rises by 25 basis points",
+        "source": "demo-fixture",
+        "observed_at": "2026-09-10T16:00:00Z",
+        "old_value": 4.0,
+        "new_value": 4.25,
+        "unit": "percent",
+        "change_pct": 6.25,
+        "base_currency": null,
+        "quote_currency": null,
+        "affected_currencies": [
+          "SEK"
+        ],
+        "jurisdiction": "SE",
+        "evidence_url": null,
+        "window_start": null,
+        "window_end": null,
+        "confidence": "scenario",
+        "provenance": {
+          "provider": "demo-fixture",
+          "source_type": "fixture",
+          "retrieved_at": "2026-09-10T16:00:00Z",
+          "series_id": null,
+          "source_url": null,
+          "notes": [
+            "Synthetic scenario, not official observations."
+          ]
+        },
+        "metadata": {
+          "demo": true
+        }
+      },
+      "market_significance": 45.0,
+      "user_relevance": 100.0,
+      "priority_score": 75.2,
+      "significance_method": "fallback_policy_rate_basis_points",
+      "relevance_reasons": [
+        "User has declared mortgage exposure",
+        "User has declared savings exposure",
+        "Policy-rate scope matches the user's declared currency exposure",
+        "Policy jurisdiction matches the user's home country"
+      ]
+    }
+  ],
+  "selected_event_id": "demo-jpy-sek-8pct",
+  "impact": {
+    "event_provenance": {
+      "provider": "demo-fixture",
+      "source_type": "fixture",
+      "retrieved_at": "2026-09-10T16:00:00Z",
+      "series_id": null,
+      "source_url": null,
+      "notes": [
+        "Synthetic scenario; values and z-score are illustrative, not official observations."
+      ]
+    },
+    "event_observed_at": "2026-09-10T16:00:00Z",
+    "event_id": "demo-jpy-sek-8pct",
+    "headline": "JPY strengthens sharply against SEK",
+    "direct_effect_home": 1739.13,
+    "home_currency": "SEK",
+    "direction": "cost_increase",
+    "impact_horizon": "one_off_travel_budget",
+    "work_hours_equivalent": 8.7,
+    "life_units": [
+      {
+        "unit": "beer",
+        "quantity": 21.74,
+        "currency": "SEK",
+        "unit_price": 80.0
+      },
+      {
+        "unit": "coffee",
+        "quantity": 38.65,
+        "currency": "SEK",
+        "unit_price": 45.0
+      },
+      {
+        "unit": "lunch",
+        "quantity": 12.42,
+        "currency": "SEK",
+        "unit_price": 140.0
+      }
+    ],
+    "explanation": "To preserve the same JPY purchasing power for the trip, the user would need about 1739.13 SEK more than before.",
+    "confidence": "scenario",
+    "assumptions": [
+      "Rates in the trace are destination-currency units per home-currency unit.",
+      "Reference-rate comparison excludes retail exchange fees and spreads."
+    ],
+    "warnings": [
+      "This event uses a synthetic judging fixture, not a current market observation."
+    ],
+    "calculation_trace": [
+      {
+        "label": "old destination purchasing power",
+        "formula": "travel_budget_home × old_fx_rate",
+        "inputs": {
+          "travel_budget_home": 20000.0,
+          "old_fx_rate": 15.0
+        },
+        "result": 300000.0
+      },
+      {
+        "label": "new destination purchasing power",
+        "formula": "travel_budget_home × new_fx_rate",
+        "inputs": {
+          "travel_budget_home": 20000.0,
+          "new_fx_rate": 13.8
+        },
+        "result": 276000.0
+      },
+      {
+        "label": "budget required to restore old purchasing power",
+        "formula": "travel_budget_home × old_fx_rate / new_fx_rate",
+        "inputs": {
+          "travel_budget_home": 20000.0,
+          "old_fx_rate": 15.0,
+          "new_fx_rate": 13.8
+        },
+        "result": 21739.13
+      },
+      {
+        "label": "personal impact",
+        "formula": "restore_budget - travel_budget_home",
+        "inputs": {
+          "restore_budget": 21739.13,
+          "travel_budget_home": 20000.0
+        },
+        "result": 1739.13
+      }
+    ],
+    "details": {
+      "old_target_purchasing_power": 300000.0,
+      "new_target_purchasing_power": 276000.0,
+      "target_currency": "JPY",
+      "travel_budget_home": 20000.0
+    }
+  },
+  "life_conversion": {
+    "amount": 1739.13,
+    "currency": "SEK",
+    "work_hours_equivalent": 8.7,
+    "life_units": [
+      {
+        "unit": "beer",
+        "quantity": 21.74,
+        "currency": "SEK",
+        "unit_price": 80.0
+      },
+      {
+        "unit": "coffee",
+        "quantity": 38.65,
+        "currency": "SEK",
+        "unit_price": 45.0
+      },
+      {
+        "unit": "lunch",
+        "quantity": 12.42,
+        "currency": "SEK",
+        "unit_price": 140.0
+      }
+    ]
+  },
+  "boundary": "Only structured old/new observations drive arithmetic; headlines never supply values."
+}
