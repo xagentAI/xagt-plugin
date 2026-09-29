@@ -1,0 +1,20 @@
+﻿# 本地/服务器一键起服务：docker compose up --build
+# 环境变量从 .env 读取（OPENAI_API_KEY / OPENAI_BASE_URL / LLM_MODEL / YAI_PROJECT_SLUG）
+services:
+  yai-agent-core:
+    build:
+      context: .
+      args:
+        YAI_GIT_COMMIT: "${YAI_GIT_COMMIT:-dev}"
+        INDEX_URL: "${INDEX_URL:-https://pypi.org/simple}"
+    image: yai-agent-core:latest
+    ports:
+      # 只绑回环：公网由 Caddy（docker-compose.deploy.yml）反代，不直接暴露容器端口
+      # 本地直连调试仍可用 http://127.0.0.1:8001
+      - "127.0.0.1:8001:8000"
+    env_file:
+      - .env
+    environment:
+      # 留空时容器内自动读不到 git，会回退 dev；生产部署显式传 40 位 commit
+      YAI_GIT_COMMIT: "${YAI_GIT_COMMIT:-}"
+    restart: unless-stopped
