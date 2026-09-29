@@ -1,0 +1,28 @@
+{
+  "name": "agent-acceptance-gate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-only prototype for an agent-first acceptance gate service.",
+  "bin": {
+    "audit-agent-deliverable": "./bin/audit-agent-deliverable.mjs"
+  },
+  "scripts": {
+    "audit": "node ./bin/audit-agent-deliverable.mjs",
+    "audit:samples": "node ./bin/audit-agent-deliverable.mjs --samples --pretty",
+    "deploy:worker": "wrangler deploy",
+    "serve": "node ./bin/serve-demo.mjs",
+    "test": "node ./test/run-samples.mjs && node ./test/schema-smoke.mjs && node ./test/http-smoke.mjs && node ./test/wave-b-services-test.mjs && node ./test/x402-worker-test.mjs && node ./test/xagent-contract-test.mjs && node ./test/xagent-submission-contract-test.mjs",
+    "worker:check": "node --check ./worker/index.mjs",
+    "test:samples": "node ./test/run-samples.mjs",
+    "test:schemas": "node ./test/schema-smoke.mjs",
+    "test:http": "node ./test/http-smoke.mjs",
+    "test:x402": "node ./test/x402-worker-test.mjs",
+    "check:upstream-contracts": "node scripts/check-upstream-contracts.mjs",
+    "test:xagent": "node ./test/xagent-contract-test.mjs",
+    "test:xagent-submission": "node ./test/xagent-submission-contract-test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.133.0"
+  }
+}

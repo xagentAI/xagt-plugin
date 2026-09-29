@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1",
+  "verdict": "needs_review",
+  "score": 82,
+  "dimension_scores": {
+    "delivery_completeness": 27,
+    "validation_and_evidence": 18,
+    "safety_and_hard_gates": 23,
+    "buyer_usability": 8,
+    "dispute_readiness": 6
+  },
+  "missing": [
+    "full release build",
+    "buyer decision on old-customer lifetime-update promise wording",
+    "visual smoke before public release"
+  ],
+  "risks": [
+    "Copy changes affect buyer expectation and should not be released without owner review.",
+    "Build was deferred, so this is local-ready rather than publish-ready.",
+    "Public release hard gates remain open."
+  ],
+  "positive_evidence": [
+    "Changed files are declared.",
+    "Pricing and payment configuration are explicitly out of scope.",
+    "Syntax and whitespace validation passed.",
+    "Rollback is low-impact before push.",
+    "Next gate is explicit: Leo approval before push/deploy."
+  ],
+  "questions_for_seller": [
+    "Should old buyers receive a separate clarification about lifetime-update wording?",
+    "Will release validation include full build and visual smoke?"
+  ],
+  "next_gate": "Buyer reviews copy-risk note and either requests changes or explicitly approves push/deploy path.",
+  "buyer_summary": "The local copy rename is mostly complete and controlled, but it should not be accepted as release-ready until the old-buyer promise wording and full release validation are resolved.",
+  "evaluator_notes": "No hard-gate breach is visible. The main unresolved issue is acceptance semantics: local-ready is not publish-ready, and copy affecting prior buyer promise needs owner judgment.",
+  "machine_flags": [
+    "deferred_build",
+    "public_release_gate",
+    "buyer_decision_required"
+  ]
+}
+

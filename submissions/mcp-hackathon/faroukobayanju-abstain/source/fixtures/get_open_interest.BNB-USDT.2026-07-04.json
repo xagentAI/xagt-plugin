@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "name": "get_open_interest",
+  "content": {
+    "symbol": "BNB/USDT",
+    "as_of_date": "2026-07-04",
+    "price": 575.76,
+    "open_interest": 540941.76,
+    "open_interest_usd": 334383148.944,
+    "long_short_ratio": 2.57919095,
+    "funding_rate": 0.00010833
+  }
+}

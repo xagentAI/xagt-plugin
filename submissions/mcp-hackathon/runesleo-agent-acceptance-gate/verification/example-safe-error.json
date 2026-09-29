@@ -1,0 +1,4 @@
+{
+  "error": "bad_request",
+  "message": "Audit input requires task (string or {buyer_goal, ...}) and delivery_summary. Optional: artifacts[], validation[], changed_files[], hard_gates[], next_gate, context."
+}

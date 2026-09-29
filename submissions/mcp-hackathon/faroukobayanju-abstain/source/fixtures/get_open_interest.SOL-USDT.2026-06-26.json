@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "name": "get_open_interest",
+  "content": {
+    "symbol": "SOL/USDT",
+    "as_of_date": "2026-06-26",
+    "price": 71.87,
+    "open_interest": null,
+    "open_interest_usd": null,
+    "long_short_ratio": null,
+    "funding_rate": 0.00006096
+  }
+}

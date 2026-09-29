@@ -1,0 +1,232 @@
+{
+  "verify": {
+    "base_url": "https://api.github.com",
+    "total_operations": 5,
+    "filtered_operations": 5,
+    "passed": 5,
+    "verified": 5,
+    "verdict": "all passed",
+    "detail": [
+      {
+        "operation_id": "getZen",
+        "http_status": 200,
+        "passed": true,
+        "status": "passed",
+        "latency_ms": 354.3
+      },
+      {
+        "operation_id": "getRateLimit",
+        "http_status": 200,
+        "passed": true,
+        "status": "passed",
+        "latency_ms": 313.1
+      },
+      {
+        "operation_id": "listPublicEvents",
+        "http_status": 200,
+        "passed": true,
+        "status": "passed",
+        "latency_ms": 324.2
+      },
+      {
+        "operation_id": "searchRepositories",
+        "http_status": 200,
+        "passed": true,
+        "status": "passed",
+        "latency_ms": 351.9
+      },
+      {
+        "operation_id": "getRepository",
+        "http_status": 200,
+        "passed": true,
+        "status": "passed",
+        "latency_ms": 320.8
+      }
+    ]
+  },
+  "register": {
+    "name": "github_live",
+    "ops": 5
+  },
+  "calls": [
+    {
+      "operation_id": "getZen",
+      "ok": true,
+      "status_code": 200,
+      "metered": true
+    },
+    {
+      "operation_id": "getZen",
+      "ok": true,
+      "status_code": 200,
+      "metered": true
+    },
+    {
+      "operation_id": "getRateLimit",
+      "ok": true,
+      "status_code": 200,
+      "metered": true
+    },
+    {
+      "operation_id": "getRateLimit",
+      "ok": true,
+      "status_code": 200,
+      "metered": true
+    },
+    {
+      "operation_id": "listPublicEvents",
+      "ok": true,
+      "status_code": 200,
+      "metered": true
+    },
+    {
+      "operation_id": "listPublicEvents",
+      "ok": true,
+      "status_code": 200,
+      "metered": true
+    }
+  ],
+  "usage_report": {
+    "found": true,
+    "currency_note": "billing currency: USD (override with MCPFORGE_CURRENCY)",
+    "total_calls_all_apis": 34,
+    "apis": {
+      "github_live": {
+        "total_calls": 34,
+        "ok_calls": 34,
+        "failed_calls": 0,
+        "success_rate": 1.0,
+        "first_seen": "2026-09-14T10:34:30.898747+00:00",
+        "last_seen": "2026-09-16T16:08:36.135368+00:00",
+        "active_days": 2,
+        "calls_per_day": 17.0,
+        "projected_monthly_calls": 510,
+        "daily": {
+          "2026-09-14": 12,
+          "2026-09-16": 22
+        },
+        "operations": [
+          {
+            "operation_id": "getRateLimit",
+            "calls": 6,
+            "ok": 6,
+            "failed": 0,
+            "avg_latency_ms": 444.5,
+            "success_rate": 1.0
+          },
+          {
+            "operation_id": "getRepository",
+            "calls": 12,
+            "ok": 12,
+            "failed": 0,
+            "avg_latency_ms": 560.0,
+            "success_rate": 1.0
+          },
+          {
+            "operation_id": "getZen",
+            "calls": 6,
+            "ok": 6,
+            "failed": 0,
+            "avg_latency_ms": 1400.5,
+            "success_rate": 1.0
+          },
+          {
+            "operation_id": "listPublicEvents",
+            "calls": 6,
+            "ok": 6,
+            "failed": 0,
+            "avg_latency_ms": 446.4,
+            "success_rate": 1.0
+          },
+          {
+            "operation_id": "searchRepositories",
+            "calls": 4,
+            "ok": 4,
+            "failed": 0,
+            "avg_latency_ms": 671.7,
+            "success_rate": 1.0
+          }
+        ]
+      }
+    }
+  },
+  "invoice": {
+    "schema_version": "2.0",
+    "api": "github_live",
+    "pricing_tier": "pro",
+    "billing_model": "pay-per-call",
+    "currency": "USD",
+    "billing_basis": "actual recorded usage",
+    "metered_actual": {
+      "total_calls": 34,
+      "ok_calls": 34,
+      "failed_calls": 0,
+      "success_rate": 1.0,
+      "active_days": 2,
+      "calls_per_day": 17.0
+    },
+    "billable_calls": 34,
+    "included_calls": 50000,
+    "billable_overage_calls": 0,
+    "price_per_1k_calls": 8.0,
+    "amount_due": 0.0,
+    "line_items": [
+      {
+        "operation_id": "getRateLimit",
+        "actual_calls": 6,
+        "share_of_actual_calls": 0.176,
+        "projected_calls": 6
+      },
+      {
+        "operation_id": "getRepository",
+        "actual_calls": 12,
+        "share_of_actual_calls": 0.353,
+        "projected_calls": 12
+      },
+      {
+        "operation_id": "getZen",
+        "actual_calls": 6,
+        "share_of_actual_calls": 0.176,
+        "projected_calls": 6
+      },
+      {
+        "operation_id": "listPublicEvents",
+        "actual_calls": 6,
+        "share_of_actual_calls": 0.176,
+        "projected_calls": 6
+      },
+      {
+        "operation_id": "searchRepositories",
+        "actual_calls": 4,
+        "share_of_actual_calls": 0.118,
+        "projected_calls": 4
+      }
+    ],
+    "generated_at": "2026-09-16T16:08:36.137402+00:00",
+    "note": "usage comes from real metering in this service (usage.json), not an estimate; the projection basis is stated in billing_basis."
+  },
+  "manifest": {
+    "name": "github_live",
+    "pricing_tier": "pro",
+    "currency": "USD",
+    "tool_count": 5,
+    "billing_model": "pay-per-call"
+  },
+  "health": {
+    "status": "ok",
+    "service": "MCPForge",
+    "version": "2.1.0",
+    "registered_apis": [
+      "github_live",
+      "github_probe",
+      "judge_check_demo",
+      "judge_probe",
+      "kw_probe"
+    ],
+    "counters": {
+      "registered_apis": 5,
+      "metered_calls": 45
+    },
+    "time": "2026-09-16T16:08:36.138484+00:00"
+  }
+}

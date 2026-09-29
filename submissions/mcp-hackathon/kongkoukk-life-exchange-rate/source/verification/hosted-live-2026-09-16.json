@@ -1,0 +1,704 @@
+{
+  "recorded_at": "2026-09-16T06:40:40.841320+00:00",
+  "origin": "https://life-exchange-rate-mcp.vercel.app",
+  "endpoint": "https://life-exchange-rate-mcp.vercel.app/mcp/",
+  "expected_commit": "c8f2e6f073db92f6d6a75b2a478159044216f7db",
+  "transport": "Public HTTPS Streamable HTTP on Vercel",
+  "live_provider_calls": true,
+  "before": {
+    "health": {
+      "status": "ok",
+      "version": "0.2.0",
+      "commit": "c8f2e6f073db92f6d6a75b2a478159044216f7db",
+      "mcp": "enabled"
+    },
+    "proof": {
+      "schemaVersion": 1,
+      "slug": "kongkoukk-life-exchange-rate",
+      "version": "0.2.0",
+      "commit": "c8f2e6f073db92f6d6a75b2a478159044216f7db",
+      "apiBaseUrl": "https://life-exchange-rate-mcp.vercel.app",
+      "health": "https://life-exchange-rate-mcp.vercel.app/health",
+      "openapi": "https://life-exchange-rate-mcp.vercel.app/openapi.json",
+      "mcp": "https://life-exchange-rate-mcp.vercel.app/mcp/"
+    }
+  },
+  "modes": [
+    {
+      "mode": "auto",
+      "protocol_version": "2026-07-28",
+      "server_info": {
+        "name": "Life Exchange Rate",
+        "title": null,
+        "version": "0.2.0",
+        "description": null,
+        "website_url": null,
+        "icons": null
+      },
+      "tool_names": [
+        "compare_event_scenarios",
+        "convert_to_life_units",
+        "get_energy_event",
+        "get_live_fx_event",
+        "get_macro_events",
+        "get_official_macro_headlines",
+        "get_policy_rate_event",
+        "rank_events_for_user",
+        "translate_event_to_life"
+      ],
+      "calls": [
+        {
+          "tool": "get_macro_events",
+          "status": "passed"
+        },
+        {
+          "tool": "get_policy_rate_event",
+          "status": "passed"
+        },
+        {
+          "tool": "get_energy_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        },
+        {
+          "tool": "compare_event_scenarios",
+          "status": "passed"
+        },
+        {
+          "tool": "get_official_macro_headlines",
+          "status": "passed"
+        },
+        {
+          "tool": "get_live_fx_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        }
+      ],
+      "negative_checks": [
+        {
+          "check": "unsupported event mode",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "unknown headline source",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "identical FX currencies",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "out-of-range lookback",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "headline lacks numeric event values",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "conversion currency mismatch",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "invalid scenario multiplier",
+          "status": "rejected_as_expected"
+        }
+      ]
+    },
+    {
+      "mode": "legacy",
+      "protocol_version": "2025-11-25",
+      "server_info": {
+        "name": "Life Exchange Rate",
+        "title": null,
+        "version": "0.2.0",
+        "description": null,
+        "website_url": null,
+        "icons": null
+      },
+      "tool_names": [
+        "compare_event_scenarios",
+        "convert_to_life_units",
+        "get_energy_event",
+        "get_live_fx_event",
+        "get_macro_events",
+        "get_official_macro_headlines",
+        "get_policy_rate_event",
+        "rank_events_for_user",
+        "translate_event_to_life"
+      ],
+      "calls": [
+        {
+          "tool": "get_macro_events",
+          "status": "passed"
+        },
+        {
+          "tool": "get_policy_rate_event",
+          "status": "passed"
+        },
+        {
+          "tool": "get_energy_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        },
+        {
+          "tool": "compare_event_scenarios",
+          "status": "passed"
+        },
+        {
+          "tool": "get_official_macro_headlines",
+          "status": "passed"
+        },
+        {
+          "tool": "get_live_fx_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        }
+      ],
+      "negative_checks": [
+        {
+          "check": "unsupported event mode",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "unknown headline source",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "identical FX currencies",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "out-of-range lookback",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "headline lacks numeric event values",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "conversion currency mismatch",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "invalid scenario multiplier",
+          "status": "rejected_as_expected"
+        }
+      ]
+    }
+  ],
+  "end_to_end": {
+    "event_mode": "live_official_observations",
+    "profile_origin": "Explicit synthetic judging profile; prices and income are inputs, not claimed market observations.",
+    "profile": {
+      "home_currency": "SEK",
+      "home_country": "SE",
+      "net_monthly_income": 32000.0,
+      "monthly_work_hours": 160.0,
+      "travel_budget_home": 20000.0,
+      "travel_target_currency": "JPY",
+      "mortgage": {
+        "principal": 2500000.0,
+        "remaining_years": 25.0,
+        "current_annual_rate_pct": 3.8,
+        "currency": "SEK"
+      },
+      "savings_balance": 100000.0,
+      "commute": {
+        "monthly_fuel_liters": 65.0,
+        "fuel_price_per_liter": 18.5
+      },
+      "life_units": [
+        {
+          "name": "beer",
+          "price": 80.0,
+          "currency": "SEK"
+        },
+        {
+          "name": "coffee",
+          "price": 45.0,
+          "currency": "SEK"
+        },
+        {
+          "name": "lunch",
+          "price": 140.0,
+          "currency": "SEK"
+        }
+      ]
+    },
+    "event": {
+      "event_id": "fx-SEK-JPY-2026-09-08-2026-09-15",
+      "event_type": "fx_move",
+      "title": "SEK/JPY moved -1.27% from 2026-09-08 to 2026-09-15",
+      "source": "Frankfurter / ECB",
+      "observed_at": "2026-09-15T00:00:00Z",
+      "old_value": 16.0689,
+      "new_value": 15.8648,
+      "unit": "JPY per SEK",
+      "change_pct": -1.2701553933374354,
+      "base_currency": "SEK",
+      "quote_currency": "JPY",
+      "affected_currencies": [
+        "SEK",
+        "JPY"
+      ],
+      "jurisdiction": null,
+      "evidence_url": "https://frankfurter.dev/providers/ecb/",
+      "window_start": "2026-09-08T00:00:00Z",
+      "window_end": "2026-09-15T00:00:00Z",
+      "confidence": "observed",
+      "provenance": {
+        "provider": "Frankfurter (ECB reference-rate provider)",
+        "source_type": "structured_intermediary_official_provider",
+        "retrieved_at": "2026-09-16T06:40:43.931596Z",
+        "series_id": "ECB:SEK/JPY",
+        "source_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-18&to=2026-09-16&base=SEK&quotes=JPY",
+        "notes": [
+          "Query uses the dedicated ECB provider route; observations are daily reference rates, not executable quotes.",
+          "Up to seven calendar days of provider backfill before the query start are retained and counted separately.",
+          "Observation timestamps represent source dates at 00:00 UTC, not publication times.",
+          "Requested 7 calendar days; actual observed window is 2026-09-08 through 2026-09-15.",
+          "Anomaly reference windows end on or before the event start; overlapping reference windows are descriptive, not independent trials."
+        ]
+      },
+      "metadata": {
+        "old_date": "2026-09-08",
+        "new_date": "2026-09-15",
+        "provider": "ECB",
+        "requested_lookback_days": 7,
+        "target_old_date": "2026-09-08",
+        "actual_calendar_days": 7,
+        "anchor_gap_days": 0,
+        "latest_observation_age_days": 1,
+        "query_start_date": "2025-08-18",
+        "query_end_date": "2026-09-16",
+        "history_start_date": "2025-08-18",
+        "pre_query_observation_count": 0,
+        "query_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-18&to=2026-09-16&base=SEK&quotes=JPY",
+        "history_observation_count": 276,
+        "identical_duplicates_removed": 0,
+        "anomaly": {
+          "method": "preceding_equal_calendar_horizon_log_return_z_score",
+          "formula": "(event_log_return - reference_mean_log_return) / reference_sample_stddev",
+          "horizon_calendar_days": 7,
+          "sample_count": 252,
+          "minimum_sample_count": 30,
+          "maximum_sample_count": 252,
+          "reference_window_start": "2025-08-29",
+          "reference_window_end": "2026-09-08",
+          "reference_windows_may_overlap": true,
+          "event_excluded_from_reference": true,
+          "missing_endpoint_policy": "skip_window_without_exact_calendar_horizon_endpoints",
+          "event_log_return": -0.012782908288157646,
+          "reference_mean_log_return": 0.0005772762267621959,
+          "reference_sample_stddev": 0.011447140325383607,
+          "z_score": -1.1671198338762503,
+          "fallback_reason": null
+        },
+        "z_score": -1.1671198338762503
+      }
+    },
+    "ranked_radar": [
+      {
+        "event": {
+          "event_id": "synthetic-brent-2025-12-24-2025-12-31",
+          "event_type": "oil_move",
+          "title": "Synthetic scenario: Brent crude moved +15.00% over the observation window",
+          "source": "synthetic judging fixture",
+          "observed_at": "2025-12-31T00:00:00Z",
+          "old_value": 80.0,
+          "new_value": 92.0,
+          "unit": "USD per barrel",
+          "change_pct": 14.999999999999991,
+          "base_currency": null,
+          "quote_currency": null,
+          "affected_currencies": [],
+          "jurisdiction": null,
+          "evidence_url": null,
+          "window_start": "2025-12-24T00:00:00Z",
+          "window_end": "2025-12-31T00:00:00Z",
+          "confidence": "scenario",
+          "provenance": {
+            "provider": "synthetic-fixture",
+            "source_type": "synthetic_fixture",
+            "retrieved_at": "2026-09-16T06:40:42.269970Z",
+            "series_id": "synthetic-brent-step-v1",
+            "source_url": null,
+            "notes": [
+              "Synthetic fixed step scenario; values and dates are not EIA observations."
+            ]
+          },
+          "metadata": {
+            "requested_lookback_days": 7,
+            "requested_as_of": "2025-12-31",
+            "target_start_date": "2025-12-24",
+            "old_date": "2025-12-24",
+            "new_date": "2025-12-31",
+            "actual_window_days": 7,
+            "observation_lag_days": 0,
+            "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+            "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+            "provider": "synthetic-fixture",
+            "synthetic": true,
+            "mode": "fixture",
+            "fallback_used": false,
+            "commodity": "Brent crude oil",
+            "price_currency": "USD",
+            "scope": "Brent Europe spot benchmark",
+            "fixture_anchor_date": "2025-12-31",
+            "live_request_as_of": "2026-09-16"
+          }
+        },
+        "market_significance": 90.0,
+        "user_relevance": 100.0,
+        "priority_score": 95.5,
+        "significance_method": "fallback_oil_percent_move",
+        "relevance_reasons": [
+          "User supplied monthly fuel use and pump price",
+          "User has direct driving exposure"
+        ]
+      },
+      {
+        "event": {
+          "event_id": "fx-SEK-JPY-2026-09-08-2026-09-15",
+          "event_type": "fx_move",
+          "title": "SEK/JPY moved -1.27% from 2026-09-08 to 2026-09-15",
+          "source": "Frankfurter / ECB",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "old_value": 16.0689,
+          "new_value": 15.8648,
+          "unit": "JPY per SEK",
+          "change_pct": -1.2701553933374354,
+          "base_currency": "SEK",
+          "quote_currency": "JPY",
+          "affected_currencies": [
+            "SEK",
+            "JPY"
+          ],
+          "jurisdiction": null,
+          "evidence_url": "https://frankfurter.dev/providers/ecb/",
+          "window_start": "2026-09-08T00:00:00Z",
+          "window_end": "2026-09-15T00:00:00Z",
+          "confidence": "observed",
+          "provenance": {
+            "provider": "Frankfurter (ECB reference-rate provider)",
+            "source_type": "structured_intermediary_official_provider",
+            "retrieved_at": "2026-09-16T06:40:43.931596Z",
+            "series_id": "ECB:SEK/JPY",
+            "source_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-18&to=2026-09-16&base=SEK&quotes=JPY",
+            "notes": [
+              "Query uses the dedicated ECB provider route; observations are daily reference rates, not executable quotes.",
+              "Up to seven calendar days of provider backfill before the query start are retained and counted separately.",
+              "Observation timestamps represent source dates at 00:00 UTC, not publication times.",
+              "Requested 7 calendar days; actual observed window is 2026-09-08 through 2026-09-15.",
+              "Anomaly reference windows end on or before the event start; overlapping reference windows are descriptive, not independent trials."
+            ]
+          },
+          "metadata": {
+            "old_date": "2026-09-08",
+            "new_date": "2026-09-15",
+            "provider": "ECB",
+            "requested_lookback_days": 7,
+            "target_old_date": "2026-09-08",
+            "actual_calendar_days": 7,
+            "anchor_gap_days": 0,
+            "latest_observation_age_days": 1,
+            "query_start_date": "2025-08-18",
+            "query_end_date": "2026-09-16",
+            "history_start_date": "2025-08-18",
+            "pre_query_observation_count": 0,
+            "query_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-18&to=2026-09-16&base=SEK&quotes=JPY",
+            "history_observation_count": 276,
+            "identical_duplicates_removed": 0,
+            "anomaly": {
+              "method": "preceding_equal_calendar_horizon_log_return_z_score",
+              "formula": "(event_log_return - reference_mean_log_return) / reference_sample_stddev",
+              "horizon_calendar_days": 7,
+              "sample_count": 252,
+              "minimum_sample_count": 30,
+              "maximum_sample_count": 252,
+              "reference_window_start": "2025-08-29",
+              "reference_window_end": "2026-09-08",
+              "reference_windows_may_overlap": true,
+              "event_excluded_from_reference": true,
+              "missing_endpoint_policy": "skip_window_without_exact_calendar_horizon_endpoints",
+              "event_log_return": -0.012782908288157646,
+              "reference_mean_log_return": 0.0005772762267621959,
+              "reference_sample_stddev": 0.011447140325383607,
+              "z_score": -1.1671198338762503,
+              "fallback_reason": null
+            },
+            "z_score": -1.1671198338762503
+          }
+        },
+        "market_significance": 29.2,
+        "user_relevance": 100.0,
+        "priority_score": 68.1,
+        "significance_method": "provider_z_score",
+        "relevance_reasons": [
+          "FX pair includes the user's home currency",
+          "FX pair includes the user's travel target currency",
+          "User supplied a travel budget"
+        ]
+      },
+      {
+        "event": {
+          "event_id": "synthetic-deposit-rate-2025-12-01-2025-12-31",
+          "event_type": "interest_rate_change",
+          "title": "Synthetic scenario: Euro-area deposit facility rate moved +25.0 basis points",
+          "source": "synthetic judging fixture",
+          "observed_at": "2025-12-31T00:00:00Z",
+          "old_value": 3.0,
+          "new_value": 3.25,
+          "unit": "percent",
+          "change_pct": null,
+          "base_currency": null,
+          "quote_currency": null,
+          "affected_currencies": [
+            "EUR"
+          ],
+          "jurisdiction": "EA",
+          "evidence_url": null,
+          "window_start": "2025-12-01T00:00:00Z",
+          "window_end": "2025-12-31T00:00:00Z",
+          "confidence": "scenario",
+          "provenance": {
+            "provider": "synthetic-fixture",
+            "source_type": "synthetic_fixture",
+            "retrieved_at": "2026-09-16T06:40:42.122242Z",
+            "series_id": "synthetic-policy-rate-step-v1",
+            "source_url": null,
+            "notes": [
+              "Synthetic fixed step scenario; values and dates are not ECB observations."
+            ]
+          },
+          "metadata": {
+            "requested_lookback_days": 30,
+            "requested_as_of": "2025-12-31",
+            "target_start_date": "2025-12-01",
+            "old_date": "2025-12-01",
+            "new_date": "2025-12-31",
+            "actual_window_days": 30,
+            "observation_lag_days": 0,
+            "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+            "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+            "provider": "synthetic-fixture",
+            "synthetic": true,
+            "mode": "fixture",
+            "fallback_used": false,
+            "change_basis_points": 25.0,
+            "change_percentage_points": 0.25,
+            "scope": "Euro area; EUR exposures only",
+            "rate_name": "deposit facility",
+            "fixture_anchor_date": "2025-12-31",
+            "live_request_as_of": "2026-09-16"
+          }
+        },
+        "market_significance": 45.0,
+        "user_relevance": 0.0,
+        "priority_score": 20.2,
+        "significance_method": "fallback_policy_rate_basis_points",
+        "relevance_reasons": [
+          "Policy-rate currency scope does not support a direct home-currency impact"
+        ]
+      }
+    ],
+    "impact": {
+      "event_provenance": {
+        "provider": "Frankfurter (ECB reference-rate provider)",
+        "source_type": "structured_intermediary_official_provider",
+        "retrieved_at": "2026-09-16T06:40:43.931596Z",
+        "series_id": "ECB:SEK/JPY",
+        "source_url": "https://api.frankfurter.dev/v2/providers/ecb/rates?from=2025-08-18&to=2026-09-16&base=SEK&quotes=JPY",
+        "notes": [
+          "Query uses the dedicated ECB provider route; observations are daily reference rates, not executable quotes.",
+          "Up to seven calendar days of provider backfill before the query start are retained and counted separately.",
+          "Observation timestamps represent source dates at 00:00 UTC, not publication times.",
+          "Requested 7 calendar days; actual observed window is 2026-09-08 through 2026-09-15.",
+          "Anomaly reference windows end on or before the event start; overlapping reference windows are descriptive, not independent trials."
+        ]
+      },
+      "event_observed_at": "2026-09-15T00:00:00Z",
+      "event_id": "fx-SEK-JPY-2026-09-08-2026-09-15",
+      "headline": "SEK/JPY moved -1.27% from 2026-09-08 to 2026-09-15",
+      "direct_effect_home": 257.3,
+      "home_currency": "SEK",
+      "direction": "cost_increase",
+      "impact_horizon": "one_off_travel_budget",
+      "work_hours_equivalent": 1.29,
+      "life_units": [
+        {
+          "unit": "beer",
+          "quantity": 3.22,
+          "currency": "SEK",
+          "unit_price": 80.0
+        },
+        {
+          "unit": "coffee",
+          "quantity": 5.72,
+          "currency": "SEK",
+          "unit_price": 45.0
+        },
+        {
+          "unit": "lunch",
+          "quantity": 1.84,
+          "currency": "SEK",
+          "unit_price": 140.0
+        }
+      ],
+      "explanation": "To preserve the same JPY purchasing power for the trip, the user would need about 257.30 SEK more than before.",
+      "confidence": "observed",
+      "assumptions": [
+        "Rates in the trace are destination-currency units per home-currency unit.",
+        "Reference-rate comparison excludes retail exchange fees and spreads."
+      ],
+      "warnings": [],
+      "calculation_trace": [
+        {
+          "label": "old destination purchasing power",
+          "formula": "travel_budget_home × old_fx_rate",
+          "inputs": {
+            "travel_budget_home": 20000.0,
+            "old_fx_rate": 16.0689
+          },
+          "result": 321378.0
+        },
+        {
+          "label": "new destination purchasing power",
+          "formula": "travel_budget_home × new_fx_rate",
+          "inputs": {
+            "travel_budget_home": 20000.0,
+            "new_fx_rate": 15.8648
+          },
+          "result": 317296.0
+        },
+        {
+          "label": "budget required to restore old purchasing power",
+          "formula": "travel_budget_home × old_fx_rate / new_fx_rate",
+          "inputs": {
+            "travel_budget_home": 20000.0,
+            "old_fx_rate": 16.0689,
+            "new_fx_rate": 15.8648
+          },
+          "result": 20257.3
+        },
+        {
+          "label": "personal impact",
+          "formula": "restore_budget - travel_budget_home",
+          "inputs": {
+            "restore_budget": 20257.3,
+            "travel_budget_home": 20000.0
+          },
+          "result": 257.3
+        }
+      ],
+      "details": {
+        "old_target_purchasing_power": 321378.0,
+        "new_target_purchasing_power": 317296.0,
+        "target_currency": "JPY",
+        "travel_budget_home": 20000.0
+      }
+    },
+    "life_unit_conversion": {
+      "amount": 257.3,
+      "currency": "SEK",
+      "work_hours_equivalent": 1.29,
+      "life_units": [
+        {
+          "unit": "beer",
+          "quantity": 3.22,
+          "currency": "SEK",
+          "unit_price": 80.0
+        },
+        {
+          "unit": "coffee",
+          "quantity": 5.72,
+          "currency": "SEK",
+          "unit_price": 45.0
+        },
+        {
+          "unit": "lunch",
+          "quantity": 1.84,
+          "currency": "SEK",
+          "unit_price": 140.0
+        }
+      ]
+    },
+    "separately_fetched_official_headline": {
+      "headline_id": "fed-9014ded4c9180ac8",
+      "title": "Minutes of the Board's discount rate meetings on July 20 and July 29, 2026",
+      "publisher": "Federal Reserve Board",
+      "published_at": "2026-08-25T18:00:00Z",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260825a.htm",
+      "jurisdiction": "US",
+      "event_type_hint": null,
+      "tags": [],
+      "requires_quantification": true,
+      "source_type": "official_rss"
+    },
+    "headline_relationship": "Shown to test the headline boundary; no causal link to the FX move is asserted. Only the numeric FX observations drive this calculation."
+  },
+  "after": {
+    "health": {
+      "status": "ok",
+      "version": "0.2.0",
+      "commit": "c8f2e6f073db92f6d6a75b2a478159044216f7db",
+      "mcp": "enabled"
+    },
+    "proof": {
+      "schemaVersion": 1,
+      "slug": "kongkoukk-life-exchange-rate",
+      "version": "0.2.0",
+      "commit": "c8f2e6f073db92f6d6a75b2a478159044216f7db",
+      "apiBaseUrl": "https://life-exchange-rate-mcp.vercel.app",
+      "health": "https://life-exchange-rate-mcp.vercel.app/health",
+      "openapi": "https://life-exchange-rate-mcp.vercel.app/openapi.json",
+      "mcp": "https://life-exchange-rate-mcp.vercel.app/mcp/"
+    }
+  },
+  "status": "passed"
+}

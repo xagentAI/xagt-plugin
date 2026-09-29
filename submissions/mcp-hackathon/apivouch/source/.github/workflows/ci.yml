@@ -1,0 +1,43 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
+      - run: python -m pip install -r backend/requirements-dev.txt
+      - name: Validate dependency resolution
+        run: python -m pip check
+      - name: Audit production dependencies
+        run: python -m pip_audit --strict --progress-spinner off -r backend/requirements.txt
+      - name: Audit development dependencies
+        run: python -m pip_audit --strict --progress-spinner off -r backend/requirements-dev.txt
+      - run: python -m ruff check backend/app backend/tests examples scripts
+      - name: Scan tracked and unignored files without printing secret values
+        run: python scripts/scan_secrets.py
+      - run: python -m compileall -q backend/app
+      - run: python -m pytest -q
+      - name: Verify reviewer capability and receipt
+        run: python scripts/verify_hackathon.py
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - run: node --check frontend/app.js
+      - run: docker build -t apivouch:verify .

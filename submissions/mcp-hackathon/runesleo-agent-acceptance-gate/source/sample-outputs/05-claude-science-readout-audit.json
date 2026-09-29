@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1",
+  "verdict": "pass",
+  "score": 88,
+  "dimension_scores": {
+    "delivery_completeness": 25,
+    "validation_and_evidence": 20,
+    "safety_and_hard_gates": 25,
+    "buyer_usability": 9,
+    "dispute_readiness": 9
+  },
+  "missing": [
+    "no live test was run, by design"
+  ],
+  "risks": [
+    "The artifact should not be treated as proof that Claude Science is suitable for Leo's production research workflow.",
+    "A future live test would create external state and requires explicit approval."
+  ],
+  "positive_evidence": [
+    "Read-only scope is clear.",
+    "No private files, new project, SSH/HPC/Modal, download, account permission change, or new message were performed.",
+    "Observed mechanics are concrete.",
+    "Transferable workflow pattern is extracted.",
+    "Limitations are explicit.",
+    "Next gate requires owner approval."
+  ],
+  "questions_for_seller": [
+    "Does the buyer want a live public-source test later, or only the UX benchmark?"
+  ],
+  "next_gate": "If a live test is desired, owner explicitly approves one small public-source Claude Science project.",
+  "buyer_summary": "Accept this as a read-only product-learning artifact. It does not mutate external state and clearly separates observation from future live testing.",
+  "evaluator_notes": "This is a strong low-risk research delivery because scope, non-actions, observations, limitations, and next gate are all explicit.",
+  "machine_flags": [
+    "read_only_delivery",
+    "hard_gates_declared",
+    "dispute_ready"
+  ]
+}
+

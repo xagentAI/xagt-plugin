@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Titan Edge MCP Server",
+  "slug": "titan-edge-mcp",
+  "sourceRepository": "https://github.com/jackhu24-ship-it/xagt-plugin",
+  "reviewCommit": "422f0aeb5520a3506b08b05cfefcb76c6cb786c0",
+  "apiBaseUrl": "https://commander-jackhu24.netlify.app/api",
+  "healthCheckUrl": "https://commander-jackhu24.netlify.app/api/health",
+  "deploymentProofUrl": "https://commander-jackhu24.netlify.app/.well-known/xagent-verification.json"
+}

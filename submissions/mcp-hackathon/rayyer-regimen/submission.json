@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Regimen",
+  "slug": "rayyer-regimen",
+  "sourceRepository": "https://github.com/RaYYeR220/regimen",
+  "reviewCommit": "c5c3a0b5f719aed5418c9738fd1002b9d20eef71",
+  "apiBaseUrl": "https://regimen-nu.vercel.app/api/v1",
+  "healthCheckUrl": "https://regimen-nu.vercel.app/api/health",
+  "deploymentProofUrl": "https://regimen-nu.vercel.app/.well-known/xagent-verification.json"
+}

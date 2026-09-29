@@ -1,0 +1,10 @@
+# MCPForge runtime dependencies
+# Pinned to the ranges actually used when generating and verifying, so a major-version bump cannot drift the API
+# (kept identical to the requirements.txt written into generated bundles).
+fastmcp>=4.0,<5.0
+httpx>=0.27,<1.0
+pyyaml>=6.0,<7.0
+
+# Needed by the visual demo and the /mcp endpoint (demo_app.py); skip it if you only run the stdio MCP server.
+fastapi>=0.110,<1.0
+uvicorn>=0.27,<1.0

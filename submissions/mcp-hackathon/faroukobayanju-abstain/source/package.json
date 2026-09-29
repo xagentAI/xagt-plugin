@@ -1,0 +1,25 @@
+{
+  "name": "abstain",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/src/server.js",
+    "dev": "npm run build && npm start",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "chart": "npm run build && node dist/src/chart/build.js",
+    "record": "npm run build && node dist/src/chart/record.js",
+    "frontier": "npm run build && node dist/src/chart/frontier.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "hono": "^4.13.8"
+  },
+  "version": "0.1.0"
+}

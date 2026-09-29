@@ -1,0 +1,104 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Checkout Pilot API",
+    "version": "0.1.0",
+    "description": "Create referenceable, one-off payment requests and read settlement status. Demo mode never moves money."
+  },
+  "servers": [{ "url": "/" }],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Read service and source-version health",
+        "responses": {
+          "200": {
+            "description": "Healthy service",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Health" } } }
+          }
+        }
+      }
+    },
+    "/api/capabilities": {
+      "get": {
+        "operationId": "listCapabilities",
+        "summary": "Describe the agent capability boundary",
+        "responses": { "200": { "description": "Capability metadata" } }
+      }
+    },
+    "/api/payment-links": {
+      "post": {
+        "operationId": "createPaymentRequest",
+        "summary": "Create a one-off payment request",
+        "description": "Creates a hosted request. This operation never sends, swaps, signs, or withdraws funds.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreatePaymentRequest" },
+              "example": { "amount": "49.00", "item": "Pilot onboarding", "reference": "PILOT-001" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Payment request created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentRequest" } } } },
+          "400": { "description": "Invalid decimal amount or request fields" },
+          "503": { "description": "Live configuration is incomplete" }
+        }
+      },
+      "get": {
+        "operationId": "listPaymentRequests",
+        "summary": "List recent requests",
+        "responses": { "200": { "description": "Recent payment requests" } }
+      }
+    },
+    "/api/payment-links/{id}": {
+      "get": {
+        "operationId": "getPaymentRequest",
+        "summary": "Read current request status",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "Current payment request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentRequest" } } } },
+          "404": { "description": "Request not found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "required": ["status", "service", "mode", "commit"],
+        "properties": {
+          "status": { "type": "string", "const": "ok" },
+          "service": { "type": "string" },
+          "mode": { "type": "string", "enum": ["demo", "live", "misconfigured"] },
+          "commit": { "type": "string" }
+        }
+      },
+      "CreatePaymentRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": { "type": "string", "pattern": "^\\d+(?:\\.\\d{1,2})?$", "description": "Positive decimal string; never a JSON number." },
+          "item": { "type": "string", "maxLength": 80 },
+          "reference": { "type": "string", "maxLength": 48 },
+          "expirationDate": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "PaymentRequest": {
+        "type": "object",
+        "required": ["id", "url", "status", "toAmount"],
+        "properties": {
+          "id": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "status": { "type": "string", "enum": ["active", "completed", "inactive"] },
+          "toAmount": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "receivedAmount": { "type": "string" },
+          "demo": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

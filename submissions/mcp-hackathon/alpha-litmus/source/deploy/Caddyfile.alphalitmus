@@ -1,0 +1,17 @@
+alphalitmus.sklab.cc {
+    request_body {
+        max_size 4MB
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        X-Frame-Options DENY
+        -Server
+    }
+    reverse_proxy alpha-litmus:8040 {
+        transport http {
+            dial_timeout 5s
+            response_header_timeout 75s
+        }
+    }
+}

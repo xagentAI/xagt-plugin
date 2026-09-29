@@ -1,0 +1,541 @@
+/**
+ * Environment configuration, validated with zod at process start.
+ * Importing this module throws on invalid/missing required env —
+ * that is intentional: fail fast at boot, not on first request.
+ */
+
+import { createHmac } from 'node:crypto';
+import { join } from 'node:path';
+import { z } from 'zod';
+import { JSON_BODY_LIMIT_BYTES } from './limits.ts';
+
+/**
+ * Compose `${VAR:-}` injects "" when the var is unset. Treat empty/whitespace
+ * as missing so optional fields stay optional and `.default()` can apply.
+ */
+function emptyAsUndefined(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  return value.trim() === '' ? undefined : value;
+}
+
+/** RFC 5321 mailbox maximum; matches the API send-route address boundary. */
+const SMTP_MAILBOX_MAX_LENGTH = 254;
+const SMTP_LOCAL_PART_MAX_OCTETS = 64;
+const SMTP_DOMAIN_LABEL_MAX_OCTETS = 63;
+const SMTP_DOMAIN_LABEL_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/;
+
+/** Only http(s) — these values feed ntfy HTTP calls and push click actions. */
+const httpUrl = z
+  .string()
+  .url()
+  .refine(
+    (value) => {
+      try {
+        const protocol = new URL(value).protocol;
+        return protocol === 'http:' || protocol === 'https:';
+      } catch {
+        return false;
+      }
+    },
+    { message: 'URL must use http or https' },
+  );
+
+/**
+ * URL env: empty string → undefined（可选或落到 default）。
+ * zod v4 的 preprocess 输入是 unknown，重载输出须写 ZodType<Out, unknown>
+ * 才与实现签名兼容（v3 的 ZodType<Out> 单参写法不再够用）。
+ */
+function envUrl(): z.ZodType<string | undefined, unknown>;
+function envUrl(fallback: string): z.ZodType<string, unknown>;
+function envUrl(fallback?: string): z.ZodType<string | undefined, unknown> {
+  if (fallback !== undefined) {
+    return z.preprocess(emptyAsUndefined, httpUrl.default(fallback));
+  }
+  return z.preprocess(emptyAsUndefined, httpUrl.optional());
+}
+
+/**
+ * Public dashboard origin for ntfy click actions (F80). Rejects userinfo so
+ * credentials never ride the notification channel. Internal ntfy URLs keep
+ * envUrl() (credentials may be required on private networks).
+ * F114: query strings and fragments are rejected too — the value is attached
+ * verbatim as the ntfy click field on every mail-arrival push, so a copied
+ * authenticated URL (`…/ui?token=secret`) would leak the credential.
+ */
+function dashboardPublicUrlEnv() {
+  return z.preprocess(
+    emptyAsUndefined,
+    httpUrl
+      .refine(
+        (value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.username === '' &&
+              url.password === '' &&
+              url.search === '' &&
+              url.hash === ''
+            );
+          } catch {
+            return false;
+          }
+        },
+        {
+          message:
+            'DASHBOARD_PUBLIC_URL must not include credentials (userinfo, query, or fragment)',
+        },
+      )
+      .optional(),
+  );
+}
+
+const envSchema = z.object({
+  // HTTP port for the API service.
+  PORT: z.coerce.number().int().positive().default(3100),
+  // Domain identities live on (address = <localpart>@DOMAIN).
+  DOMAIN: z.string().min(1),
+  // Comma-separated ADMIN Bearer keys. Admin keys can manage identities and
+  // act as any address; per-identity tokens (issued by POST /v1/identities)
+  // are stored hashed in the identity store and scoped to one address.
+  API_KEYS: z.string().min(1),
+
+  IMAP_HOST: z.string().min(1).default('127.0.0.1'),
+  IMAP_PORT: z.coerce.number().int().positive().default(993),
+  IMAP_USER: z.string().min(1),
+  IMAP_PASS: z.string().min(1),
+  // 'true' = implicit TLS (993), 'false' = plaintext/STARTTLS (143).
+  IMAP_TLS: z.enum(['true', 'false']).default('true'),
+  // Keep the bundled self-signed mailserver working by default. Set true for
+  // a public IMAP server with a certificate from a trusted CA.
+  IMAP_TLS_REJECT_UNAUTHORIZED: z.enum(['true', 'false']).default('false'),
+
+  SMTP_HOST: z.string().min(1).default('127.0.0.1'),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_USER: z.string().min(1),
+  SMTP_PASS: z.string().min(1),
+  // Same default as IMAP: bundled docker-mailserver starts with a self-signed
+  // certificate, while external public SMTP servers should normally use true.
+  SMTP_TLS_REJECT_UNAUTHORIZED: z.enum(['true', 'false']).default('false'),
+
+  // Optional compliance archive recipient. Empty Compose interpolation stays
+  // disabled; a nonblank value must be exactly one mailbox, not a list/name.
+  ALWAYS_BCC: z.preprocess(
+    emptyAsUndefined,
+    z
+      .string()
+      .email()
+      .max(SMTP_MAILBOX_MAX_LENGTH)
+      .refine(
+        (address) =>
+          Buffer.byteLength(address.slice(0, address.lastIndexOf('@')), 'utf8')
+          <= SMTP_LOCAL_PART_MAX_OCTETS,
+        { message: 'SMTP local part must be at most 64 octets' },
+      )
+      .refine(
+        (address) =>
+          address
+            .slice(address.lastIndexOf('@') + 1)
+            .split('.')
+            .every(
+              (label) =>
+                Buffer.byteLength(label, 'utf8') <= SMTP_DOMAIN_LABEL_MAX_OCTETS
+                && SMTP_DOMAIN_LABEL_PATTERN.test(label),
+            ),
+        { message: 'SMTP domain labels must be valid ASCII labels of at most 63 octets' },
+      )
+      .optional(),
+  ),
+
+  // Stable private key for task-header stamps. This must outlive SMTP account
+  // password rotations so old task threads remain verifiable.
+  TASK_SIGNING_SECRET: z.string().min(16).optional(),
+
+  // Optional managed-identity task leases. Keep the historical task API
+  // byte-compatible unless an operator explicitly enables this authority.
+  TASK_LEASES_ENABLED: z.enum(['true', 'false']).default('false'),
+
+  // M3：claim 到期派生失活（默认关）。只门控 reclaim 与审计 SMTP 解耦；
+  // 迟到回执容忍无条件生效，不随本开关。
+  TASK_LEASES_EXPIRY_AUDIT_M3: z.enum(['true', 'false']).default('false'),
+
+  // M1：公共读（list/详情）对未索引 lease overlay 重放有界（默认关）。
+  // 只影响展示视图；写路径权威快照不受本开关影响。
+  TASK_LEASES_OVERLAY_BOUND: z.enum(['true', 'false']).default('false'),
+
+  // M2：pending journal + claim_lost + 延期审计发射器（默认关）。
+  // 依赖 TASK_LEASES_ENABLED 才生效；不自动开生产。M3 reclaim 仍零内联审计 IO。
+  TASK_LEASES_PENDING_JOURNAL: z.enum(['true', 'false']).default('false'),
+
+  // Comma-separated domains allowed as the `from` domain of an identity.
+  // Defaults to [DOMAIN]. Sending to any recipient domain is unrestricted.
+  ALLOWED_SEND_DOMAINS: z.string().optional(),
+
+  // Optional comma-separated secondary domains (e.g. "domain-b.com,domain-c.org").
+  EXTRA_DOMAINS: z.string().optional(),
+
+  // Directory for the identity store JSON file. Single-writer process only
+  // (Compose runs one API); multi-process shared DATA_DIR is unsupported.
+  DATA_DIR: z.string().default('./data'),
+
+  // Built-in, read-only human inbox. Disable to make every /ui route 404.
+  UI_ENABLED: z.enum(['true', 'false']).default('true'),
+
+  // Notification transport. Docker Compose enables ntfy by default; keeping
+  // the bare-process default off preserves the lightweight API test/runtime.
+  NTFY_ENABLED: z.enum(['true', 'false']).default('false'),
+  // Outbound webhooks (§10.1).
+  WEBHOOKS_ENABLED: z.enum(['true', 'false']).default('false'),
+  WEBHOOK_SIGNING_SECRET: z.string().min(32).optional(),
+  WEBHOOK_SIGNING_SECRET_PREVIOUS: z.string().min(32).optional(),
+  WEBHOOK_ALLOW_PRIVATE_TARGETS: z.enum(['true', 'false']).default('false'),
+  WEBHOOK_ALLOWED_PORTS: z.string().default('443'),
+  WEBHOOK_MAX_SUBSCRIPTIONS: z.coerce.number().int().min(0).default(16),
+  WEBHOOK_MAX_PER_ADDRESS: z.coerce.number().int().min(0).default(4),
+  WEBHOOK_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(11).default(11),
+  WEBHOOK_DELIVERY_TIMEOUT_MS: z.coerce.number().int().min(1000).default(10000),
+  WEBHOOK_MAX_CONCURRENT: z.coerce.number().int().min(1).default(8),
+  WEBHOOK_POOL_RETRY_MS: z.coerce.number().int().min(1000).default(5000),
+  WEBHOOK_PAYLOAD_MAX_BYTES: z.coerce.number().int().min(2048).default(16384),
+  WEBHOOK_APPROVAL_ARGS_MAX_BYTES: z.coerce.number().int().min(0).default(4096),
+  WEBHOOK_APPROVAL_ARGS_MAX_DEPTH: z.coerce.number().int().min(1).default(4),
+  WEBHOOK_RESPONSE_MAX_BYTES: z.coerce.number().int().min(1).default(4096),
+  WEBHOOK_TIMESTAMP_TOLERANCE_SEC: z.coerce.number().int().min(30).default(300),
+  WEBHOOK_DISABLE_THRESHOLD: z.coerce.number().int().min(1).default(10),
+  WEBHOOK_ROTATION_OVERLAP_MS: z.coerce.number().int().min(0).default(86400000),
+  WEBHOOK_LOG_RETENTION_DAYS: z.coerce.number().int().min(4).default(30),
+  WEBHOOK_RATE_CREATE_PER_MIN: z.coerce.number().int().min(0).default(10),
+  WEBHOOK_RATE_TEST_PER_MIN: z.coerce.number().int().min(0).default(3),
+  WEBHOOK_RATE_DELIVER_PER_MIN: z.coerce.number().int().min(0).default(60),
+  NTFY_INTERNAL_URL: envUrl('http://ntfy'),
+  // Path as seen by the ntfy container. The API writes the same named volume
+  // at /app/data, so this must not be derived from DATA_DIR.
+  NTFY_STORAGE_DIR: z.string().min(1).default('/var/lib/openagentemail/ntfy'),
+  // This can stay on a private address for server-only notifications. Phone
+  // delivery needs a deliberate public HTTPS reverse proxy and full restart.
+  NOTIFY_PUBLIC_URL: envUrl('http://127.0.0.1:2586'),
+  // Forward unknown topics to ntfy.sh unless an operator explicitly disables
+  // it with NTFY_UPSTREAM=false.
+  NTFY_UPSTREAM: z.enum(['true', 'false']).default('true'),
+  // Required by the Compose provisioner when notifications are enabled. Keep
+  // it optional here so importing config alone never materializes a secret.
+  NTFY_ADMIN_PASSWORD: z.string().min(1).optional(),
+  // Only identities explicitly granted can_notify_user may spend this budget.
+  NOTIFY_RATE_LIMIT: z.coerce.number().int().min(0).default(10),
+  PUSH_POLICY: z.enum(['otp', 'all', 'none']).default('otp'),
+  // Optional public origin of the human dashboard. When set, mail-arrival
+  // ntfy pushes include a click action that opens this URL (no deep link).
+  // Must not contain userinfo — credentials must not leave via ntfy (F80).
+  // Query/fragment are rejected too (F114): a copied authenticated URL would
+  // leak its token verbatim on every push.
+  DASHBOARD_PUBLIC_URL: dashboardPublicUrlEnv(),
+
+  // 可选：MCP RFC 9728 元数据里的对外绝对 origin（优先于请求 Host）。
+  // 反向代理 / 公网暴露时应设为 https://…，避免盲信 Host 头。
+  MCP_PUBLIC_URL: envUrl(),
+
+  // MCP tools/call 分桶限量（每分钟；0 = 关闭该桶）。admin 豁免。
+  // 默认：读 60 / 写 20——写更严；对照 Joe 事故下午 ~3000 次合法调用，
+  // 20 写/min 仍够正常 agent，却能挡住失控循环。
+  MCP_RATE_READ_PER_MIN: z.coerce.number().int().min(0).default(60),
+  MCP_RATE_WRITE_PER_MIN: z.coerce.number().int().min(0).default(20),
+
+  // 阻塞等待上限（秒）：钳 mail_wait_for / POST /v1/messages/wait 的 timeoutSec
+  // 与 task_* wait 的服务端封顶。schema 仍广告 max 600（历史客户端兼容），
+  // 超参静默钳到本值（不 400）。默认 60——对任意反代读超时都更安全。
+  MCP_MAX_WAIT_SECONDS: z.coerce.number().int().min(1).max(600).default(60),
+
+  // 是否信任 X-Forwarded-For 首跳作为客户端 IP。默认 false（直连部署开=自杀）。
+  // 仅在确有受信反代剥离/覆写 XFF 时设 true。
+  TRUST_PROXY_HEADERS: z.enum(['true', 'false']).default('false'),
+
+  // 公网边缘姿态：true 时关闭 CIMD SSRF 私网放行（RFC1918/loopback/CGNAT/ULA 全拒）。
+  // 默认 false——tailnet/loopback 部署不受影响。永拒清单始终生效。
+  OAE_PUBLIC_EDGE: z.enum(['true', 'false']).default('false'),
+
+  // 预鉴权 IP 限量（每分钟；0 = 关闭）。键 = clientIp()。
+  OAUTH_RATE_PER_MIN: z.coerce.number().int().min(0).default(30),
+  // 默认 120：OAuth 引导握手故意无 token 探 401 拿挑战是规范动作；
+  // 共享出口 IP 下 60 偏紧，易把合法客户端打成 429。
+  MCP_PREAUTH_RATE_PER_MIN: z.coerce.number().int().min(0).default(120),
+
+  // Per-identity send rate limit (messages per rolling hour). 0 disables.
+  SEND_RATE_LIMIT: z.coerce.number().int().min(0).default(20),
+
+  // Delete messages older than this many days from the catch-all mailbox.
+  // 0 disables the retention sweeper.
+  RETENTION_DAYS: z.coerce.number().int().min(0).default(30),
+  // How often the retention sweeper runs, in hours.
+  RETENTION_CHECK_HOURS: z.coerce.number().positive().default(6),
+
+  // H1 / X-Agent 黑客松自证：可选 40 位小写 hex commit（空串视为未配置）。
+  SOURCE_COMMIT: z.preprocess(
+    emptyAsUndefined,
+    z
+      .string()
+      .regex(/^[0-9a-f]{40}$/, 'SOURCE_COMMIT must be a 40-char lowercase hex SHA')
+      .optional(),
+  ),
+  // H1：可选验证 slug；与 SOURCE_COMMIT 同时存在时才挂 /.well-known/xagent-verification.json。
+  // 形态：1–64，小写字母/数字开头，仅 [a-z0-9-]（与 SOURCE_COMMIT 同严格风格）。
+  XAGT_VERIFICATION_SLUG: z.preprocess(
+    emptyAsUndefined,
+    z
+      .string()
+      .min(1)
+      .max(64)
+      .regex(
+        /^[a-z0-9][a-z0-9-]*$/,
+        'XAGT_VERIFICATION_SLUG must match /^[a-z0-9][a-z0-9-]*$/ (max 64)',
+      )
+      .optional(),
+  ),
+});
+
+function splitCsv(value: string): string[] {
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function parseAllowedPorts(rawPorts: string): number[] {
+  const parts = splitCsv(rawPorts);
+  if (parts.length === 0) {
+    throw new Error('WEBHOOK_ALLOWED_PORTS must be non-empty');
+  }
+  const ports: number[] = [];
+  for (const p of parts) {
+    const port = Number(p);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      throw new Error(`WEBHOOK_ALLOWED_PORTS contains invalid port: "${p}"`);
+    }
+    ports.push(port);
+  }
+  return ports;
+}
+
+/**
+ * Canonical form keeps configured and request URLs comparable as origins.
+ * Only drops a redundant trailing slash on the pathname — never rewrites
+ * query values or fragments (e.g. `?next=/` and `#/` must survive).
+ * Exported so notify device pairing uses the same normalizer as config.
+ */
+export function normalizeUrl(value: string): string {
+  const url = new URL(value);
+  if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+    url.pathname = url.pathname.replace(/\/+$/, '') || '/';
+  }
+  // Root path serializes as "https://host/" (or with userinfo). Prefer href so
+  // publisher:secret@host credentials survive; origin alone drops userinfo.
+  // Only apply when search/hash are empty so those branches keep full href.
+  if (url.pathname === '/' && url.search === '' && url.hash === '') {
+    return url.href.replace(/\/+$/, '');
+  }
+  return url.href;
+}
+
+const DOMAIN_MAX_LENGTH = 253;
+
+function isValidDomain(domain: string): boolean {
+  if (!domain || domain.length > DOMAIN_MAX_LENGTH) return false;
+  const labels = domain.split('.');
+  return labels.every(
+    (label) =>
+      label.length > 0 &&
+      Buffer.byteLength(label, 'utf8') <= SMTP_DOMAIN_LABEL_MAX_OCTETS &&
+      SMTP_DOMAIN_LABEL_PATTERN.test(label),
+  );
+}
+
+/** Parse an environment object so TLS defaults and validation stay testable. */
+export function parseConfig(env: NodeJS.ProcessEnv) {
+  const raw = envSchema.parse(env);
+  const primaryDomain = raw.DOMAIN.toLowerCase();
+  if (primaryDomain.endsWith('..')) {
+    throw new Error(`DOMAIN contains invalid domain: "${raw.DOMAIN}"`);
+  }
+  const canonicalPrimary = primaryDomain.replace(/\.$/, '');
+  if (!isValidDomain(canonicalPrimary)) {
+    throw new Error(`DOMAIN contains invalid domain: "${raw.DOMAIN}"`);
+  }
+  const extraDomains: string[] = [];
+  const seenExtra = new Set<string>();
+  const rawExtra = raw.EXTRA_DOMAINS?.trim();
+  if (rawExtra) {
+    const entries = rawExtra.split(',').map((s) => s.trim());
+    for (const rawEntry of entries) {
+      if (!rawEntry) continue;
+      const lowerEntry = rawEntry.toLowerCase();
+      if (lowerEntry.endsWith('..')) {
+        throw new Error(`EXTRA_DOMAINS contains invalid domain entry: "${rawEntry}"`);
+      }
+      const canonical = lowerEntry.replace(/\.$/, '');
+      if (!isValidDomain(canonical)) {
+        throw new Error(`EXTRA_DOMAINS contains invalid domain entry: "${rawEntry}"`);
+      }
+      if (canonical === canonicalPrimary) {
+        throw new Error('EXTRA_DOMAINS must not contain the primary DOMAIN');
+      }
+      if (seenExtra.has(canonical)) {
+        throw new Error('EXTRA_DOMAINS contains duplicate entries');
+      }
+      seenExtra.add(canonical);
+      extraDomains.push(canonical);
+    }
+  }
+
+  const allDomains = new Set<string>([primaryDomain, ...extraDomains]);
+
+  const archiveDomain = raw.ALWAYS_BCC
+    ?.slice(raw.ALWAYS_BCC.lastIndexOf('@') + 1)
+    .toLowerCase();
+  const canonicalArchiveDomain = archiveDomain?.replace(/\.+$/, '');
+  if (raw.ALWAYS_BCC && canonicalArchiveDomain) {
+    for (const d of allDomains) {
+      if (canonicalArchiveDomain === d.replace(/\.+$/, '')) {
+        throw new Error('ALWAYS_BCC must be an external compliance archive');
+      }
+    }
+  }
+  if (raw.ALWAYS_BCC) {
+    const externalArchiveSigningSecret = raw.TASK_SIGNING_SECRET;
+    if (!externalArchiveSigningSecret) {
+      throw new Error('TASK_SIGNING_SECRET is required for an external compliance archive');
+    }
+    if (externalArchiveSigningSecret.length < 32) {
+      throw new Error(
+        'TASK_SIGNING_SECRET must be at least 32 characters for an external compliance archive',
+      );
+    }
+  }
+
+  if (raw.WEBHOOKS_ENABLED === 'true') {
+    const explicitTaskSecret = raw.TASK_SIGNING_SECRET;
+    if (!explicitTaskSecret) {
+      throw new Error('TASK_SIGNING_SECRET is required when WEBHOOKS_ENABLED is true');
+    }
+    if (explicitTaskSecret.length < 32) {
+      throw new Error(
+        'TASK_SIGNING_SECRET must be at least 32 characters when WEBHOOKS_ENABLED is true',
+      );
+    }
+  }
+
+  if (raw.WEBHOOK_PAYLOAD_MAX_BYTES > JSON_BODY_LIMIT_BYTES) {
+    throw new Error('WEBHOOK_PAYLOAD_MAX_BYTES must be <= JSON_BODY_LIMIT_BYTES');
+  }
+
+  const webhookAllowedPorts = parseAllowedPorts(raw.WEBHOOK_ALLOWED_PORTS);
+  const webhookAllowPrivateTargets =
+    raw.OAE_PUBLIC_EDGE === 'true' ? false : raw.WEBHOOK_ALLOW_PRIVATE_TARGETS === 'true';
+
+  const taskSigningSecret = raw.TASK_SIGNING_SECRET ?? raw.SMTP_PASS;
+
+  return {
+    port: raw.PORT,
+    domain: primaryDomain,
+    extraDomains,
+    allDomains,
+    apiKeys: new Set(splitCsv(raw.API_KEYS)),
+    imap: {
+      host: raw.IMAP_HOST,
+      port: raw.IMAP_PORT,
+      user: raw.IMAP_USER,
+      pass: raw.IMAP_PASS,
+      secure: raw.IMAP_TLS === 'true',
+      tlsRejectUnauthorized: raw.IMAP_TLS_REJECT_UNAUTHORIZED === 'true',
+    },
+    smtp: {
+      host: raw.SMTP_HOST,
+      port: raw.SMTP_PORT,
+      user: raw.SMTP_USER,
+      pass: raw.SMTP_PASS,
+      tlsRejectUnauthorized: raw.SMTP_TLS_REJECT_UNAUTHORIZED === 'true',
+    },
+    alwaysBcc: raw.ALWAYS_BCC,
+    // The fallback supports an upgrade where the new variable has not reached
+    // a bare-process config yet. Both Compose variants require the dedicated
+    // secret, which is the supported v0.4 deployment path.
+    taskSigningSecret,
+    taskLeasesEnabled: raw.TASK_LEASES_ENABLED === 'true',
+    // M3 与 leases 总闸独立；默认关，灰度后再开。
+    taskLeasesExpiryAuditM3: raw.TASK_LEASES_EXPIRY_AUDIT_M3 === 'true',
+    // M1 公共读 overlay 有界闸；与 leases 总闸独立，默认关。
+    taskLeasesOverlayBound: raw.TASK_LEASES_OVERLAY_BOUND === 'true',
+    // M2 pending journal；默认关。依赖 TASK_LEASES_ENABLED，不替代权威。
+    taskLeasesPendingJournal: raw.TASK_LEASES_PENDING_JOURNAL === 'true',
+    // 通知游标与 task/mail 游标域分离；不新增 env。旧 notify 游标失效可接受。
+    notifyCursorSecret: createHmac('sha256', taskSigningSecret)
+      .update('notify-cursor-v1')
+      .digest(),
+    allowedSendDomains: raw.ALLOWED_SEND_DOMAINS
+      ? splitCsv(raw.ALLOWED_SEND_DOMAINS).map((d) => d.toLowerCase())
+      : [...allDomains],
+    dataDir: raw.DATA_DIR,
+    uiEnabled: raw.UI_ENABLED === 'true',
+    ntfy: {
+      enabled: raw.NTFY_ENABLED === 'true',
+      internalUrl: normalizeUrl(raw.NTFY_INTERNAL_URL),
+      storageDir: raw.NTFY_STORAGE_DIR,
+      publicUrl: normalizeUrl(raw.NOTIFY_PUBLIC_URL),
+      upstreamEnabled: raw.NTFY_UPSTREAM === 'true',
+      adminPassword: raw.NTFY_ADMIN_PASSWORD,
+      configPath: join(raw.DATA_DIR, 'ntfy', 'server.yml'),
+      pushPolicy: raw.PUSH_POLICY,
+      notifyRateLimit: raw.NOTIFY_RATE_LIMIT,
+    },
+    webhooks: {
+      enabled: raw.WEBHOOKS_ENABLED === 'true',
+      signingSecret: raw.WEBHOOK_SIGNING_SECRET,
+      signingSecretPrevious: raw.WEBHOOK_SIGNING_SECRET_PREVIOUS,
+      allowPrivateTargets: webhookAllowPrivateTargets,
+      allowedPorts: webhookAllowedPorts,
+      maxSubscriptions: raw.WEBHOOK_MAX_SUBSCRIPTIONS,
+      maxPerAddress: raw.WEBHOOK_MAX_PER_ADDRESS,
+      maxAttempts: raw.WEBHOOK_MAX_ATTEMPTS,
+      deliveryTimeoutMs: raw.WEBHOOK_DELIVERY_TIMEOUT_MS,
+      maxConcurrent: raw.WEBHOOK_MAX_CONCURRENT,
+      poolRetryMs: raw.WEBHOOK_POOL_RETRY_MS,
+      payloadMaxBytes: raw.WEBHOOK_PAYLOAD_MAX_BYTES,
+      approvalArgsMaxBytes: raw.WEBHOOK_APPROVAL_ARGS_MAX_BYTES,
+      approvalArgsMaxDepth: raw.WEBHOOK_APPROVAL_ARGS_MAX_DEPTH,
+      responseMaxBytes: raw.WEBHOOK_RESPONSE_MAX_BYTES,
+      timestampToleranceSec: raw.WEBHOOK_TIMESTAMP_TOLERANCE_SEC,
+      disableThreshold: raw.WEBHOOK_DISABLE_THRESHOLD,
+      rotationOverlapMs: raw.WEBHOOK_ROTATION_OVERLAP_MS,
+      logRetentionDays: raw.WEBHOOK_LOG_RETENTION_DAYS,
+      rateCreatePerMin: raw.WEBHOOK_RATE_CREATE_PER_MIN,
+      rateTestPerMin: raw.WEBHOOK_RATE_TEST_PER_MIN,
+      rateDeliverPerMin: raw.WEBHOOK_RATE_DELIVER_PER_MIN,
+    },
+    dashboardPublicUrl: raw.DASHBOARD_PUBLIC_URL
+      ? normalizeUrl(raw.DASHBOARD_PUBLIC_URL)
+      : undefined,
+    mcpPublicUrl: raw.MCP_PUBLIC_URL ? normalizeUrl(raw.MCP_PUBLIC_URL) : undefined,
+    mcpRateReadPerMin: raw.MCP_RATE_READ_PER_MIN,
+    mcpRateWritePerMin: raw.MCP_RATE_WRITE_PER_MIN,
+    mcpMaxWaitSeconds: raw.MCP_MAX_WAIT_SECONDS,
+    trustProxyHeaders: raw.TRUST_PROXY_HEADERS === 'true',
+    oaePublicEdge: raw.OAE_PUBLIC_EDGE === 'true',
+    oauthRatePerMin: raw.OAUTH_RATE_PER_MIN,
+    mcpPreauthRatePerMin: raw.MCP_PREAUTH_RATE_PER_MIN,
+    sendRateLimit: raw.SEND_RATE_LIMIT,
+    retentionDays: raw.RETENTION_DAYS,
+    retentionCheckHours: raw.RETENTION_CHECK_HOURS,
+    // X-Agent 自证（可选；未配置时 /healthz 与 well-known 保持历史行为）
+    sourceCommit: raw.SOURCE_COMMIT,
+    xagtVerificationSlug: raw.XAGT_VERIFICATION_SLUG,
+  } as const;
+}
+
+export const config = parseConfig(process.env);
+
+/**
+ * 将请求的等待秒数静默钳到 MCP_MAX_WAIT_SECONDS（1..上限）。
+ * 不抛 400——历史客户端按文档传 600 仍须可用。
+ * @param cap 可选覆盖（测试用）；默认读进程 config
+ */
+export function clampWaitSeconds(requested: number, cap = config.mcpMaxWaitSeconds): number {
+  if (!Number.isFinite(requested)) return cap;
+  return Math.min(Math.max(1, Math.trunc(requested)), cap);
+}

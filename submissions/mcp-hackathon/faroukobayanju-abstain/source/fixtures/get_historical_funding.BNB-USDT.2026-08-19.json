@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "name": "get_historical_funding",
+  "content": {
+    "symbol": "BNB/USDT",
+    "as_of_date": "2026-08-19",
+    "last_funding_rate": 0.00005473
+  }
+}
