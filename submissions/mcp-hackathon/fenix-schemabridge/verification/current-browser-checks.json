@@ -1,0 +1,56 @@
+{
+  "sourceCommit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "commit": "18d0eac794d0075df3f763bd2a442370e03f02fd",
+  "url": "https://schemabridge.wiaikit.com/",
+  "checkedAt": "2026-09-14T08:56:46.234Z",
+  "result": "PASS",
+  "surface": "Codex in-app browser, public custom domain, no application login requested",
+  "checks": [
+    {
+      "name": "Published editorial homepage and original bridge illustration render",
+      "passed": true
+    },
+    {
+      "name": "CTA reaches and focuses live example",
+      "passed": true
+    },
+    {
+      "name": "CSV transforms through public API into2rows with4changed types, preserving0/false",
+      "passed": true
+    },
+    {
+      "name": "JSON response disclosure expands real response",
+      "passed": true
+    },
+    {
+      "name": "Editing invalidates old result",
+      "passed": true
+    },
+    {
+      "name": "Invalid seven produces named record/field error",
+      "passed": true
+    },
+    {
+      "name": "Reset restores initial CSV and clears result",
+      "passed": true
+    },
+    {
+      "name": "API guide opens readable documentation",
+      "passed": true
+    },
+    {
+      "name": "Service status loads HTTP200 and exact newsourcecommit",
+      "passed": true
+    },
+    {
+      "name": "Home link returns to editorial homepage",
+      "passed": true
+    }
+  ],
+  "priorLocalMobile": {
+    "viewport": 320,
+    "pageWidth": 320,
+    "formWidth": 288,
+    "sourceRelationship": "Final published HTML/CSS/JS/PNG/WOFF2 responses matched checked localsource bytes in the independent public verification."
+  }
+}

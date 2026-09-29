@@ -1,0 +1,13 @@
+{
+  "format": "json",
+  "data": [
+    { "reference": 101, "amount": " 12.50 ", "settled": "false", "note": null },
+    { "reference": 102, "amount": 0, "settled": true }
+  ],
+  "schema": [
+    { "source": "reference", "target": "id", "type": "string" },
+    { "source": "amount", "target": "amount", "type": "number", "trim": true },
+    { "source": "settled", "target": "settled", "type": "boolean" },
+    { "source": "note", "target": "note", "type": "string", "required": false, "nullable": true }
+  ]
+}
