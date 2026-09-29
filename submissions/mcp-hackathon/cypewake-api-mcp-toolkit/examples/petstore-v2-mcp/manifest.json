@@ -1,0 +1,375 @@
+{
+  "schema_version": "2.0",
+  "generated_by": "MCPForge/2.1.0",
+  "generated_at": "2026-09-16T16:08:13.697567+00:00",
+  "listing": {
+    "name": "petstore-v2-mcp",
+    "display_name": "Petstore V2 Mcp",
+    "category": "api-tool",
+    "description": "petstore-v2-mcp API turned into MCP by MCPForge in one pass, 20 callable tools.",
+    "endpoint": "https://petstore.swagger.io/v2",
+    "auth": {
+      "required": true,
+      "schemes": [
+        {
+          "name": "api_key",
+          "type": "apiKey",
+          "in": "header",
+          "key_name": "api_key"
+        },
+        {
+          "name": "petstore_auth",
+          "type": "oauth2",
+          "flows": []
+        }
+      ],
+      "credential_env": "API_KEY"
+    },
+    "capabilities": {
+      "tool_count": 20,
+      "paginated_tools": 0,
+      "deprecated_tools": 1
+    }
+  },
+  "tools": [
+    {
+      "operation_id": "uploadFile",
+      "method": "POST",
+      "path": "/pet/{petId}/uploadImage",
+      "summary": "uploads an image",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "integer",
+            "description": "ID of pet to update"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      }
+    },
+    {
+      "operation_id": "addPet",
+      "method": "POST",
+      "path": "/pet",
+      "summary": "Add a new pet to the store",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "updatePet",
+      "method": "PUT",
+      "path": "/pet",
+      "summary": "Update an existing pet",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "findPetsByStatus",
+      "method": "GET",
+      "path": "/pet/findByStatus",
+      "summary": "Finds Pets by status",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status values that need to be considered for filter"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+    },
+    {
+      "operation_id": "findPetsByTags",
+      "method": "GET",
+      "path": "/pet/findByTags",
+      "summary": "Finds Pets by tags",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "string",
+            "description": "Tags to filter by"
+          }
+        },
+        "required": [
+          "tags"
+        ]
+      }
+    },
+    {
+      "operation_id": "getPetById",
+      "method": "GET",
+      "path": "/pet/{petId}",
+      "summary": "Find pet by ID",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "integer",
+            "description": "ID of pet to return"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      }
+    },
+    {
+      "operation_id": "updatePetWithForm",
+      "method": "POST",
+      "path": "/pet/{petId}",
+      "summary": "Updates a pet in the store with form data",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "integer",
+            "description": "ID of pet that needs to be updated"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      }
+    },
+    {
+      "operation_id": "deletePet",
+      "method": "DELETE",
+      "path": "/pet/{petId}",
+      "summary": "Deletes a pet",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "integer",
+            "description": "Pet id to delete"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      }
+    },
+    {
+      "operation_id": "getInventory",
+      "method": "GET",
+      "path": "/store/inventory",
+      "summary": "Returns pet inventories by status",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "placeOrder",
+      "method": "POST",
+      "path": "/store/order",
+      "summary": "Place an order for a pet",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "getOrderById",
+      "method": "GET",
+      "path": "/store/order/{orderId}",
+      "summary": "Find purchase order by ID",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "integer",
+            "description": "ID of pet that needs to be fetched"
+          }
+        },
+        "required": [
+          "orderId"
+        ]
+      }
+    },
+    {
+      "operation_id": "deleteOrder",
+      "method": "DELETE",
+      "path": "/store/order/{orderId}",
+      "summary": "Delete purchase order by ID",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "integer",
+            "description": "ID of the order that needs to be deleted"
+          }
+        },
+        "required": [
+          "orderId"
+        ]
+      }
+    },
+    {
+      "operation_id": "createUsersWithListInput",
+      "method": "POST",
+      "path": "/user/createWithList",
+      "summary": "Creates list of users with given input array",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "getUserByName",
+      "method": "GET",
+      "path": "/user/{username}",
+      "summary": "Get user by user name",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "The name that needs to be fetched. Use user1 for testing. "
+          }
+        },
+        "required": [
+          "username"
+        ]
+      }
+    },
+    {
+      "operation_id": "updateUser",
+      "method": "PUT",
+      "path": "/user/{username}",
+      "summary": "Updated user",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "name that need to be updated"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      }
+    },
+    {
+      "operation_id": "deleteUser",
+      "method": "DELETE",
+      "path": "/user/{username}",
+      "summary": "Delete user",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "The name that needs to be deleted"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      }
+    },
+    {
+      "operation_id": "loginUser",
+      "method": "GET",
+      "path": "/user/login",
+      "summary": "Logs user into the system",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "The user name for login"
+          },
+          "password": {
+            "type": "string",
+            "description": "The password for login in clear text"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      }
+    },
+    {
+      "operation_id": "logoutUser",
+      "method": "GET",
+      "path": "/user/logout",
+      "summary": "Logs out current logged in user session",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "createUsersWithArrayInput",
+      "method": "POST",
+      "path": "/user/createWithArray",
+      "summary": "Creates list of users with given input array",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "operation_id": "createUser",
+      "method": "POST",
+      "path": "/user",
+      "summary": "Create user",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ],
+  "pricing": {
+    "tier": "free",
+    "billing_model": "free",
+    "included_calls": 1000,
+    "price_per_1k_calls": 0.0,
+    "currency": "USD",
+    "all_tiers": {
+      "free": {
+        "price_per_1k_calls": 0.0,
+        "included_calls": 1000
+      },
+      "basic": {
+        "price_per_1k_calls": 2.0,
+        "included_calls": 10000
+      },
+      "pro": {
+        "price_per_1k_calls": 8.0,
+        "included_calls": 50000
+      },
+      "enterprise": {
+        "price_per_1k_calls": 25.0,
+        "included_calls": 500000
+      }
+    }
+  },
+  "compliance": {
+    "note": "produced as an engineering portfolio piece to demonstrate API→MCP wrapping and metering.",
+    "contains_security_audit_capability": false,
+    "crypto_token_speculation": false
+  }
+}

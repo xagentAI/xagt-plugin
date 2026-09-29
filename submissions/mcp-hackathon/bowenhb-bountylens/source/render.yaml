@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+
+services:
+  - type: web
+    name: bountylens-api
+    runtime: docker
+    plan: free
+    region: singapore
+    repo: https://github.com/bowenhb/bountylens
+    branch: build/xagent-hackathon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    renderSubdomainPolicy: enabled
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PROJECT_SLUG
+        value: bountylens
+      - key: CACHE_TTL_SECONDS
+        value: "300"
+      - key: REQUEST_TIMEOUT_MS
+        value: "10000"

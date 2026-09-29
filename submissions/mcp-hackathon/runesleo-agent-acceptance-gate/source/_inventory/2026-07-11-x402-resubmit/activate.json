@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "data": {
+    "activate": {
+      "approvalStatus": 5,
+      "rejectReason": "当前 Agent 未通过 x402 标准校验，请按照下述步骤修改后再提交：\n\n1. 使用 OKX Payment SDK 在您的服务端完成 x402 接入，参考接入指南：https://web3.okx.com/zh-hans/onchainos/dev-docs/okxai/howtomcp\n2. 完成所需的集成步骤，确保未支付请求返回标准 402 挑战。\n3. 重新验证服务可用性后再次提交。",
+      "success": false
+    },
+    "submitApproval": [
+      {
+        "approvalStatus": 2,
+        "success": true
+      }
+    ]
+  }
+}

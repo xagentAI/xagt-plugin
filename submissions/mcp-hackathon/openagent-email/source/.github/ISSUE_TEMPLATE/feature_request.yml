@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a capability or an improvement.
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tell us the problem you are trying to solve. Concrete use cases help us prioritize.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve for you?
+      description: Describe the situation, not just the feature. What are you trying to do, and what blocks you today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution (optional)
+      description: If you have a shape in mind, sketch it. Rough is fine.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered (optional)
+      description: Other tools or workarounds you tried.
+
+  - type: dropdown
+    id: willing_to_pr
+    attributes:
+      label: Would you like to open a PR yourself? (optional)
+      description: External contributors who want to implement their own request are especially welcome — we review AI-assisted and human PRs at the same bar.
+      options:
+        - "No"
+        - "Yes — I can try on my own"
+        - "Yes — with maintainer guidance"
+    validations:
+      required: false

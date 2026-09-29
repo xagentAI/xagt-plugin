@@ -1,0 +1,89 @@
+{
+  "fixtureVersion": 1,
+  "sanitized": true,
+  "scenario": "clear-reward-high-competition",
+  "sourceUrl": "https://github.com/copperheadhq/copperhead/issues/66",
+  "capturedAt": "2026-09-17",
+  "context": {
+    "issue": {
+      "title": "Bounty: end-to-end test copperhead create (brief → clean full run) + findings report",
+      "body": "> BOUNTY — $50 USD\n> First mergeable PR wins; paid on merge, not on submission. Claims expire after two days without visible progress.\n\n## Summary\n\nRun the eight-stage `copperhead create` pipeline from a non-trivial brief through a committed final stage. Fix source blockers rather than editing generated artifacts manually.\n\n## Scope\n\n1. Produce a clean eight-stage run that exits successfully.\n2. Add deterministic end-to-end or integration coverage that detects a wedged stage, a false-green verification gate, or failure to reach the final stage.\n3. Add an evidence-backed findings report.\n\n## Acceptance criteria\n\n- [ ] All eight stages are committed and the process exits successfully.\n- [ ] Automated coverage is runnable in CI or through a documented gated command.\n- [ ] Existing tests and lint checks pass.\n- [ ] Source fixes are minimal, explained, and tested.\n- [ ] A structured findings report is included.",
+      "state": "open",
+      "labels": [
+        "help wanted",
+        "area:pipeline",
+        "area:observability",
+        "bounty"
+      ],
+      "assignees": [
+        "candidate-1",
+        "candidate-2"
+      ],
+      "author": "maintainer",
+      "createdAt": "2026-07-24T08:17:43Z",
+      "updatedAt": "2026-09-16T10:45:43Z"
+    },
+    "comments": [
+      {
+        "author": "candidate-1",
+        "body": "Claiming this bounty. I will post visible progress and a reviewable PR within the claim window.",
+        "createdAt": "2026-07-24T08:41:06Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "candidate-2",
+        "body": "I would like to take this on and can start now.",
+        "createdAt": "2026-07-24T08:45:17Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "maintainer",
+        "body": "Please share the brief and implementation plan before starting.",
+        "createdAt": "2026-07-24T08:46:38Z",
+        "authorAssociation": "CONTRIBUTOR"
+      },
+      {
+        "author": "candidate-3",
+        "body": "I can implement the technical work and return source plus verification evidence.",
+        "createdAt": "2026-07-24T08:50:30Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "candidate-4",
+        "body": "Please assign this issue to me.",
+        "createdAt": "2026-07-24T09:03:25Z",
+        "authorAssociation": "CONTRIBUTOR"
+      },
+      {
+        "author": "candidate-5",
+        "body": "Can you assign this to me? I have prepared a brief and plan.",
+        "createdAt": "2026-07-24T09:12:23Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "candidate-6",
+        "body": "I have started a baseline run and will submit a deterministic replay test with the PR.",
+        "createdAt": "2026-07-24T09:16:05Z",
+        "authorAssociation": "NONE"
+      },
+      {
+        "author": "candidate-7",
+        "body": "Claiming the $50 bounty and preparing a mergeable regression harness.",
+        "createdAt": "2026-09-13T13:40:25Z",
+        "authorAssociation": "NONE"
+      }
+    ],
+    "repository": {
+      "fullName": "copperheadhq/copperhead",
+      "pushedAt": "2026-09-16T16:16:45Z",
+      "updatedAt": "2026-09-16T16:46:37Z",
+      "openIssuesCount": 186,
+      "languages": {
+        "TypeScript": 1850588,
+        "JavaScript": 33498,
+        "Shell": 17497,
+        "Tape": 4764
+      }
+    }
+  }
+}

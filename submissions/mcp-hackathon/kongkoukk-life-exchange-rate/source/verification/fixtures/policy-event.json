@@ -1,0 +1,52 @@
+{
+  "event_id": "synthetic-deposit-rate-2025-12-01-2025-12-31",
+  "event_type": "interest_rate_change",
+  "title": "Synthetic scenario: Euro-area deposit facility rate moved +25.0 basis points",
+  "source": "synthetic judging fixture",
+  "observed_at": "2025-12-31T00:00:00Z",
+  "old_value": 3.0,
+  "new_value": 3.25,
+  "unit": "percent",
+  "change_pct": null,
+  "base_currency": null,
+  "quote_currency": null,
+  "affected_currencies": [
+    "EUR"
+  ],
+  "jurisdiction": "EA",
+  "evidence_url": null,
+  "window_start": "2025-12-01T00:00:00Z",
+  "window_end": "2025-12-31T00:00:00Z",
+  "confidence": "scenario",
+  "provenance": {
+    "provider": "synthetic-fixture",
+    "source_type": "synthetic_fixture",
+    "retrieved_at": "2026-09-10T16:00:00Z",
+    "series_id": "synthetic-policy-rate-step-v1",
+    "source_url": null,
+    "notes": [
+      "Synthetic fixed step scenario; values and dates are not ECB observations."
+    ]
+  },
+  "metadata": {
+    "requested_lookback_days": 30,
+    "requested_as_of": "2025-12-31",
+    "target_start_date": "2025-12-01",
+    "old_date": "2025-12-01",
+    "new_date": "2025-12-31",
+    "actual_window_days": 30,
+    "observation_lag_days": 0,
+    "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+    "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+    "provider": "synthetic-fixture",
+    "synthetic": true,
+    "mode": "fixture",
+    "fallback_used": false,
+    "change_basis_points": 25.0,
+    "change_percentage_points": 0.25,
+    "scope": "Euro area; EUR exposures only",
+    "rate_name": "deposit facility",
+    "fixture_anchor_date": "2025-12-31",
+    "live_request_as_of": "2026-09-10"
+  }
+}

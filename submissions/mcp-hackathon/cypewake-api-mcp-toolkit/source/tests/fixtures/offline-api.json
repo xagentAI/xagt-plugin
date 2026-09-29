@@ -1,0 +1,86 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Offline Fixture API",
+    "version": "1.0.0",
+    "description": "MCPForge offline test fixture: shaped like Swagger Petstore but dependent on no network."
+  },
+  "servers": [{ "url": "/api/v3" }],
+  "components": {
+    "parameters": {
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "description": "Page number (used to verify $ref merging of path-level parameters)",
+        "schema": { "type": "integer" }
+      }
+    },
+    "securitySchemes": {
+      "fixture_key": { "type": "apiKey", "in": "header", "name": "X-Fixture-Key" },
+      "fixture_oauth": {
+        "type": "oauth2",
+        "flows": { "implicit": { "authorizationUrl": "https://example.com/auth", "scopes": {} } }
+      }
+    }
+  },
+  "paths": {
+    "/pet/{petId}": {
+      "parameters": [{ "$ref": "#/components/parameters/PageParam" }],
+      "get": {
+        "operationId": "getPetById",
+        "summary": "Get a pet by ID",
+        "tags": ["pet"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "description": "Pet ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": { "200": { "description": "ok" } }
+      },
+      "delete": {
+        "operationId": "deletePet",
+        "summary": "Delete a pet",
+        "security": [{ "fixture_key": [] }],
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/pet": {
+      "post": {
+        "operationId": "addPet",
+        "summary": "Add a pet",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object" } }
+          }
+        },
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/store/inventory": {
+      "get": {
+        "operationId": "getInventory",
+        "summary": "Inventory totals",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/weird/{account-id}/balance": {
+      "get": {
+        "operationId": "getWeirdBalance",
+        "summary": "A path containing a non-identifier placeholder",
+        "parameters": [
+          {
+            "name": "account-id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "ok" } }
+      }
+    }
+  }
+}

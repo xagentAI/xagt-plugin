@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "YAI Agent Core",
+  "slug": "yai-agent-core",
+  "sourceRepository": "https://github.com/Gi-Tuu/yai-agent-core",
+  "reviewCommit": "__REVIEW_COMMIT__",
+  "apiBaseUrl": "https://yai-agent-core.onrender.com",
+  "healthCheckUrl": "https://yai-agent-core.onrender.com/health",
+  "deploymentProofUrl": "https://yai-agent-core.onrender.com/.well-known/xagent-verification.json"
+}

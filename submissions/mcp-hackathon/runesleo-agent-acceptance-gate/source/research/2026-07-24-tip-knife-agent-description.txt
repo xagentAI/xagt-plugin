@@ -1,0 +1,2 @@
+Pay-per-call PM toolkit gates: wallet PnL trust audit (晒单流水验真), same-event matrix (同场盘口矩阵), pre-trade decision cards, plus scanners — market scan, book health/overround, wallet one-pager. JSON in, structured verdict out — not a chatbot, not trade tips.
+给 Agent 的按次付费刀具：晒单流水验真、同场盘口矩阵、下单前决策卡；另含市场扫描/盘口健康/钱包一页纸等 toolkit 扫描器。JSON 进、结构化结论出；非聊天、非喊单。

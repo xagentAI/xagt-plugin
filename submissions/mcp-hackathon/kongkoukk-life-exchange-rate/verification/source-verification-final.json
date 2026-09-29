@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-09-16T09:54:47.366796+00:00",
+  "source_repository": "https://github.com/KongkouKK/life-exchange-rate-mcp",
+  "public_commit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+  "archive_url": "https://codeload.github.com/KongkouKK/life-exchange-rate-mcp/zip/238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+  "archive_sha256": "c75a6210c5ff1ca6a277f2d10acb1e99dc0b797eb36294d930f2820a136dc79f",
+  "comparison": "Exact UTF-8 bytes except CRLF/CR line endings; binary bytes exact",
+  "local_file_count": 76,
+  "remote_file_count": 76,
+  "line_ending_only_paths": [
+    "tests/test_deployment_config.py"
+  ],
+  "missing_paths": [],
+  "differing_paths": [],
+  "remote_only_paths": [],
+  "local_source_matches_remote": true,
+  "file_sets_match": true,
+  "runtime_complete_and_matches_local": true,
+  "runtime_unchanged_since_148_test_pass": true
+}

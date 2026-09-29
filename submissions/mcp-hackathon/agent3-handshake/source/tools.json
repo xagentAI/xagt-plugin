@@ -1,0 +1,117 @@
+{
+  "generatedFrom": "src/tools.ts",
+  "tools": [
+    {
+      "name": "registry_audit",
+      "title": "Audit every entry for callability",
+      "description": "Walks the whole Agent3 registry and reports, per entry, whether a caller can construct a request from what is published — and when not, which field is missing or unusable. Takes no input.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "errors": [
+        "upstream_unavailable: the registry could not be read; the response says so instead of returning a partial audit"
+      ],
+      "rest": {
+        "method": "GET",
+        "path": "/v1/audit"
+      }
+    },
+    {
+      "name": "entry_describe",
+      "title": "Describe one entry, normalized",
+      "description": "Everything the registry publishes about one entry, with the payment field resolved across both spellings and the operation list flattened to id, method and path.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "type": "string",
+            "description": "resource id or exact entry name"
+          }
+        },
+        "required": [
+          "entry"
+        ],
+        "additionalProperties": false
+      },
+      "errors": [
+        "entry_not_found: no entry matches; the response lists the ids that do exist",
+        "upstream_unavailable: the registry could not be read"
+      ],
+      "rest": {
+        "method": "GET",
+        "path": "/v1/entry"
+      }
+    },
+    {
+      "name": "call_plan",
+      "title": "Build the request, or name what blocks it",
+      "description": "Turns one entry plus one operation into the exact request to send: absolute URL, method, headers, the published body schema and its required fields, and whether payment is required. When the entry does not support a call, it refuses and names every blocking field rather than guessing a value.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "type": "string",
+            "description": "resource id or exact entry name"
+          },
+          "operation": {
+            "type": "string",
+            "description": "operation id as published"
+          }
+        },
+        "required": [
+          "entry",
+          "operation"
+        ],
+        "additionalProperties": false
+      },
+      "errors": [
+        "entry_not_found: no entry matches; the response lists the ids that do exist",
+        "not_callable: the entry was found but publishes no usable call; every blocker is named with its field",
+        "upstream_unavailable: the registry could not be read"
+      ],
+      "rest": {
+        "method": "GET",
+        "path": "/v1/plan"
+      }
+    },
+    {
+      "name": "payment_readings",
+      "title": "Read the payment field both ways",
+      "description": "The registry states the payment kind under two different keys. This reports, per entry, what a reader of each key alone would see, and how many entries each reader silently misses.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "errors": [
+        "upstream_unavailable: the registry could not be read"
+      ],
+      "rest": {
+        "method": "GET",
+        "path": "/v1/payments"
+      }
+    },
+    {
+      "name": "registry_snapshot",
+      "title": "Pin what was read",
+      "description": "Source URL, read time, entry count, entry ids and a sha256 digest over the canonical payload, so a reviewer can pin an answer to the exact registry state it came from.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "errors": [
+        "upstream_unavailable: the registry could not be read"
+      ],
+      "rest": {
+        "method": "GET",
+        "path": "/v1/snapshot"
+      }
+    }
+  ]
+}

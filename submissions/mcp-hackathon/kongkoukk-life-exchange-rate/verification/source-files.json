@@ -1,0 +1,304 @@
+{
+  "reviewCommit": "238954196ea6922d3cea2ae8acb914b0f4e01dbb",
+  "sourceRepository": "https://github.com/KongkouKK/life-exchange-rate-mcp",
+  "note": "File hashes of the supplied review source. Its relationship to the public commit requires separate verification.",
+  "excluded_submission_boilerplate": [
+    "RIGHTS.md",
+    "SUBMISSION.md",
+    "submission.json"
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "sha256": "39cca14cb50bf69820d9de781457abd73fbd23ea98451fcdfc6fd8f62860d672"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "a8249d12043716a27e88ca8c49fa3452c8d1add323bc5a43f2ff081eee3b3322"
+    },
+    {
+      "path": ".python-version",
+      "sha256": "8dfda54ba2f66ab3a8ebab460f4338bbeea1fb1e0f85ce06fe3530aa3c64679b"
+    },
+    {
+      "path": ".vercelignore",
+      "sha256": "9f6a705e80b7c26890c81b7f09d00ab3fe18509f6b7d7bd6ee084b9a558cf3dc"
+    },
+    {
+      "path": "app.py",
+      "sha256": "2af46c91540b85d4fa0a931e9fbf59919cf866912e76cfd587db38f3b97fea18"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "aa12a027e8a86bdb92f3ecd17a298a2df0903a4299ac66a6009ff2af54072905"
+    },
+    {
+      "path": "DEPLOYMENT_STATUS.md",
+      "sha256": "5e1db9176f3fde23d6a388293106fb19184d81fbd5a5bab1a4c139199312420c"
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "b474bad6fda59d621fe19ab6973886721a0b1a012775cc2b8428226b3cb9ed7c"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "35a9f341536c4a2cebb70234da3ea35ee81cd5b03e802bf71850755621bce689"
+    },
+    {
+      "path": "docs/DATA_SOURCES.md",
+      "sha256": "3f985acb0661667ee79ff113c1d83fe875c21afc6e7318bc7b559570b05a679e"
+    },
+    {
+      "path": "docs/DEMO.md",
+      "sha256": "87e6914f57ebb4642f016a02827e4afe28bae976738100ba23eb84c742c14301"
+    },
+    {
+      "path": "docs/DEPLOY_FREE.md",
+      "sha256": "08799331f359059eedb5c482ca3bb85be8edbd1285892c21b6bdfb6a0b73aa25"
+    },
+    {
+      "path": "docs/EVAL_CASES.md",
+      "sha256": "9b41c6d8a83d4f316a8da3040f19121b55351bc56afd7599a3d9b276528b3275"
+    },
+    {
+      "path": "docs/FX_ANOMALY.md",
+      "sha256": "73d059a831f616ea07498131cc71f0121b0b330d635e9ebecadc7cfe5d7181b2"
+    },
+    {
+      "path": "docs/JUDGE_DEMO.md",
+      "sha256": "7a028627424cc4d45e9081974dd5e77c941264cff422489c5de9560356d8e0cc"
+    },
+    {
+      "path": "docs/PRODUCT_SPEC.md",
+      "sha256": "25e3a23bdbe53e3b4e5cd070f55ed80104e7eb71bdeb904ef9c836a2289bf966"
+    },
+    {
+      "path": "docs/ROADMAP_18_DAYS.md",
+      "sha256": "c3ac8c840a1651bcf8ff51909dc421a29ca5e7342d441c3a774c18ebb2d59e7e"
+    },
+    {
+      "path": "docs/TOOL_CONTRACTS.md",
+      "sha256": "1cb7d6649ada1e407188836ec8d404c071295353e701c35dabdaee489a569e4d"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "e4af6dfd032b691c4a78b48425dde5d992c2cef838319f418efa00cf736f6f24"
+    },
+    {
+      "path": "README.md",
+      "sha256": "eec85ef810e680a1e0ced055c27b07682ecc3d98a661f494893dafe09f93f4f4"
+    },
+    {
+      "path": "source/life_exchange_rate/__init__.py",
+      "sha256": "667d4a15b970b851e20d17510224670c14646cfb6d5a1e388ca6b9cc6da8bf41"
+    },
+    {
+      "path": "source/life_exchange_rate/calculations.py",
+      "sha256": "bb73a5d31514c379b656ef2920baae196327f7db8606a0f2fde2976633761aef"
+    },
+    {
+      "path": "source/life_exchange_rate/demo.py",
+      "sha256": "4bc60f5cb1efdb7ed263cb25dd9936f7dd0e1997da9ee8c91c93ecc8a7ab1cda"
+    },
+    {
+      "path": "source/life_exchange_rate/main.py",
+      "sha256": "7132116492357f6d370e286953a02c204b6026413ec57f103f7e24691e8d2abe"
+    },
+    {
+      "path": "source/life_exchange_rate/mcp_server.py",
+      "sha256": "1ec8b983cc363140cb5aa6e4501e1d0b19e8809c1406f8242dee6b70689873f7"
+    },
+    {
+      "path": "source/life_exchange_rate/models.py",
+      "sha256": "c67e15c3d622af25b94b604931ae4e85bf731859783551920542138bf6a859ac"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/common.py",
+      "sha256": "7066cdbe44b8bbb9aaf562dc63c9f6a2a145f7be59db04bf5792b11e2ad48af3"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/data/energy.json",
+      "sha256": "b0c4ebf1ac7c3b661b7987e029439b4dcffb2489cc2d4c98e2e70c2326d2606b"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/data/policy_rate.json",
+      "sha256": "b8e6c347ffe47f70dbd590ab2f08424e3f5d17269a375087107198aaee543511"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/energy.py",
+      "sha256": "aaee25bf1a5dca847e888ac9ddf644358cf3ecf522201e7bf1e7dbfb4a4fbd4b"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/fixtures.py",
+      "sha256": "6f7e6c95f65d6b6e89b9e5e946ff107db395482c1d6502efbee6b1063d10a391"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/frankfurter.py",
+      "sha256": "f99257d815d55230521c3ae51f984633e2a59bc2771975b3113844f2c99a94f0"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/fx_anomaly.py",
+      "sha256": "b63f9caf350c9c0f0f0eeb10c4792b399d58cbc5c4d6958dd77abd06a25e7cd3"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/official_rss.py",
+      "sha256": "dabb8389118c788cf1cb11c8e1e6c6999ad2a0ef17d8ed447336f1db32ca2520"
+    },
+    {
+      "path": "source/life_exchange_rate/providers/policy_rate.py",
+      "sha256": "ded286ed2f68f4bc48f21c9d6c9b693c4afca6c359b9fa8b784d7039e3b7fb04"
+    },
+    {
+      "path": "source/life_exchange_rate/radar.py",
+      "sha256": "ee1cf84e05f625a38a6f965a08300f9fac7f9f6a5492c0d5e377e2cc11ec29dc"
+    },
+    {
+      "path": "source/life_exchange_rate/service.py",
+      "sha256": "e8a2b0311be7b696bb60ef88d9baad9cc84f697e30f007106a93b3648beb23ac"
+    },
+    {
+      "path": "tests/test_api.py",
+      "sha256": "3ccc5948c0f059e42dea490dc6b3985b4c3a3429c92c9ad6dd96396a3b633338"
+    },
+    {
+      "path": "tests/test_calculations.py",
+      "sha256": "255dd8d1df1c9aafe96555b1d09d63054bf443f46453a987c06e707fab174d49"
+    },
+    {
+      "path": "tests/test_deployment_config.py",
+      "sha256": "275023cd6f3eeeea3bbec4b3434cae7d7694415b221e76b5effaac08774a4456"
+    },
+    {
+      "path": "tests/test_frankfurter.py",
+      "sha256": "afc4fba3f3844f60e0266b8db061e0c55ebd1b32f3270ec90591a0eb37e94612"
+    },
+    {
+      "path": "tests/test_guardrails.py",
+      "sha256": "f4fe0ae282888d034fc02144146a955ff1404b8ead11f3549f2a9864e527b6e6"
+    },
+    {
+      "path": "tests/test_mcp.py",
+      "sha256": "31f1058c129ae2023e07d225817c791ebc2f26a2b371f1967121c27af04708b1"
+    },
+    {
+      "path": "tests/test_official_rss.py",
+      "sha256": "02fcab88ab7578a2e26b211b126800fcaf89eda98cb00f91c591f7cefd5619ac"
+    },
+    {
+      "path": "tests/test_radar.py",
+      "sha256": "7002ca37e234fc919b0139b71ea5bb7740bfdcdc285fe1c901abc8e938e6a01c"
+    },
+    {
+      "path": "tests/test_structured_providers.py",
+      "sha256": "998026978d8416507a4bfa9d40d344fd26f6a5a2f257390a54f4a45415a7c9a1"
+    },
+    {
+      "path": "tests/test_verification.py",
+      "sha256": "8d10559f60b5aa09973915ccaed31fbcc4207995f443378976078d73cdc14007"
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "d67c058ded87d2778474f63fe051214025122c77982f80baf1e7bee1c94a4e5d"
+    },
+    {
+      "path": "vercel.json",
+      "sha256": "bc0cec871f652284058677a7fd7a3518b05b5bd2ba6eeee128a66b55646fa22e"
+    },
+    {
+      "path": "verification/build-check.json",
+      "sha256": "3f0646bb12b69d088fc08ed78ac206b098dc073c048cd57fff043a66d04b44de"
+    },
+    {
+      "path": "verification/end-to-end-demo.json",
+      "sha256": "148303410e8cebf6a3b2354722ec4b629d1d4bca6f0b1c5cbfbfbdda46d4d6a9"
+    },
+    {
+      "path": "verification/fixtures/energy-event.json",
+      "sha256": "a25c40f58eab8835913d3dbce9d48b9718b2a6e6a7bc887b5d513b2d91fdeb84"
+    },
+    {
+      "path": "verification/fixtures/energy-request.json",
+      "sha256": "134e03109c662b1458b85001a806c68481b8c2ea923386c662fac82d1e21941d"
+    },
+    {
+      "path": "verification/fixtures/energy-response.json",
+      "sha256": "fc43c9b4d87f04813fd38ba11a2c684f15973c00931f7b7bb1d2b2930a979a14"
+    },
+    {
+      "path": "verification/fixtures/fx-event.json",
+      "sha256": "6a428967bd9986ef91228b4199edb14d0a52e44516bae6b63d79e050fdb503fd"
+    },
+    {
+      "path": "verification/fixtures/fx-request.json",
+      "sha256": "6cbdb20183fbdfae4dc0e087f8bb456f03f437c4e8fc96f107d958310a70e628"
+    },
+    {
+      "path": "verification/fixtures/fx-response.json",
+      "sha256": "836da27b4e43d11918188189258105d7b9b0ff99f4f16e62f950a9c0679e132e"
+    },
+    {
+      "path": "verification/fixtures/invalid-request.json",
+      "sha256": "e556521df3d9b56d94dc4532927d04ce3e02294a4e65bb49953310c7995e9779"
+    },
+    {
+      "path": "verification/fixtures/offline-demo.json",
+      "sha256": "18daa0c974edc0c7f30f2e05e7adbfc63b1676e06139065f1cb5a3d36d14aa1f"
+    },
+    {
+      "path": "verification/fixtures/policy-event.json",
+      "sha256": "bf6470b7c60b3d565096a3c96902f372c5378596a1b3b1385cb99866c17c15cc"
+    },
+    {
+      "path": "verification/fixtures/policy-request.json",
+      "sha256": "d64898c30b747c5f35c903f770db7760cbb61a1e55a9d24ed3fe9e110a46ac6f"
+    },
+    {
+      "path": "verification/fixtures/policy-response.json",
+      "sha256": "537293ff74bc11680896a178b6bff060b58183dbcdf12ab056f578c99448f60d"
+    },
+    {
+      "path": "verification/generate_fixtures.py",
+      "sha256": "ece289c566a195d581cee63c419e3d503d41b6a91fd557f1d69821f111a4d0c6"
+    },
+    {
+      "path": "verification/hosted-live-2026-09-16.json",
+      "sha256": "659960c6b20246e8d979bfd9b8514d91f43e75e7678d518800381d40101d4ec6"
+    },
+    {
+      "path": "verification/live-cli-demo.json",
+      "sha256": "ba19bdd3cb0485419fd561362c6341cefdad256d3ac16a8200c27d894c16fdf0"
+    },
+    {
+      "path": "verification/live-providers.json",
+      "sha256": "1df981c0219356938509c944ca05e752190940a6c33dc1746ad39b3308593d84"
+    },
+    {
+      "path": "verification/mcp-smoke.json",
+      "sha256": "582783f0188e9e14043e3f1e6e8f89fd0c99b7dfeba9b7d82474e68b4cfcbf32"
+    },
+    {
+      "path": "verification/MCP_SMOKE.md",
+      "sha256": "4a31060c9a555540e52e99d7b223afc58d87ae75a25218cfc189c6807bb0ae67"
+    },
+    {
+      "path": "verification/openapi.json",
+      "sha256": "51904365e407c45f62010b3fae2c1016c6383f16347cde6f394097c02ef79d73"
+    },
+    {
+      "path": "verification/README.md",
+      "sha256": "fe55ba8f0e1cb750d8eba403f82df78b00bf141f9d3e264050a1d1f9bbe5ae46"
+    },
+    {
+      "path": "verification/record_live_providers.py",
+      "sha256": "f7849c4e06a6de71a3c1e963bbe2111f7b8bd245d3a247400e6cb1b210847857"
+    },
+    {
+      "path": "verification/smoke_mcp.py",
+      "sha256": "bc6d4dbf4367f5ea6bb0380efb62c8980dfbc397006b111cde6d574f469c9b4d"
+    },
+    {
+      "path": "verification/summary.json",
+      "sha256": "30867f50854be781d57e0b1e77627302f267653ba041a6602f7d85baddaf0695"
+    }
+  ]
+}

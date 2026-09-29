@@ -1,0 +1,29 @@
+# 本地环境与密钥（绝不进镜像）
+.env
+.venv/
+venv/
+
+# 本地 SQLite 数据（容器内如需持久化走挂载卷，不进镜像）
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# 版本控制与缓存
+.git/
+.github/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+*.pyc
+
+# 文档与生成产物（镜像只跑服务，不需要讲义）
+docs/
+*.docx
+*.pdf
+
+# 编辑器/系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

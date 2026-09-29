@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "BountyLens",
+  "slug": "bowenhb-bountylens",
+  "sourceRepository": "https://github.com/bowenhb/bountylens",
+  "reviewCommit": "752c513d63b141b7acbf812ac71f33d5d99a98e1",
+  "apiBaseUrl": "https://bountylens-api.onrender.com",
+  "healthCheckUrl": "https://bountylens-api.onrender.com/health",
+  "deploymentProofUrl": "https://bountylens-api.onrender.com/.well-known/xagent-verification.json"
+}

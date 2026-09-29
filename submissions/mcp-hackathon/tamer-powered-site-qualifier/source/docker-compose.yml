@@ -1,0 +1,19 @@
+services:
+  powered-site-qualifier:
+    build: .
+    container_name: powered-site-qualifier
+    environment:
+      XAGENT_REVIEW_COMMIT: ${XAGENT_REVIEW_COMMIT:-local-development}
+    ports:
+      - "127.0.0.1:8787:8787"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 64
+    mem_limit: 1g
+    cpus: 1.0
+    restart: unless-stopped

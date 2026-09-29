@@ -1,0 +1,1169 @@
+{
+  "request": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "limit": 50
+  },
+  "eligible": [
+    {
+      "modelId": "claude-fable-5",
+      "name": "claude-fable-5 [J]",
+      "line": "jinwang",
+      "lineCode": "J",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-fable-5",
+      "name": "claude-fable-5 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-fable-5-1",
+      "name": "claude-fable-5-1 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-haiku-4-5-20251001",
+      "name": "Claude Haiku 4.5 [A]",
+      "line": "arklin",
+      "lineCode": "A",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-haiku-4-5-20251001",
+      "name": "claude-haiku-4-5-20251001 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-5-20251101",
+      "name": "claude-opus-4-5-20251101 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-6",
+      "name": "claude-opus-4-6 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-7",
+      "name": "claude-opus-4-7 [J]",
+      "line": "jinwang",
+      "lineCode": "J",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-7",
+      "name": "claude-opus-4-7 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-8",
+      "name": "Claude Opus 4.8 [A]",
+      "line": "arklin",
+      "lineCode": "A",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-8",
+      "name": "claude-opus-4-8 [J]",
+      "line": "jinwang",
+      "lineCode": "J",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-opus-4-8",
+      "name": "claude-opus-4-8 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-sonnet-4-5-20250929",
+      "name": "claude-sonnet-4-5-20250929 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-sonnet-4-6",
+      "name": "claude-sonnet-4-6 [J]",
+      "line": "jinwang",
+      "lineCode": "J",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-sonnet-4-6",
+      "name": "claude-sonnet-4-6 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-sonnet-5",
+      "name": "claude-sonnet-5 [J]",
+      "line": "jinwang",
+      "lineCode": "J",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "claude-sonnet-5",
+      "name": "claude-sonnet-5 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-flash",
+      "name": "DeepSeek V4.1 Flash-0910",
+      "line": "deepseek",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v3-0324",
+      "name": "deepseek-v3-0324 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 8192,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v3.2",
+      "name": "deepseek-v3.2 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 8192,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-flash",
+      "name": "deepseek-v4-flash-0731 [C]",
+      "line": "cm",
+      "lineCode": "C",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-flash",
+      "name": "DeepSeek V4 Flash-0731",
+      "line": "deepseek",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-flash",
+      "name": "deepseek-v4-flash-0731 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 8192,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-pro",
+      "name": "DeepSeek V4 Pro-0813",
+      "line": "deepseek",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-pro",
+      "name": "deepseek-v4-pro-0813 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 8192,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-2.5-flash",
+      "name": "gemini-2.5-flash [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-2.5-flash-lite",
+      "name": "gemini-2.5-flash-lite [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-2.5-pro",
+      "name": "Gemini 2.5 Pro [A]",
+      "line": "arklin",
+      "lineCode": "A",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-2.5-pro",
+      "name": "gemini-2.5-pro [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3-flash-preview",
+      "name": "gemini-3-flash-preview [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.1-flash-lite",
+      "name": "gemini-3.1-flash-lite [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.1-flash-lite-preview",
+      "name": "gemini-3.1-flash-lite-preview [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.1-pro-preview",
+      "name": "Gemini 3.1 Pro (Preview) [A]",
+      "line": "arklin",
+      "lineCode": "A",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.1-pro-preview",
+      "name": "gemini-3.1-pro-preview [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.1-pro-preview-customtools",
+      "name": "gemini-3.1-pro-preview-customtools [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.5-flash",
+      "name": "Gemini 3.5 Flash [A]",
+      "line": "arklin",
+      "lineCode": "A",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 64000,
+      "availability": "live"
+    },
+    {
+      "modelId": "gemini-3.5-flash",
+      "name": "gemini-3.5-flash [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-4.5",
+      "name": "GLM-4.5",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-4.5-air",
+      "name": "GLM-4.5 Air",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-4.5-flash",
+      "name": "GLM-4.5 Flash",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live",
+      "listedAtZero": true
+    },
+    {
+      "modelId": "glm-4.6",
+      "name": "GLM-4.6",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-4.7",
+      "name": "GLM-4.7",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-4.7-flash",
+      "name": "GLM-4.7 Flash",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 16000,
+      "availability": "live",
+      "listedAtZero": true
+    },
+    {
+      "modelId": "glm-5",
+      "name": "GLM-5",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-5-turbo",
+      "name": "GLM-5 Turbo",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-5.1",
+      "name": "GLM-5.1",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-5.1",
+      "name": "glm-5.1 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 32000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-5.1",
+      "name": "glm-5.1 [N]",
+      "line": "nube",
+      "lineCode": "N",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 32000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-5.2",
+      "name": "GLM-5.2",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 1000000,
+      "maxOutput": 16000,
+      "availability": "live"
+    },
+    {
+      "modelId": "glm-5.2",
+      "name": "glm-5.2 [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 32000,
+      "availability": "live"
+    }
+  ],
+  "rejected": [
+    {
+      "modelId": "qwen3.8-max",
+      "line": "mixai",
+      "lineCode": "M",
+      "reason": "This offer is marked preview, not live. Set includePreview to consider it.",
+      "bindingConstraint": "availability",
+      "requiredValue": "live",
+      "actualValue": "preview"
+    },
+    {
+      "modelId": "doubao-seedance-2-0-fast",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "doubao-seedance-2.0",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0-fast",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0-lite",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0-fast-lite",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "seedance-2-0-mini",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "seedance-2-0-fast",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "seedance-2-0",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "doubao-seedream-4-0",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    }
+  ],
+  "eligibleCount": 82,
+  "rejectedCount": 11,
+  "truncated": true,
+  "omittedCount": 32,
+  "snapshotId": "c4675be6df4d0a9bf65d8c70eb3e2a37f5509bf0d22b42b8ea17382316fab64b",
+  "pricedAt": "2026-09-16T18:47:47.077Z",
+  "staleSeconds": 0
+}

@@ -1,0 +1,363 @@
+openapi: 3.1.0
+info:
+  title: Agent Acceptance Gate
+  version: 0.2.0
+  description: |
+    Public, read-only decision-support API for checking whether an AI agent
+    delivery can continue to acceptance. The production Worker is deployed at
+    api.leolabs.me; normal paid service routes retain their existing x402
+    contract. The X-Agent reviewer route is enabled only when
+    XAGENT_REVIEW_ENABLED=true. The service never signs, settles, trades, or
+    mutates a repository or user account.
+servers:
+  - url: https://api.leolabs.me
+    description: Production Cloudflare Worker
+  - url: http://127.0.0.1:8787
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check with deployed source commit
+      responses:
+        "200":
+          description: Service is healthy and version-bound
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, commit]
+                properties:
+                  status:
+                    type: string
+                    const: ok
+                  commit:
+                    type: string
+                    pattern: '^[0-9a-f]{40}$'
+        "503":
+          description: Deployment identity is missing or invalid
+  /.well-known/xagent-verification.json:
+    get:
+      summary: X-Agent same-origin deployment proof
+      responses:
+        "200":
+          description: Submission slug and deployed source commit
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [schemaVersion, slug, commit]
+                properties:
+                  schemaVersion:
+                    type: integer
+                    const: 1
+                  slug:
+                    type: string
+                  commit:
+                    type: string
+                    pattern: '^[0-9a-f]{40}$'
+        "503":
+          description: Deployment identity is missing or invalid
+  /xagent/agent-delivery-acceptance-audit:
+    post:
+      summary: Reviewer-accessible agent delivery audit
+      description: |
+        Free review surface for the X-Agent submission. It is available only
+        while XAGENT_REVIEW_ENABLED=true and does not change the existing x402
+        contract of /agent-delivery-acceptance-audit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompactAuditRequest"
+      responses:
+        "200":
+          description: Structured audit result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditResponse"
+        "400":
+          description: Invalid audit input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Review route is disabled
+        "503":
+          description: Deployment identity is missing or invalid
+  /api/sample-audits:
+    get:
+      summary: Return bundled sample audits
+      responses:
+        "200":
+          description: Sample audit list
+  /api/okx-ai-services:
+    get:
+      summary: Return local OKX.AI ASP launch-pack service list
+      responses:
+        "200":
+          description: Local ASP service list
+  /.well-known/agent-service.json:
+    get:
+      summary: Machine-readable service discovery metadata
+      responses:
+        "200":
+          description: Agent service manifest
+  /mcp-tool-manifest.json:
+    get:
+      summary: MCP-style tool manifest
+      responses:
+        "200":
+          description: MCP-style tool metadata
+  /audit-agent-deliverable:
+    post:
+      summary: Audit an AI agent delivery
+      description: |
+        Use before accepting an AI agent delivery, releasing payment/escrow,
+        submitting a seller delivery, or preparing dispute review.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditRequest"
+      responses:
+        "200":
+          description: Audit result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditResponse"
+        "400":
+          description: Invalid request
+  /world-cup-smart-money-radar:
+    post:
+      summary: Return World Cup smart-money movement signals
+      description: |
+        OKX.AI ASP candidate endpoint. Returns a public-safe demo report for
+        World Cup prediction-market smart-money movements. Production launch
+        requires fresh data, wallet/payment setup, public endpoint deployment,
+        and ASP listing approval.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                market:
+                  type: string
+                  description: Optional market hint, market id, or "all".
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+      responses:
+        "200":
+          description: Smart-money signal report
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [schema_version, service_id, mode, summary, signals, caveats, next_gate]
+                properties:
+                  schema_version:
+                    type: string
+                  service_id:
+                    type: string
+                    const: world_cup_smart_money_radar
+                  mode:
+                    type: string
+                  summary:
+                    type: string
+                  signals:
+                    type: array
+                    items:
+                      type: object
+                  caveats:
+                    type: array
+                    items:
+                      type: string
+                  next_gate:
+                    type: string
+  /polymarket-smart-money-radar:
+    post:
+      summary: Return Polymarket smart-money movement signals
+      description: OKX.AI ASP candidate endpoint for all-market Polymarket smart-money tracking.
+      responses:
+        "200":
+          description: Smart-money signal report
+  /event-probability-crypto-divergence:
+    post:
+      summary: Return event probability vs crypto market divergence signals
+      description: OKX.AI ASP candidate endpoint for event probability and crypto price/funding divergence.
+      responses:
+        "200":
+          description: Divergence signal report
+  /crypto-market-pulse-report:
+    post:
+      summary: Return compact crypto market pulse report
+      description: OKX.AI ASP candidate endpoint for agent-readable crypto market pulse reports.
+      responses:
+        "200":
+          description: Market pulse report
+components:
+  schemas:
+    CompactAuditRequest:
+      type: object
+      required: [task, delivery_summary]
+      properties:
+        task:
+          oneOf:
+            - type: string
+            - type: object
+        delivery_summary:
+          type: string
+        artifacts:
+          type: array
+          items:
+            type: string
+        changed_files:
+          type: array
+          items:
+            type: string
+        validation:
+          type: array
+          items:
+            type: string
+        validation_output:
+          type: string
+        rollback_plan:
+          type: string
+        hard_gates:
+          type: array
+          items:
+            type: string
+        next_gate:
+          type: string
+        context:
+          type: object
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    AuditRequest:
+      type: object
+      required: [schema_version, mode, task, delivery, context]
+      properties:
+        schema_version:
+          type: string
+          const: "0.1"
+        mode:
+          type: string
+          enum: [quick, full, evaluator]
+        task:
+          type: object
+          required: [buyer_goal, surface]
+          properties:
+            task_id:
+              type: string
+            buyer_goal:
+              type: string
+            surface:
+              type: string
+              enum: [repo, website, research, data, ops, other]
+            allowed_actions:
+              type: array
+              items:
+                type: string
+            forbidden_actions:
+              type: array
+              items:
+                type: string
+            acceptance_criteria:
+              type: array
+              items:
+                type: string
+        delivery:
+          type: object
+          required: [writeback_text, next_gate]
+          properties:
+            writeback_text:
+              type: string
+            artifact_paths:
+              type: array
+              items:
+                type: string
+            changed_files:
+              type: array
+              items:
+                type: string
+            validation:
+              type: array
+              items:
+                type: string
+            validation_output:
+              type: string
+            rollback_plan:
+              type: string
+            hard_gates_declared:
+              type: array
+              items:
+                type: string
+            next_gate:
+              type: string
+        context:
+          type: object
+          properties:
+            repo_state:
+              type: string
+              enum: [clean, dirty, unknown, not_applicable]
+            public_publish_requested:
+              type: boolean
+            payments_or_wallets_in_scope:
+              type: boolean
+            credentials_in_scope:
+              type: boolean
+            notes:
+              type: string
+    AuditResponse:
+      type: object
+      required: [schema_version, verdict, score, dimension_scores, missing, risks, next_gate, buyer_summary, machine_flags]
+      properties:
+        schema_version:
+          type: string
+        verdict:
+          type: string
+          enum: [pass, needs_review, fail]
+        score:
+          type: number
+        dimension_scores:
+          type: object
+        missing:
+          type: array
+          items:
+            type: string
+        risks:
+          type: array
+          items:
+            type: string
+        positive_evidence:
+          type: array
+          items:
+            type: string
+        questions_for_seller:
+          type: array
+          items:
+            type: string
+        next_gate:
+          type: string
+        buyer_summary:
+          type: string
+        evaluator_notes:
+          type: string
+        machine_flags:
+          type: array
+          items:
+            type: string
