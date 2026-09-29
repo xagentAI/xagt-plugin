@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "finfold-growth-mission-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "api.finfold.app",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "APP_BASE_URL": "https://api.finfold.app",
+    "COMMIT_SHA": "0000000000000000000000000000000000000000",
+    "MODEL_PROVIDER": "workers-ai",
+    "LLM_API_BASE": "https://api.openai.com/v1",
+    "LLM_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "SUPPORT_EMAIL": "support@finfold.app"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "finfold-growth-mission",
+      "database_id": "1d5732db-bac8-4222-acaf-0714d42cb35a",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    "crons": ["17 3 * * *"]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

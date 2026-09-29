@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clink Interaction</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="interaction-page">
+  <main
+    class="interaction-shell"
+    data-interaction-id="{{INTERACTION_ID}}"
+  >
+    <p class="eyebrow">SECURE INTERACTION</p>
+    <h1>Review in Clink</h1>
+    <p class="lede">
+      The access token stays in this browser. It is sent once to your Node and
+      cannot be replayed.
+    </p>
+    <div id="interaction-state" class="interaction-state">
+      <span class="pulse"></span>
+      <p>Ready to unlock this request.</p>
+    </div>
+    <button id="unlock-interaction" class="primary-action">
+      Unlock request
+    </button>
+    <pre id="interaction-payload" hidden></pre>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

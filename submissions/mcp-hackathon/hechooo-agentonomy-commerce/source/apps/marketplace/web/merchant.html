@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Clink Merchant Console</title>
+  <link rel="stylesheet" href="/assets/console.css">
+  <script src="/assets/merchant.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/merchant" aria-label="Clink merchant home">
+      <span class="brand-mark">C</span>
+      <span><strong>CLINK</strong><small>MERCHANT OPERATIONS</small></span>
+    </a>
+    <div class="session-block">
+      <span id="wallet-state" class="session-state">Wallet disconnected</span>
+      <button id="connect-wallet" class="button primary" type="button">Connect + SIWE</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Supply verification pipeline</p>
+        <h1 id="page-title">Move a service from discovery to trusted delivery.</h1>
+      </div>
+      <p class="lede">Search Bazaar candidates, edit the canonical Manifest, sign the claim in your wallet, then prove domain and live x402 behavior. Keys never leave the wallet.</p>
+      <p id="auth-result" class="result-line intro-result" aria-live="polite">Connect an EVM wallet to begin.</p>
+    </section>
+
+    <div class="workspace">
+      <div class="pipeline" aria-label="Merchant publishing workflow">
+        <section class="panel step" data-step="1">
+          <div class="step-index">01</div>
+          <div class="step-body">
+            <div class="section-heading">
+              <div><p class="eyebrow">Discover</p><h2>Find a Bazaar candidate</h2></div>
+              <span class="status-chip neutral">Registry input</span>
+            </div>
+            <form id="candidate-form" class="filter-grid">
+              <label>Capability query<input id="candidate-query" name="query" placeholder="wallet risk"></label>
+              <label>Provider domain<input id="candidate-domain" name="domain" placeholder="merchant.example"></label>
+              <label>Payment recipient<input id="candidate-pay-to" name="pay_to" placeholder="0x..."></label>
+              <button class="button" type="submit">Search candidates</button>
+            </form>
+            <p id="candidate-result" class="result-line" aria-live="polite">Connect a wallet to search the internal candidate pool.</p>
+            <div id="candidate-list" class="record-list"></div>
+          </div>
+        </section>
+
+        <section class="panel step" data-step="2">
+          <div class="step-index">02</div>
+          <div class="step-body">
+            <div class="section-heading">
+              <div><p class="eyebrow">Declare</p><h2>Edit and submit Manifest JSON</h2></div>
+              <span class="status-chip neutral">Canonical JSON</span>
+            </div>
+            <label class="editor-label" for="manifest-editor">Manifest payload</label>
+            <textarea id="manifest-editor" class="code-editor" spellcheck="false" placeholder='{"provider": {"name": "...", "domain": "...", "source": "clink_manifest"}, "offerings": [...]}'></textarea>
+            <div class="action-row">
+              <button id="submit-manifest" class="button primary" type="button">Submit Manifest</button>
+              <button id="sign-claim" class="button" type="button">Sign ManifestClaim</button>
+            </div>
+            <p id="manifest-result" class="result-line" aria-live="polite">No Manifest submitted in this session.</p>
+            <p id="claim-result" class="result-line" aria-live="polite">EIP-712 claim not signed.</p>
+          </div>
+        </section>
+
+        <section class="panel step" data-step="3">
+          <div class="step-index">03</div>
+          <div class="step-body">
+            <div class="section-heading">
+              <div><p class="eyebrow">Prove</p><h2>Verify domain and live x402</h2></div>
+              <span class="status-chip attention">Merchant action</span>
+            </div>
+            <p class="supporting">Domain verification reads the configured proof from your public domain. Live verification calls the service and compares its HTTP 402 payment fields with the signed Manifest.</p>
+            <div class="action-row">
+              <button id="verify-domain" class="button primary" type="button">Verify domain</button>
+              <button id="refresh-portfolio" class="button" type="button">Refresh status</button>
+            </div>
+            <p id="domain-result" class="result-line" aria-live="polite">Submit and sign a Manifest before domain verification.</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side-stack">
+        <section class="panel sticky-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">Owned supply</p><h2>Provider status</h2></div>
+            <span id="provider-count" class="counter">0</span>
+          </div>
+          <p id="portfolio-result" class="result-line" aria-live="polite">Authenticate to load providers.</p>
+          <h3 class="subheading">Manifest records</h3>
+          <div id="manifest-list" class="record-list compact"></div>
+          <h3 class="subheading">Materialized providers</h3>
+          <div id="provider-list" class="record-list compact"></div>
+        </section>
+        <section class="panel log-panel">
+          <div class="section-heading"><div><p class="eyebrow">Session trace</p><h2>Operation log</h2></div></div>
+          <ol id="operation-log" class="operation-log" aria-live="polite"></ol>
+        </section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

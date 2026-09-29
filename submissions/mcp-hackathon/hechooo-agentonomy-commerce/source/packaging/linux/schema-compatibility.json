@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "release_metadata": {
+    "current": 1,
+    "supported": [1]
+  },
+  "channel_metadata": {
+    "current": 1,
+    "supported": [1]
+  },
+  "installer": {
+    "minimum_version": "0.1.0"
+  },
+  "platforms": ["linux-x86_64"]
+}

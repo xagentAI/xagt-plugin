@@ -1,0 +1,31 @@
+[node]
+profile = "personal"
+host = "127.0.0.1"
+port = 8170
+mcp_host = "127.0.0.1"
+mcp_port = 9170
+multi_tenant = false
+
+[storage]
+backend = "sqlite"
+sqlite_path = "~/.clink/data/clink.db"
+
+[events]
+backend = "memory"
+
+[secrets]
+backend = "keychain"
+service_name = "clink-node"
+
+[interaction]
+mode = "local"
+session_ttl_seconds = 900
+
+[modules.core]
+mode = "managed"
+
+[modules.marketplace]
+mode = "managed"
+
+[modules.prediction-markets]
+mode = "managed"

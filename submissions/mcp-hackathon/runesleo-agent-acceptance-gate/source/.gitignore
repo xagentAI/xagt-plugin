@@ -1,0 +1,18 @@
+node_modules/
+.DS_Store
+.env
+.env.*
+generated-audits/
+coverage/
+dist/
+*.log
+
+.secrets.env
+.dev.vars
+.wrangler/
+
+# demo intermediates
+research/demo-video-cn/audio/
+research/demo-video-cn/part-*.mp4
+research/demo-video-cn/slides/
+research/demo-video-cn/concat.txt

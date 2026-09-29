@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Clink Admin Console</title>
+  <link rel="stylesheet" href="/assets/console.css">
+  <script src="/assets/admin.js" defer></script>
+</head>
+<body class="admin-surface">
+  <header class="topbar">
+    <a class="brand" href="/admin" aria-label="Clink administration home">
+      <span class="brand-mark inverse">C</span>
+      <span><strong>CLINK</strong><small>TRUST OPERATIONS</small></span>
+    </a>
+    <div class="session-block">
+      <span id="wallet-state" class="session-state">Admin session required</span>
+      <button id="connect-wallet" class="button primary" type="button">Connect + SIWE</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro compact-intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">Control plane visibility</p><h1 id="page-title">Trust operations, without secret exposure.</h1></div>
+      <p class="lede">Read Registry, worker, Core, and pilot signals. Suspend risky providers, restore them to re-verification, or trigger a fenced Registry sync.</p>
+    </section>
+
+    <section class="status-ribbon" aria-label="Runtime status">
+      <article class="metric-card"><span>Overall</span><strong id="overall-status">Unknown</strong></article>
+      <article class="metric-card"><span>Worker</span><strong id="worker-status">Unknown</strong></article>
+      <article class="metric-card"><span>Core</span><strong id="core-status">Unknown</strong></article>
+      <article class="metric-card"><span>Registries</span><strong id="registry-status">0</strong></article>
+    </section>
+
+    <div class="admin-grid">
+      <section class="panel span-two">
+        <div class="section-heading">
+          <div><p class="eyebrow">Runtime detail</p><h2>Registry / worker / Core / metrics</h2></div>
+          <div class="action-row tight">
+            <button id="refresh-status" class="button" type="button">Refresh status</button>
+            <button id="sync-registry" class="button primary" type="button">Run Registry sync</button>
+          </div>
+        </div>
+        <p id="status-result" class="result-line" aria-live="polite">Authenticate with an allowlisted wallet.</p>
+        <div id="runtime-detail" class="runtime-grid"></div>
+      </section>
+
+      <section class="panel span-two">
+        <div class="section-heading">
+          <div><p class="eyebrow">Supply controls</p><h2>Providers</h2></div>
+          <span id="provider-count" class="counter">0</span>
+        </div>
+        <form id="provider-filter" class="filter-grid admin-filter">
+          <label>Search<input id="provider-query" name="query" placeholder="name, domain, provider id"></label>
+          <label>Status<select id="provider-status" name="status"><option value="">All statuses</option><option>active</option><option>domain_verified</option><option>wallet_verified</option><option>suspended</option><option>discovered</option></select></label>
+          <button class="button" type="submit">Apply filters</button>
+        </form>
+        <p id="provider-result" class="result-line" aria-live="polite">No provider data loaded.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Provider</th><th>Owner</th><th>State</th><th>Offerings</th><th>Action</th></tr></thead>
+            <tbody id="provider-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel span-two log-panel">
+        <div class="section-heading"><div><p class="eyebrow">Operator trace</p><h2>Operation log</h2></div></div>
+        <ol id="operation-log" class="operation-log horizontal" aria-live="polite"></ol>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

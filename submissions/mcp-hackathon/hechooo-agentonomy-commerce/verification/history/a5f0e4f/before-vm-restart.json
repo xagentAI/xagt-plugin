@@ -1,0 +1,19 @@
+{
+  "boot_id": "e488abc8-f19e-4835-8c79-6443554dbe14",
+  "budget": {
+    "after_used_amount_usdc": "0.30",
+    "before_used_amount_usdc": "0.30",
+    "merchant_deliveries": 1,
+    "remaining_amount_usdc": "0.70",
+    "settlement_submissions": 1
+  },
+  "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+  "mode": "reboot_replay",
+  "same_purchase": true,
+  "status": "ready",
+  "image_id": "sha256:1c3163661910425eaffbb1e938890ae2244012466d1245b8f7f9c3522d40ec5c",
+  "container_restart_verified": true,
+  "https_verified": true,
+  "actual_source_commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+  "verified_at": "2026-09-22T06:04:10.564085+00:00"
+}

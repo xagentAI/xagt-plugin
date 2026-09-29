@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "name": "get_historical_funding",
+  "strategy_id": "str_515920d047ca",
+  "content": {
+    "symbol": "BTC/USDT",
+    "as_of_date": "2026-09-17",
+    "last_funding_rate": 0.0019
+  }
+}

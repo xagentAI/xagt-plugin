@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="description"
+    content="Agentonomy gives AI agents bounded, revocable and auditable spending authority without taking custody of private keys."
+  >
+  <title>Agentonomy — The control layer for agentic commerce</title>
+  <link rel="icon" href="/static/agentonomy-mark.png" type="image/png">
+  <link rel="stylesheet" href="/static/landing.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Agentonomy home">
+      <img
+        class="brand-mark"
+        src="/static/agentonomy-mark.png"
+        width="40"
+        height="40"
+        alt=""
+        aria-hidden="true"
+      >
+      <span>Agentonomy</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a class="how-link" href="#control-flow">How it works</a>
+      <a class="marketplace-link" href="#marketplace-showcase">Marketplace</a>
+      <a class="console-link" href="/console">Open Console</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">THE CONTROL LAYER FOR AGENTIC COMMERCE</p>
+        <h1 id="hero-title">
+          <span>Let agents act.</span>
+          <span>Keep control of the money.</span>
+        </h1>
+        <p class="hero-lede">
+          Agentonomy gives AI agents bounded, revocable and auditable spending
+          authority—without giving them your private keys.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#marketplace-showcase">
+            Explore the Marketplace
+          </a>
+          <a class="text-action" href="#control-flow">See the control flow</a>
+        </div>
+        <p class="hero-proof">
+          ONE NODE <span>·</span> ONE MCP <span>·</span>
+          EVERY FUNDED ACTION THROUGH CORE
+        </p>
+      </div>
+
+      <div
+        class="authorization-field"
+        id="authorization-field"
+        aria-label="Agent request passing through Agentonomy controls"
+      >
+        <div class="field-heading">
+          <span>AUTHORIZATION FIELD</span>
+          <span class="field-state"><i></i> BOUNDED AUTHORITY</span>
+        </div>
+        <img
+          class="brand-seal"
+          src="/static/agentonomy-mark.png"
+          width="76"
+          height="76"
+          alt=""
+          aria-hidden="true"
+        >
+        <div class="field-stage">
+          <div class="field-origin">
+            <span class="field-kicker">REQUEST</span>
+            <strong>Agent intent</strong>
+            <small>Buy a service</small>
+          </div>
+          <div class="wallet-boundary">
+            <span class="wallet-orbit" aria-hidden="true"></span>
+            <span class="field-kicker">OUTSIDE CORE</span>
+            <strong>Wallet</strong>
+            <small>Keys and final signature stay here</small>
+          </div>
+          <div class="gate-track" aria-label="Core control gates">
+            <button
+              class="control-gate"
+              type="button"
+              data-step="1"
+              data-gate-detail="Confirms the wallet-backed identity and the Agent acting for it."
+            >
+              <span>01</span><strong>Identity</strong><small>Who may act?</small>
+            </button>
+            <button
+              class="control-gate"
+              type="button"
+              data-step="2"
+              data-gate-detail="Checks amount, time, network, asset and product against the signed Spending Mandate."
+            >
+              <span>02</span><strong>Mandate</strong><small>Is it in scope?</small>
+            </button>
+            <button
+              class="control-gate"
+              type="button"
+              data-step="3"
+              data-gate-detail="Applies Core policy and fresh risk facts before funds can move."
+            >
+              <span>03</span><strong>Policy / Risk</strong><small>Should it proceed?</small>
+            </button>
+            <button
+              class="control-gate"
+              type="button"
+              data-step="4"
+              data-gate-detail="Reserves the exact budget atomically so concurrent requests cannot overspend it."
+            >
+              <span>04</span><strong>Budget</strong><small>Can it be afforded?</small>
+            </button>
+            <button
+              class="control-gate"
+              type="button"
+              data-step="5"
+              data-gate-detail="Independently verifies payment and delivery instead of trusting an external success response."
+            >
+              <span>05</span><strong>Verify</strong><small>Did it really happen?</small>
+            </button>
+          </div>
+          <div class="field-destination">
+            <span class="field-kicker">AUTHORIZED</span>
+            <strong>Paid service</strong>
+            <small>Marketplace / Markets / Future</small>
+          </div>
+          <div class="audit-receipt">
+            <span class="receipt-stamp" aria-hidden="true">✓</span>
+            <div>
+              <span class="field-kicker">RETURN PATH</span>
+              <strong>Audit receipt</strong>
+              <small>Decision, payment and outcome remain traceable</small>
+            </div>
+          </div>
+        </div>
+        <p id="gate-detail" class="gate-detail" aria-live="polite">
+          Select a control gate to see what Agentonomy verifies.
+        </p>
+      </div>
+    </section>
+
+    <section class="tension-section" aria-labelledby="tension-title">
+      <p class="section-label">THE MISSING LAYER</p>
+      <h2 id="tension-title">Autonomy without custody.</h2>
+      <div class="tension-grid">
+        <p>Signing every step<br><strong>defeats autonomy.</strong></p>
+        <p>Unlimited wallet access<br><strong>defeats trust.</strong></p>
+        <p class="tension-answer">
+          Agentonomy defines a third path: the user sets the boundary once,
+          and the Agent acts only inside it.
+        </p>
+      </div>
+    </section>
+
+    <section class="control-flow" id="control-flow" aria-labelledby="flow-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">A CONTROL SYSTEM, NOT A BLANK CHECK</p>
+          <h2 id="flow-title">Authority is a system,<br>not a signature.</h2>
+        </div>
+        <p>
+          A wallet signature starts the relationship. Core keeps every later
+          decision inside the authority the user actually granted.
+        </p>
+      </div>
+      <ol class="flow-steps">
+        <li>
+          <span>01</span>
+          <h3>Prove ownership</h3>
+          <p>Choose the wallet and exact address, then sign a short ownership challenge.</p>
+        </li>
+        <li>
+          <span>02</span>
+          <h3>Define authority</h3>
+          <p>Set per-transaction, rolling-hour, daily, total, asset and expiry limits.</p>
+        </li>
+        <li>
+          <span>03</span>
+          <h3>Let the Agent act</h3>
+          <p>The Agent reaches Marketplace and market capabilities through one MCP.</p>
+        </li>
+        <li>
+          <span>04</span>
+          <h3>Verify and record</h3>
+          <p>Core rechecks authority, verifies the result and produces an audit trail.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="architecture-section" aria-labelledby="architecture-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">UNIFIED BY DESIGN</p>
+          <h2 id="architecture-title">One control plane.<br>Every paid action.</h2>
+        </div>
+        <p>
+          The Agent never assembles its own payment stack. It connects to one
+          Agentonomy Node; business modules cannot route around Core.
+        </p>
+      </div>
+      <div class="architecture-map" role="img" aria-label="Wallet and Agent connect through Agentonomy Node and Core to paid services">
+        <div class="architecture-clients">
+          <div><small>USER CONTROL</small><strong>Wallet</strong><span>Identity · Signature · Revoke</span></div>
+          <div><small>USER INTENT</small><strong>Agent</strong><span>One Agentonomy MCP</span></div>
+        </div>
+        <div class="architecture-node">
+          <small>UNIFIED ENTRY</small>
+          <strong>Agentonomy Node</strong>
+          <span>HTTP · MCP · State</span>
+        </div>
+        <div class="architecture-core">
+          <small>SOLE MONEY CONTROL PLANE</small>
+          <strong>Core</strong>
+          <span>Identity · Mandate · Policy · Risk · Funding · Audit</span>
+        </div>
+        <div class="architecture-domains">
+          <div><small>DISCOVER / BUY</small><strong>Marketplace</strong></div>
+          <div><small>COMPARE / TRADE</small><strong>Prediction Markets</strong></div>
+          <div><small>EXTENSIBLE</small><strong>Future Services</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety-section" aria-labelledby="safety-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">NON-NEGOTIABLES</p>
+          <h2 id="safety-title">Keys stay with you.<br>Control stays visible.</h2>
+        </div>
+        <p>Automation earns trust when its limits are explicit and its outcomes can be independently checked.</p>
+      </div>
+      <div class="safety-grid">
+        <article><span>KEYS</span><h3>Private keys never enter Agentonomy.</h3><p>No seed phrases or MPC shares are stored by Agentonomy.</p></article>
+        <article><span>CONTROL</span><h3>No module bypasses Core.</h3><p>Marketplace, markets and future funded actions share one authority.</p></article>
+        <article><span>REPLAY</span><h3>One request cannot become two charges.</h3><p>Reservations and settlement are designed around explicit idempotency.</p></article>
+        <article><span>TRUTH</span><h3>External success is not enough.</h3><p>Payment and business outcomes are independently verified.</p></article>
+      </div>
+    </section>
+
+    <section class="marketplace-showcase" id="marketplace-showcase" aria-labelledby="marketplace-title">
+      <div class="marketplace-heading">
+        <div>
+          <p class="section-label">LIVE CATALOG · READ-ONLY PREVIEW</p>
+          <h2 id="marketplace-title">Services your Agent<br>can actually discover.</h2>
+        </div>
+        <p id="marketplace-count">Loading current services…</p>
+      </div>
+      <div class="service-catalog" id="marketplace-services" aria-live="polite" aria-busy="true">
+        <div class="service-grid marketplace-skeleton-grid">
+          <article class="service-card service-skeleton" aria-hidden="true"></article>
+          <article class="service-card service-skeleton" aria-hidden="true"></article>
+          <article class="service-card service-skeleton" aria-hidden="true"></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="status-section" aria-labelledby="status-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">DELIVERY STATUS</p>
+          <h2 id="status-title">Built to prove<br>before it spends.</h2>
+        </div>
+        <p>
+          Real-money execution remains off by default. Mainnet canaries and
+          Server Profile production validation stay explicit release gates.
+        </p>
+      </div>
+      <div class="status-grid">
+        <article>
+          <span class="status-state built">BUILT / LOCAL-VALIDATED</span>
+          <h3>One Node, one MCP</h3>
+          <p>Wallet ownership, bounded mandates, Core controls and a read-only service catalog.</p>
+        </article>
+        <article>
+          <span class="status-state validating">VALIDATING</span>
+          <h3>Low-value real flows</h3>
+          <p>Wallet journeys, Marketplace purchase canaries, reconciliation and rollback.</p>
+        </article>
+        <article>
+          <span class="status-state next">NEXT</span>
+          <h3>Agent-native finance</h3>
+          <p>Wallet AI interface, mobile conversation gateway and team authority controls.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="closing-section" aria-labelledby="closing-title">
+      <p class="section-label">THE SERVICE LAYER IS ALREADY VISIBLE</p>
+      <h2 id="closing-title">See what your Agent<br>could use next.</h2>
+      <a class="primary-action" href="#marketplace-showcase">Explore the Marketplace</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark footer-wordmark" href="/">
+      <img
+        class="brand-mark"
+        src="/static/agentonomy-mark.png"
+        width="40"
+        height="40"
+        alt=""
+        aria-hidden="true"
+      >
+      <span>Agentonomy</span>
+    </a>
+    <p>Bounded authority for autonomous systems.</p>
+    <nav aria-label="Footer navigation">
+      <a href="#marketplace-showcase">Marketplace</a>
+      <a href="/console">Open Console</a>
+    </nav>
+  </footer>
+
+  <script src="/static/landing.js" defer></script>
+</body>
+</html>

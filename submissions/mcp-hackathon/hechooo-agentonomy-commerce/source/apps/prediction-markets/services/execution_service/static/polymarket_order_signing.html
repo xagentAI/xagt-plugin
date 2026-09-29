@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Agentonomy · Confirm order</title>
+  <link rel="stylesheet" href="/execution/polymarket/order-signing-assets/polymarket_order_signing.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">AGENTONOMY · POLYMARKET</p>
+      <h1>Review and sign this order</h1>
+      <p>Your wallet signs exactly the order shown below. Nothing is submitted until you confirm.</p>
+    </header>
+
+    <section class="order-card" aria-labelledby="order-title">
+      <div class="market-heading">
+        <span>Market</span>
+        <h2 id="order-title">Loading order…</h2>
+      </div>
+      <dl class="order-grid">
+        <div><dt>Outcome</dt><dd id="order-outcome">—</dd></div>
+        <div><dt>Side</dt><dd id="order-side">—</dd></div>
+        <div><dt>Amount</dt><dd id="order-amount">—</dd></div>
+        <div><dt>Limit price</dt><dd id="order-limit-price">—</dd></div>
+        <div><dt>Worst price</dt><dd id="order-worst-price">—</dd></div>
+        <div><dt>Max slippage</dt><dd id="order-slippage">—</dd></div>
+      </dl>
+      <div class="technical">
+        <div><span>Wallet</span><strong id="order-wallet">—</strong></div>
+        <div><span>Exchange</span><strong id="order-exchange">—</strong></div>
+        <div><span>Signature mode</span><strong id="order-signature-mode">—</strong></div>
+      </div>
+    </section>
+
+    <section class="wallet-card">
+      <div>
+        <p class="section-label">Wallet</p>
+        <p>Select the wallet that owns the bound Polymarket account.</p>
+      </div>
+      <div id="wallet-list" class="wallet-list"></div>
+    </section>
+
+    <section class="action-card">
+      <button id="sign-order" type="button" disabled>Confirm and sign once</button>
+      <p id="order-status" role="status" aria-live="polite">Loading the immutable order…</p>
+      <a id="return-link" href="/" hidden>Return to Agentonomy</a>
+    </section>
+  </main>
+  <script src="/execution/polymarket/order-signing-assets/polymarket_order_signing.bundle.js" defer></script>
+</body>
+</html>

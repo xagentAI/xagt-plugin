@@ -1,0 +1,22 @@
+{
+  "status": "pass",
+  "slug": "hechooo-agentonomy-commerce",
+  "checks": [
+    "submission structure and manifest are valid",
+    "733 source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)",
+    "verification evidence contains a health check and repeatable curl command"
+  ],
+  "manifest": {
+    "apiBaseUrl": "https://review.agentonomy.xyz",
+    "deploymentProofUrl": "https://review.agentonomy.xyz/.well-known/xagent-verification.json",
+    "healthCheckUrl": "https://review.agentonomy.xyz/health",
+    "name": "Agentonomy Commerce",
+    "reviewCommit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+    "schemaVersion": 1,
+    "slug": "hechooo-agentonomy-commerce",
+    "sourceRepository": "https://github.com/HEchooo/agentonomy-commerce"
+  },
+  "officialRepositoryCommit": "239140cc04dc82a121e9c31199bc8a12b510e130",
+  "reviewedOn": "2026-09-22",
+  "scopeNote": "Prepared package technical validation. Submitter rights and sample-identity disposition remain pending; rerun after final authorization edits before publication."
+}

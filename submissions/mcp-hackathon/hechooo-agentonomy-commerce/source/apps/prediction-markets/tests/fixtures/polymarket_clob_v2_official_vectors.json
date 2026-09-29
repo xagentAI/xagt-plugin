@@ -1,0 +1,106 @@
+{
+  "source_urls": [
+    "https://docs.polymarket.com/trading/place-orders",
+    "https://docs.polymarket.com/v2-migration",
+    "https://docs.polymarket.com/resources/contracts"
+  ],
+  "retrieved_at": "2026-08-20",
+  "sdk_versions": {
+    "python": "py-clob-client-v2==1.1.0",
+    "typescript": "@polymarket/clob-client-v2@1.1.0",
+    "viem": "2.55.19"
+  },
+  "vector": {
+    "inputs": {
+      "wallet_mode": "deposit_wallet",
+      "maker_wallet": "0x1111111111111111111111111111111111111111",
+      "account_signer": "0x1111111111111111111111111111111111111111",
+      "token_id": "102936",
+      "side": "BUY",
+      "price": "0.52",
+      "size": "10",
+      "tick_size": "0.01",
+      "min_order_size": "5",
+      "neg_risk": false,
+      "salt": "479249096354",
+      "timestamp_ms": "1787184000000",
+      "order_type": "GTC",
+      "expiration": "0"
+    },
+    "expected_projection": {
+      "typed_data": {
+        "domain": {
+          "name": "Polymarket CTF Exchange",
+          "version": "2",
+          "chainId": 137,
+          "verifyingContract": "0xE111180000d2663C0091e4f400237545B87B996B"
+        },
+        "types": {
+          "Order": [
+            {"name": "salt", "type": "uint256"},
+            {"name": "maker", "type": "address"},
+            {"name": "signer", "type": "address"},
+            {"name": "tokenId", "type": "uint256"},
+            {"name": "makerAmount", "type": "uint256"},
+            {"name": "takerAmount", "type": "uint256"},
+            {"name": "side", "type": "uint8"},
+            {"name": "signatureType", "type": "uint8"},
+            {"name": "timestamp", "type": "uint256"},
+            {"name": "metadata", "type": "bytes32"},
+            {"name": "builder", "type": "bytes32"}
+          ],
+          "TypedDataSign": [
+            {"name": "contents", "type": "Order"},
+            {"name": "name", "type": "string"},
+            {"name": "version", "type": "string"},
+            {"name": "chainId", "type": "uint256"},
+            {"name": "verifyingContract", "type": "address"},
+            {"name": "salt", "type": "bytes32"}
+          ]
+        },
+        "primaryType": "TypedDataSign",
+        "message": {
+          "contents": {
+            "salt": "479249096354",
+            "maker": "0x1111111111111111111111111111111111111111",
+            "signer": "0x1111111111111111111111111111111111111111",
+            "tokenId": "102936",
+            "makerAmount": "5200000",
+            "takerAmount": "10000000",
+            "side": 0,
+            "signatureType": 3,
+            "timestamp": "1787184000000",
+            "metadata": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "builder": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "name": "DepositWallet",
+          "version": "1",
+          "chainId": 137,
+          "verifyingContract": "0x1111111111111111111111111111111111111111",
+          "salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "order": {
+        "salt": 479249096354,
+        "maker": "0x1111111111111111111111111111111111111111",
+        "signer": "0x1111111111111111111111111111111111111111",
+        "tokenId": "102936",
+        "makerAmount": "5200000",
+        "takerAmount": "10000000",
+        "side": "BUY",
+        "signatureType": 3,
+        "timestamp": "1787184000000",
+        "metadata": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "builder": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "expiration": "0"
+      },
+      "orderType": "GTC",
+      "exchange": "0xE111180000d2663C0091e4f400237545B87B996B",
+      "collateral": "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB",
+      "tickSize": "0.01",
+      "minOrderSize": "5",
+      "negRisk": false
+    },
+    "projection_sha256": "28e2dc05225d96ecef8599f1e136eebd68faf146bc9a16da9a7e56fdcaeeab82"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "commit": "15c007b4a785a1263df989bb72c6e10e4b60ddf4",
+  "ok": true,
+  "service": "agent-acceptance-gate",
+  "mode": "edge_worker",
+  "launch_lane": "okx_ai_asp"
+}

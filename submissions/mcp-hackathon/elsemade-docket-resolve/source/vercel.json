@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "docket-resolve"
+      }
+    }
+  ],
+  "services": {
+    "docket-resolve": {
+      "root": ".",
+      "framework": "node",
+      "entrypoint": "src/server.js"
+    }
+  }
+}

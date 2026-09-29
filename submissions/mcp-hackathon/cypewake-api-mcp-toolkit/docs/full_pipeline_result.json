@@ -1,0 +1,104 @@
+{
+    "build": {
+        "title": "Swagger Petstore - OpenAPI 3.0",
+        "base_url": "https://petstore3.swagger.io/api/v3",
+        "operation_count": 19,
+        "auth_schemes": [
+            "petstore_auth",
+            "api_key"
+        ]
+    },
+    "verify": {
+        "verified": 10,
+        "passed": 1,
+        "reached_but_failed": 9,
+        "unreachable": 0,
+        "verdict": "\u90e8\u5206\u901a\u8fc7"
+    },
+    "mcpize": {
+        "tools": 19,
+        "output_dir": "/workspace/generated/petstore-mcp"
+    },
+    "register": {
+        "name": "petstore",
+        "operations": 19,
+        "overwrote_existing": true
+    },
+    "call": {
+        "attempted": true,
+        "operation_id": "loginUser",
+        "params": {
+            "username": "sample",
+            "password": "sample"
+        },
+        "status_code": 200,
+        "ok": true
+    },
+    "monetize": {
+        "tool_count": 19,
+        "pricing_tier": "basic",
+        "price_per_1k_calls": 2.0,
+        "currency": "USD"
+    },
+    "invoice_preview": {
+        "schema_version": "2.0",
+        "api": "petstore",
+        "pricing_tier": "basic",
+        "billing_model": "pay-per-call",
+        "currency": "USD",
+        "billing_basis": "\u6307\u5b9a\u8c03\u7528\u91cf\u6d4b\u7b97",
+        "metered_actual": {
+            "total_calls": 14,
+            "ok_calls": 4,
+            "failed_calls": 10,
+            "success_rate": 0.286,
+            "active_days": 1,
+            "calls_per_day": 14.0
+        },
+        "billable_calls": 100000,
+        "included_calls": 10000,
+        "billable_overage_calls": 90000,
+        "price_per_1k_calls": 2.0,
+        "amount_due": 180.0,
+        "line_items": [
+            {
+                "operation_id": "findPetsByStatus",
+                "actual_calls": 4,
+                "share_of_actual_calls": 0.286,
+                "projected_calls": 28571
+            },
+            {
+                "operation_id": "findPetsByTags",
+                "actual_calls": 2,
+                "share_of_actual_calls": 0.143,
+                "projected_calls": 14286
+            },
+            {
+                "operation_id": "getInventory",
+                "actual_calls": 2,
+                "share_of_actual_calls": 0.143,
+                "projected_calls": 14286
+            },
+            {
+                "operation_id": "getOrderById",
+                "actual_calls": 2,
+                "share_of_actual_calls": 0.143,
+                "projected_calls": 14286
+            },
+            {
+                "operation_id": "getPetById",
+                "actual_calls": 2,
+                "share_of_actual_calls": 0.143,
+                "projected_calls": 14286
+            },
+            {
+                "operation_id": "loginUser",
+                "actual_calls": 2,
+                "share_of_actual_calls": 0.143,
+                "projected_calls": 14286
+            }
+        ],
+        "generated_at": "2026-09-13T11:22:52.577720+00:00",
+        "note": "\u7528\u91cf\u6765\u81ea\u672c\u670d\u52a1\u771f\u5b9e\u8ba1\u91cf\uff08usage.json\uff09\uff0c\u975e\u51ed\u7a7a\u4f30\u503c\uff1b\u5916\u63a8\u53e3\u5f84\u5df2\u5728 billing_basis \u6807\u660e\u3002"
+    }
+}

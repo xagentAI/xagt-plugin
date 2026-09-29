@@ -1,0 +1,1493 @@
+import { EventEmitter } from 'node:events';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+process.env.DOMAIN = 'test.example';
+process.env.API_KEYS = 'admin-key-delg-test';
+process.env.IMAP_USER = 'agent@test.example';
+process.env.IMAP_PASS = 'imap-secret';
+process.env.SMTP_USER = 'agent@test.example';
+process.env.SMTP_PASS = 'smtp-secret';
+process.env.MCP_PUBLIC_URL = 'http://localhost';
+process.env.DATA_DIR = mkdtempSync(join(tmpdir(), 'oae-delg-test-'));
+
+const { beforeEach, describe, expect, mock, test } = await import('bun:test');
+
+let fakeMessages: any[] = [
+  {
+    uid: 101,
+    flags: new Set(),
+    envelope: {
+      date: new Date('2026-09-04T00:00:00Z'),
+      subject: 'Delegated message',
+      from: [{ address: 'sender@example.net', name: 'Sender' }],
+      to: [{ address: 'alice@test.example', name: 'Alice' }],
+    },
+    internalDate: new Date('2026-09-04T00:00:00Z'),
+    source: Buffer.from(
+      'From: sender@example.net\r\nTo: alice@test.example\r\nSubject: Delegated message\r\n\r\nDelegated body',
+    ),
+  },
+];
+
+class FakeImapFlow extends EventEmitter {
+  // 选中会话必须暴露当前代际，供后向列表在 search 前校验（#144 / REPAIR-FIXTURES-01）。
+  get mailbox() {
+    return { uidValidity: 17n };
+  }
+  async connect() {}
+  async getMailboxLock() {
+    return { release() {} };
+  }
+  async idle() {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  async search() {
+    return fakeMessages.map((m) => m.uid);
+  }
+  async *fetch() {
+    yield* fakeMessages;
+  }
+  async fetchOne(uid: number) {
+    const msg = fakeMessages.find((m) => m.uid === uid);
+    if (!msg) return false;
+    return {
+      ...msg,
+      source: msg.source ?? Buffer.from('From: sender@example.net\r\n\r\nbody'),
+    };
+  }
+  async messageFlagsAdd() {}
+  async messageFlagsRemove() {}
+  async logout() {}
+  close() {}
+}
+
+mock.module('imapflow', () => ({ ImapFlow: FakeImapFlow }));
+const sendMailMock = mock(async () => ({ messageId: '<test-send@test.example>' }));
+mock.module('../src/lib/smtp.ts', () => ({ sendMail: sendMailMock }));
+
+const { config } = await import('../src/lib/config.ts');
+const { createApp } = await import('../src/app.ts');
+const {
+  createIdentity,
+  deleteIdentity,
+  findIdentity,
+  rotateIdentityToken,
+} = await import('../src/lib/identities.ts');
+const {
+  DelegationRevokedError,
+  waitForMessage,
+} = await import('../src/lib/imap.ts');
+const {
+  createDelegation,
+  getDelegation,
+  getDroppedDelegation,
+  listDelegations,
+  hasActiveDelegation,
+  findActiveDelegation,
+  revokeDelegation,
+  revokeDelegationsForAddress,
+  revokeDelegationsOnGranteeTokenRotate,
+  invalidateDelegationStoreCache,
+  resetDelegationStoreForTests,
+  DELEGATION_STORE_SCHEMA_VERSION,
+} = await import('../src/lib/delegations.ts');
+const { readAuditEvents, resetAuditForTests } = await import('../src/lib/audit.ts');
+const { putAccessTokenForTests } = await import('../src/lib/oauth-store.ts');
+const { resolveResourceUri } = await import('../src/lib/oauth-url.ts');
+const {
+  acquireWaitSlot,
+  releaseWaitSlot,
+  resetWaitSlots,
+  resetDelegationDeniedAuditLimits,
+} = await import('../src/lib/ratelimit.ts');
+
+const adminKey = [...config.apiKeys][0]!;
+let app = createApp({ uiEnabled: true });
+
+function resetIdentitiesStore(): void {
+  writeFileSync(join(config.dataDir, 'identities.json'), '[]', { mode: 0o600 });
+}
+
+describe('Issue #125: Revocable mailbox delegation ACLs', () => {
+  beforeEach(() => {
+    resetIdentitiesStore();
+    resetDelegationStoreForTests();
+    resetAuditForTests();
+    resetWaitSlots();
+    resetDelegationDeniedAuditLimits();
+  });
+
+  describe('1. Store layer (delegations.json)', () => {
+    test('creates delegation grant with delg_* id, lowercase normalization and tombstone semantics', () => {
+      const grant = createDelegation({
+        mailbox: ' Alice@Test.Example ',
+        grantee: ' Bob@Test.Example ',
+        createdBy: 'admin',
+      });
+
+      expect(grant.id.startsWith('delg_')).toBe(true);
+      expect(grant.mailbox).toBe('alice@test.example');
+      expect(grant.grantee).toBe('bob@test.example');
+      expect(grant.scopes).toEqual(['read:messages']);
+      expect(grant.revokedAt).toBeNull();
+      expect(grant.revokedBy).toBeNull();
+
+      const stored = getDelegation(grant.id);
+      expect(stored).toBeDefined();
+      expect(stored?.id).toBe(grant.id);
+
+      const filePath = join(config.dataDir, 'delegations.json');
+      expect(existsSync(filePath)).toBe(true);
+      const raw = JSON.parse(readFileSync(filePath, 'utf8'));
+      expect(raw.schemaVersion).toBe(DELEGATION_STORE_SCHEMA_VERSION);
+      expect(raw.grants.length).toBe(1);
+    });
+
+    test('revokeDelegation is an idempotent tombstone', () => {
+      const grant = createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob@test.example',
+        createdBy: 'admin',
+      });
+
+      const firstRevoke = revokeDelegation(grant.id, 'admin', '2026-09-04T10:00:00.000Z');
+      expect(firstRevoke).toBeDefined();
+      expect(firstRevoke?.revokedAt).toBe('2026-09-04T10:00:00.000Z');
+      expect(firstRevoke?.revokedBy).toBe('admin');
+
+      // Idempotent: second revoke returns existing revokedAt/revokedBy without changing
+      const secondRevoke = revokeDelegation(grant.id, 'someone-else', '2026-09-04T11:00:00.000Z');
+      expect(secondRevoke?.revokedAt).toBe('2026-09-04T10:00:00.000Z');
+      expect(secondRevoke?.revokedBy).toBe('admin');
+    });
+
+    test('preserves unknown fields at root and grant levels (forward compatibility)', () => {
+      const filePath = join(config.dataDir, 'delegations.json');
+      const customStore = {
+        schemaVersion: 1,
+        futureFeatureFlag: true,
+        grants: [
+          {
+            id: 'delg_future123',
+            mailbox: 'alice@test.example',
+            grantee: 'bob@test.example',
+            scopes: ['read:messages'],
+            createdAt: '2026-09-04T00:00:00.000Z',
+            createdBy: 'admin',
+            revokedAt: null,
+            revokedBy: null,
+            futureMetadata: { note: 'keep me safe' },
+          },
+        ],
+      };
+      writeFileSync(filePath, JSON.stringify(customStore, null, 2), { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      // Read preserved
+      const grant = getDelegation('delg_future123');
+      expect(grant?.id).toBe('delg_future123');
+      expect((grant as any).futureMetadata).toEqual({ note: 'keep me safe' });
+
+      // Mutate by adding new grant and verify rewrite keeps future fields
+      createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'carol@test.example',
+        createdBy: 'admin',
+      });
+
+      const reloaded = JSON.parse(readFileSync(filePath, 'utf8'));
+      expect(reloaded.futureFeatureFlag).toBe(true);
+      const original = reloaded.grants.find((g: any) => g.id === 'delg_future123');
+      expect(original.futureMetadata).toEqual({ note: 'keep me safe' });
+    });
+
+    test('corrupted store fails closed and does not overwrite damaged file', () => {
+      const filePath = join(config.dataDir, 'delegations.json');
+      writeFileSync(filePath, 'NOT_VALID_JSON{', { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      expect(() => listDelegations()).toThrow('delegation_store_corrupt');
+
+      // Verify file was NOT overwritten
+      expect(readFileSync(filePath, 'utf8')).toBe('NOT_VALID_JSON{');
+    });
+  });
+
+  describe('2. REST API endpoints (/v1/delegations)', () => {
+    let aliceToken: string;
+    let bobToken: string;
+    let bobScopedToken: string;
+    let carolToken: string;
+
+    beforeEach(() => {
+      const alice = createIdentity({ localpart: 'alice' })!;
+      aliceToken = alice.token;
+      const bob = createIdentity({ localpart: 'bob' })!;
+      bobToken = bob.token;
+      const bobScoped = createIdentity({ localpart: 'bob-scoped', scopes: ['read:messages'] })!;
+      bobScopedToken = bobScoped.token;
+      const carol = createIdentity({ localpart: 'carol' })!;
+      carolToken = carol.token;
+    });
+
+    test('POST /v1/delegations authorizes admin and owner, forbids third-party and scoped tokens', async () => {
+      // 1. Owner can grant
+      const ownerRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${aliceToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'bob@test.example',
+        }),
+      });
+      expect(ownerRes.status).toBe(201);
+      const ownerBody = (await ownerRes.json()) as any;
+      expect(ownerBody.id.startsWith('delg_')).toBe(true);
+      expect(ownerBody.mailbox).toBe('alice@test.example');
+      expect(ownerBody.grantee).toBe('bob@test.example');
+      expect(ownerBody.scopes).toEqual(['read:messages']);
+      expect(typeof ownerBody.createdAt).toBe('string');
+      expect(Date.parse(ownerBody.createdAt)).not.toBeNaN();
+
+      // 2. Admin can grant for any mailbox
+      const adminRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${adminKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'carol@test.example',
+          scopes: ['read:messages'],
+        }),
+      });
+      expect(adminRes.status).toBe(201);
+
+      // 3. Non-owner (Carol) cannot grant for Alice
+      const deniedRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${carolToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'carol@test.example',
+        }),
+      });
+      expect(deniedRes.status).toBe(403);
+      expect(await deniedRes.json()).toEqual({
+        error: 'forbidden: token is scoped to another address',
+      });
+
+      // 4. Scoped token cannot create delegations (not in OPERATION_POLICIES)
+      const scopedRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${bobScopedToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mailbox: 'bob-scoped@test.example',
+          grantee: 'alice@test.example',
+        }),
+      });
+      expect(scopedRes.status).toBe(403);
+      expect(await scopedRes.json()).toEqual({ error: 'forbidden: insufficient_scope' });
+
+      // Audit assertions
+      const audits = readAuditEvents();
+      const grantAudit = audits.find((e) => e.event === 'delegation.grant' && e.grantee === 'bob@test.example');
+      expect(grantAudit).toBeDefined();
+      expect(grantAudit?.actor).toBe('alice@test.example');
+      expect(grantAudit?.outcome).toBe('ok');
+      expect(typeof grantAudit?.ts).toBe('string');
+      expect(Math.abs(Date.now() - new Date(grantAudit?.ts!).getTime())).toBeLessThan(10000);
+
+      const deniedAudit = audits.find((e) => e.event === 'delegation.grant.denied');
+      expect(deniedAudit).toBeDefined();
+      expect(deniedAudit?.actor).toBe('carol@test.example');
+      expect(deniedAudit?.outcome).toBe('denied');
+      expect(deniedAudit?.mailbox).toBe('alice@test.example');
+      expect(typeof deniedAudit?.ts).toBe('string');
+      expect(Math.abs(Date.now() - new Date(deniedAudit?.ts!).getTime())).toBeLessThan(10000);
+    });
+
+    test('Item A: POST /v1/delegations enforces server-generated ts and ignores client x-audit-ts and body ts', async () => {
+      const spoofedTs = '1999-01-01T00:00:00.000Z';
+      const res = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${aliceToken}`,
+          'Content-Type': 'application/json',
+          'x-audit-ts': spoofedTs,
+        },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'bob@test.example',
+          ts: spoofedTs,
+        }),
+      });
+      expect(res.status).toBe(201);
+      const data = (await res.json()) as any;
+      expect(data.createdAt).not.toBe(spoofedTs);
+      expect(Math.abs(Date.now() - new Date(data.createdAt).getTime())).toBeLessThan(10000);
+
+      const audits = readAuditEvents();
+      const audit = audits.find((e) => e.event === 'delegation.grant' && e.grantId === data.id);
+      expect(audit).toBeDefined();
+      expect(audit?.ts).not.toBe(spoofedTs);
+      expect(Math.abs(Date.now() - new Date(audit?.ts!).getTime())).toBeLessThan(10000);
+    });
+
+    test('Item C: POST /v1/delegations rejects explicit empty scopes [] with 400 and defaults omitted scopes', async () => {
+      // 1. Explicit empty scopes array -> 400 invalid_request
+      const emptyRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'bob@test.example',
+          scopes: [],
+        }),
+      });
+      expect(emptyRes.status).toBe(400);
+      const emptyJson = (await emptyRes.json()) as any;
+      expect(emptyJson.error).toBe('invalid_request');
+      expect(emptyJson.details).toBe('scopes cannot be empty');
+
+      // 2. Omitted scopes -> defaults to ['read:messages'] with 201
+      const defaultRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'bob@test.example',
+        }),
+      });
+      expect(defaultRes.status).toBe(201);
+      const defaultJson = (await defaultRes.json()) as any;
+      expect(defaultJson.scopes).toEqual(['read:messages']);
+    });
+
+    test('Item F: POST /v1/delegations is idempotent on active grant (returns 200) and creates new after revoke', async () => {
+      // 1. Initial creation -> 201 Created
+      const res1 = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'alice@test.example', grantee: 'bob@test.example' }),
+      });
+      expect(res1.status).toBe(201);
+      const grant1 = (await res1.json()) as any;
+      expect(grant1.id.startsWith('delg_')).toBe(true);
+
+      // Verify store has 1 grant and 1 audit event
+      expect(listDelegations({ mailbox: 'alice@test.example' }).length).toBe(1);
+      let grantAudits = readAuditEvents().filter((e) => e.event === 'delegation.grant');
+      expect(grantAudits.length).toBe(1);
+
+      // 2. Retry creation with same (mailbox, grantee) -> 200 OK with existing grant, no duplicate in store or audit
+      const res2 = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'alice@test.example', grantee: 'bob@test.example' }),
+      });
+      expect(res2.status).toBe(200);
+      const grant2 = (await res2.json()) as any;
+      expect(grant2.id).toBe(grant1.id);
+      expect(grant2.createdAt).toBe(grant1.createdAt);
+
+      // Verify store STILL has only 1 grant and only 1 audit event
+      expect(listDelegations({ mailbox: 'alice@test.example' }).length).toBe(1);
+      grantAudits = readAuditEvents().filter((e) => e.event === 'delegation.grant');
+      expect(grantAudits.length).toBe(1);
+
+      // 3. Revoke the active grant
+      const delRes = await app.request(`/v1/delegations/${grant1.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${aliceToken}` },
+      });
+      expect(delRes.status).toBe(200);
+
+      // 4. Create again after revoke -> creates new active grant with 201 Created
+      const res3 = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'alice@test.example', grantee: 'bob@test.example' }),
+      });
+      expect(res3.status).toBe(201);
+      const grant3 = (await res3.json()) as any;
+      expect(grant3.id).not.toBe(grant1.id);
+
+      // Verify store now has 2 total grants (1 tombstone + 1 active)
+      expect(listDelegations({ mailbox: 'alice@test.example' }).length).toBe(2);
+      grantAudits = readAuditEvents().filter((e) => e.event === 'delegation.grant');
+      expect(grantAudits.length).toBe(2);
+    });
+
+    test('Item E & H1: GET /v1/delegations grantee combined filtering, owner query, and Cache-Control: no-store', async () => {
+      // Alice grants to Bob
+      await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'alice@test.example', grantee: 'bob@test.example' }),
+      });
+      // Carol grants to Bob
+      await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${carolToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'carol@test.example', grantee: 'bob@test.example' }),
+      });
+      // Alice grants to Carol
+      await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${aliceToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'alice@test.example', grantee: 'carol@test.example' }),
+      });
+
+      // 1. Grantee (Bob) queries combined ?mailbox=alice@test.example&grantee=bob@test.example -> 200 with Alice's grant only
+      const combinedRes = await app.request(
+        '/v1/delegations?mailbox=alice@test.example&grantee=bob@test.example',
+        { headers: { Authorization: `Bearer ${bobToken}` } },
+      );
+      expect(combinedRes.status).toBe(200);
+      expect(combinedRes.headers.get('cache-control')).toBe('no-store');
+      const combinedJson = (await combinedRes.json()) as any;
+      expect(combinedJson.delegations.length).toBe(1);
+      expect(combinedJson.delegations[0].mailbox).toBe('alice@test.example');
+      expect(combinedJson.delegations[0].grantee).toBe('bob@test.example');
+
+      // 2. Grantee (Bob) queries all incoming ?grantee=bob@test.example -> 200 with 2 grants
+      const bobAllRes = await app.request('/v1/delegations?grantee=bob@test.example', {
+        headers: { Authorization: `Bearer ${bobToken}` },
+      });
+      expect(bobAllRes.status).toBe(200);
+      const bobAllJson = (await bobAllRes.json()) as any;
+      expect(bobAllJson.delegations.length).toBe(2);
+
+      // 3. Grantee (Bob) queries ?mailbox=alice@test.example WITHOUT grantee=self -> 403 (non-disclosure)
+      const bobOnlyMailboxRes = await app.request('/v1/delegations?mailbox=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobToken}` },
+      });
+      expect(bobOnlyMailboxRes.status).toBe(403);
+
+      // 4. Bob queries someone else's grantee filter ?grantee=carol@test.example -> 403
+      const bobOtherGranteeRes = await app.request('/v1/delegations?grantee=carol@test.example', {
+        headers: { Authorization: `Bearer ${bobToken}` },
+      });
+      expect(bobOtherGranteeRes.status).toBe(403);
+
+      // 5. Carol queries ?mailbox=alice@test.example&grantee=bob@test.example (neither is self) -> 403
+      const carolProbeRes = await app.request(
+        '/v1/delegations?mailbox=alice@test.example&grantee=bob@test.example',
+        { headers: { Authorization: `Bearer ${carolToken}` } },
+      );
+      expect(carolProbeRes.status).toBe(403);
+
+      // 6. Owner (Alice) queries ?mailbox=alice@test.example -> 200 (outgoing grants)
+      const aliceOutRes = await app.request('/v1/delegations?mailbox=alice@test.example', {
+        headers: { Authorization: `Bearer ${aliceToken}` },
+      });
+      expect(aliceOutRes.status).toBe(200);
+      const aliceOutJson = (await aliceOutRes.json()) as any;
+      expect(aliceOutJson.delegations.length).toBe(2);
+    });
+
+    test('Item D & H1: GET /v1/delegations/:id scope policy read:messages, grantee/owner authorization, Cache-Control: no-store', async () => {
+      const grant = createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob-scoped@test.example',
+        createdBy: 'alice@test.example',
+      });
+
+      // 1. Scoped grantee with read:messages can GET /v1/delegations/:id -> 200
+      const scopedGetRes = await app.request(`/v1/delegations/${grant.id}`, {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(scopedGetRes.status).toBe(200);
+      expect(scopedGetRes.headers.get('cache-control')).toBe('no-store');
+      const scopedGetJson = (await scopedGetRes.json()) as any;
+      expect(scopedGetJson.id).toBe(grant.id);
+      expect(scopedGetJson.mailbox).toBe('alice@test.example');
+
+      // 2. Owner can GET /v1/delegations/:id -> 200
+      const ownerGetRes = await app.request(`/v1/delegations/${grant.id}`, {
+        headers: { Authorization: `Bearer ${aliceToken}` },
+      });
+      expect(ownerGetRes.status).toBe(200);
+
+      // 3. Third-party (Carol) gets 403
+      const thirdPartyRes = await app.request(`/v1/delegations/${grant.id}`, {
+        headers: { Authorization: `Bearer ${carolToken}` },
+      });
+      expect(thirdPartyRes.status).toBe(403);
+      expect(await thirdPartyRes.json()).toEqual({
+        error: 'forbidden: token is scoped to another address',
+      });
+
+      // 4. Token without read:messages scope (e.g. empty scopes []) gets 403 insufficient_scope
+      const noScopeUser = createIdentity({ localpart: 'no-scope-user', scopes: [] })!;
+      createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'no-scope-user@test.example',
+        createdBy: 'alice@test.example',
+      });
+      const noScopeGrant = listDelegations({ grantee: 'no-scope-user@test.example' })[0]!;
+      const noScopeRes = await app.request(`/v1/delegations/${noScopeGrant.id}`, {
+        headers: { Authorization: `Bearer ${noScopeUser.token}` },
+      });
+      expect(noScopeRes.status).toBe(403);
+      expect(await noScopeRes.json()).toEqual({ error: 'forbidden: insufficient_scope' });
+    });
+
+    test('DELETE /v1/delegations/:id authorizes owner/admin, forbids third-party, idempotent tombstone with server ts', async () => {
+      const grant = createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob@test.example',
+        createdBy: 'alice@test.example',
+      });
+
+      // 1. Third party (Carol) tries to revoke -> 403
+      const deniedRevoke = await app.request(`/v1/delegations/${grant.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${carolToken}` },
+      });
+      expect(deniedRevoke.status).toBe(403);
+
+      // 2. Owner revokes -> 200 + audit
+      const okRevoke = await app.request(`/v1/delegations/${grant.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${aliceToken}` },
+      });
+      expect(okRevoke.status).toBe(200);
+      const okJson = (await okRevoke.json()) as any;
+      expect(okJson.revoked).toBe(true);
+      expect(typeof okJson.revokedAt).toBe('string');
+      expect(Date.parse(okJson.revokedAt)).not.toBeNaN();
+      const initialRevokedAt = okJson.revokedAt;
+
+      // 3. Repeat revoke is idempotent and returns 200 with original revokedAt
+      const repeatRevoke = await app.request(`/v1/delegations/${grant.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${aliceToken}` },
+      });
+      expect(repeatRevoke.status).toBe(200);
+      const repeatJson = (await repeatRevoke.json()) as any;
+      expect(repeatJson.revoked).toBe(true);
+      expect(repeatJson.revokedAt).toBe(initialRevokedAt);
+
+      // Check audit trail
+      const audits = readAuditEvents();
+      const deniedAudit = audits.find((e) => e.event === 'delegation.revoke' && e.outcome === 'denied');
+      expect(deniedAudit).toBeDefined();
+      expect(deniedAudit?.actor).toBe('carol@test.example');
+
+      const okAudits = audits.filter((e) => e.event === 'delegation.revoke' && e.outcome === 'ok');
+      expect(okAudits.length).toBeGreaterThanOrEqual(1);
+      expect(okAudits.some((e) => e.actor === 'alice@test.example')).toBe(true);
+    });
+
+    test('Item G: POST and DELETE /v1/delegations reject OAuth-attributed credentials with 403', async () => {
+      const resource = resolveResourceUri('http://localhost');
+      const oauthToken = 'oa_oauth_token_delg_test';
+      putAccessTokenForTests({
+        token: oauthToken,
+        grantId: 'grant-oauth-delg-1',
+        address: 'alice@test.example',
+        aud: resource,
+        expiresAt: Date.now() + 3600_000,
+        ensureGrant: { clientId: 'client-delg-1', clientName: 'Client Delg 1' },
+      });
+
+      // 1. OAuth token calling POST /v1/delegations -> 403 forbidden
+      const postRes = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${oauthToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mailbox: 'alice@test.example',
+          grantee: 'bob@test.example',
+        }),
+      });
+      expect(postRes.status).toBe(403);
+      expect(await postRes.json()).toEqual({
+        error: 'forbidden: delegation management requires direct identity credentials',
+      });
+
+      // Verify audit event delegation.grant.denied was logged
+      const audits = readAuditEvents();
+      const grantDeniedAudit = audits.find(
+        (e) => e.event === 'delegation.grant.denied' && e.grantee === 'bob@test.example',
+      );
+      expect(grantDeniedAudit).toBeDefined();
+      expect(grantDeniedAudit?.outcome).toBe('denied');
+
+      // 2. Direct identity token creates grant
+      const validGrant = createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob@test.example',
+        createdBy: 'alice@test.example',
+      });
+
+      // 3. OAuth token calling DELETE /v1/delegations/:id -> 403 forbidden
+      const deleteRes = await app.request(`/v1/delegations/${validGrant.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${oauthToken}` },
+      });
+      expect(deleteRes.status).toBe(403);
+      expect(await deleteRes.json()).toEqual({
+        error: 'forbidden: delegation management requires direct identity credentials',
+      });
+
+      // Verify grant was NOT revoked
+      const storedGrant = getDelegation(validGrant.id);
+      expect(storedGrant?.revokedAt).toBeNull();
+
+      // Verify audit event delegation.revoke denied was logged
+      const deleteDeniedAudit = readAuditEvents().find(
+        (e) => e.event === 'delegation.revoke' && e.outcome === 'denied' && e.grantId === validGrant.id,
+      );
+      expect(deleteDeniedAudit).toBeDefined();
+    });
+  });
+
+  describe('3. Mailbox read authorization & guard rails', () => {
+    let aliceToken: string;
+    let bobScopedToken: string;
+    let bobNoScopeToken: string;
+    let grantId: string;
+
+    beforeEach(() => {
+      const alice = createIdentity({ localpart: 'alice' })!;
+      aliceToken = alice.token;
+      const bob = createIdentity({ localpart: 'bob', scopes: ['read:messages'] })!;
+      bobScopedToken = bob.token;
+      const bobNoScope = createIdentity({ localpart: 'bob-noscope', scopes: [] })!;
+      bobNoScopeToken = bobNoScope.token;
+
+      const grant = createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob@test.example',
+        createdBy: 'alice@test.example',
+      });
+      grantId = grant.id;
+    });
+
+    test('scoped grantee can read delegated mailbox (list, get, wait)', async () => {
+      // GET /v1/messages?address=alice@test.example
+      const listRes = await app.request('/v1/messages?address=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(listRes.status).toBe(200);
+      const listJson = (await listRes.json()) as any;
+      expect(Array.isArray(listJson.messages)).toBe(true);
+
+      // GET /v1/messages/101?address=alice@test.example
+      const getRes = await app.request('/v1/messages/101?address=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(getRes.status).toBe(200);
+
+      // POST /v1/messages/wait
+      const waitRes = await app.request('/v1/messages/wait', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${bobScopedToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: 'alice@test.example', timeoutSec: 1 }),
+      });
+      expect(waitRes.status).toBe(200);
+    });
+
+    test('scoped grantee CANNOT read non-delegated third-party mailbox (exact 403 message preserved)', async () => {
+      const res = await app.request('/v1/messages?address=carol@test.example', {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({
+        error: 'forbidden: token is scoped to another address',
+      });
+    });
+
+    test('specification guard rail: delegate CANNOT mark seen or send', async () => {
+      // POST /v1/messages/:id/seen forbidden for delegate
+      const seenRes = await app.request('/v1/messages/101/seen', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${bobScopedToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: 'alice@test.example', seen: true }),
+      });
+      // Scoped token rejected by scope middleware (not in OPERATION_POLICIES)
+      expect(seenRes.status).toBe(403);
+
+      // Full unscoped token who is only a read-delegate also cannot mark seen
+      const fullBob = createIdentity({ localpart: 'full-bob' })!;
+      createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'full-bob@test.example',
+        createdBy: 'alice@test.example',
+      });
+      const fullSeenRes = await app.request('/v1/messages/101/seen', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${fullBob.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: 'alice@test.example', seen: true }),
+      });
+      expect(fullSeenRes.status).toBe(403);
+      expect(await fullSeenRes.json()).toEqual({
+        error: 'forbidden: token is scoped to another address',
+      });
+
+      // POST /v1/send forbidden
+      const sendRes = await app.request('/v1/send', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${fullBob.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'alice@test.example',
+          to: 'recipient@example.com',
+          subject: 'Test',
+          text: 'Hello',
+        }),
+      });
+      expect(sendRes.status).toBe(403);
+      expect(await sendRes.json()).toEqual({
+        error: 'forbidden: token is scoped to another address',
+      });
+    });
+
+    test('revocation is immediate and persists across app restarts', async () => {
+      // 1. Read works initially
+      const beforeRes = await app.request('/v1/messages?address=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(beforeRes.status).toBe(200);
+
+      // 2. Revoke grant
+      revokeDelegation(grantId, 'alice@test.example');
+
+      // 3. Immediately 403
+      const afterRes = await app.request('/v1/messages?address=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(afterRes.status).toBe(403);
+      expect(await afterRes.json()).toEqual({
+        error: 'forbidden: token is scoped to another address',
+      });
+
+      // 4. Reconstruct app instance (simulating server restart)
+      invalidateDelegationStoreCache();
+      const restartedApp = createApp({ uiEnabled: false });
+      const restartRes = await restartedApp.request('/v1/messages?address=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobScopedToken}` },
+      });
+      expect(restartRes.status).toBe(403);
+    });
+
+    test('double constraint: credential without read:messages scope rejected even if grant exists', async () => {
+      createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob-noscope@test.example',
+        createdBy: 'alice@test.example',
+      });
+
+      const res = await app.request('/v1/messages?address=alice@test.example', {
+        headers: { Authorization: `Bearer ${bobNoScopeToken}` },
+      });
+      // scopePolicyMiddleware denies 403 insufficient_scope before reaching handler
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: 'forbidden: insufficient_scope' });
+    });
+  });
+
+  describe('4. Cascade revocation & token lifecycle', () => {
+    test('grantee token rotation cascades revocation of received delegations; owner rotation does NOT', () => {
+      const alice = createIdentity({ localpart: 'alice-rot' })!;
+      const bob = createIdentity({ localpart: 'bob-rot', scopes: ['read:messages'] })!;
+
+      const grant = createDelegation({
+        mailbox: 'alice-rot@test.example',
+        grantee: 'bob-rot@test.example',
+        createdBy: 'alice-rot@test.example',
+      });
+
+      // 1. Owner rotates token -> grant stays active!
+      rotateIdentityToken('alice-rot@test.example');
+      const grantAfterOwnerRotate = getDelegation(grant.id);
+      expect(grantAfterOwnerRotate?.revokedAt).toBeNull();
+
+      // 2. Grantee rotates token -> grant is cascaded!
+      rotateIdentityToken('bob-rot@test.example');
+      const grantAfterGranteeRotate = getDelegation(grant.id);
+      expect(grantAfterGranteeRotate?.revokedAt).not.toBeNull();
+      expect(grantAfterGranteeRotate?.revokedBy).toBe('cascade');
+
+      // Verify audit event emitted
+      const audits = readAuditEvents();
+      const cascadeAudit = audits.find(
+        (e) => e.event === 'delegation.revoke.cascade' && e.grantId === grant.id,
+      );
+      expect(cascadeAudit).toBeDefined();
+      expect(cascadeAudit?.outcome).toBe('ok');
+    });
+
+    test('identity deletion cascades revocation bidirectionally (owner granted + grantee received)', () => {
+      const alice = createIdentity({ localpart: 'alice-del' })!;
+      const bob = createIdentity({ localpart: 'bob-del' })!;
+      const carol = createIdentity({ localpart: 'carol-del' })!;
+
+      // Alice grants to Bob
+      const g1 = createDelegation({
+        mailbox: 'alice-del@test.example',
+        grantee: 'bob-del@test.example',
+        createdBy: 'alice-del@test.example',
+      });
+      // Carol grants to Alice
+      const g2 = createDelegation({
+        mailbox: 'carol-del@test.example',
+        grantee: 'alice-del@test.example',
+        createdBy: 'carol-del@test.example',
+      });
+
+      // Delete Alice -> both g1 (Alice is owner) and g2 (Alice is grantee) cascaded!
+      deleteIdentity('alice-del@test.example');
+
+      const reloadedG1 = getDelegation(g1.id);
+      const reloadedG2 = getDelegation(g2.id);
+      expect(reloadedG1?.revokedAt).not.toBeNull();
+      expect(reloadedG2?.revokedAt).not.toBeNull();
+
+      const audits = readAuditEvents();
+      const cascades = audits.filter((e) => e.event === 'delegation.revoke.cascade');
+      expect(cascades.some((c) => c.grantId === g1.id)).toBe(true);
+      expect(cascades.some((c) => c.grantId === g2.id)).toBe(true);
+    });
+
+    test('Item B1: deleteIdentity fail-closed: corrupted delegations.json throws error and leaves identity intact', () => {
+      const alice = createIdentity({ localpart: 'alice-fail' })!;
+      createDelegation({
+        mailbox: 'alice-fail@test.example',
+        grantee: 'bob@test.example',
+        createdBy: 'alice-fail@test.example',
+      });
+
+      // Inject failure: corrupt delegations.json
+      const filePath = join(config.dataDir, 'delegations.json');
+      writeFileSync(filePath, 'CORRUPTED_JSON{', { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      // deleteIdentity must throw error and fail closed
+      expect(() => deleteIdentity('alice-fail@test.example')).toThrow('delegation_store_corrupt');
+
+      // Verify Alice is STILL present in identities.json
+      const identitiesRaw = JSON.parse(readFileSync(join(config.dataDir, 'identities.json'), 'utf8'));
+      const found = identitiesRaw.find((i: any) => i.address === 'alice-fail@test.example');
+      expect(found).toBeDefined();
+      expect(found.address).toBe('alice-fail@test.example');
+    });
+
+    test('Item B1: rotateIdentityToken fail-closed: corrupted delegations.json throws error and leaves tokenHash unchanged', () => {
+      const bob = createIdentity({ localpart: 'bob-fail' })!;
+      createDelegation({
+        mailbox: 'alice@test.example',
+        grantee: 'bob-fail@test.example',
+        createdBy: 'alice@test.example',
+      });
+
+      // Record original tokenHash from identities.json
+      const identitiesBefore = JSON.parse(readFileSync(join(config.dataDir, 'identities.json'), 'utf8'));
+      const bobBefore = identitiesBefore.find((i: any) => i.address === 'bob-fail@test.example');
+      const originalTokenHash = bobBefore.tokenHash;
+
+      // Inject failure: corrupt delegations.json
+      const filePath = join(config.dataDir, 'delegations.json');
+      writeFileSync(filePath, 'CORRUPTED_JSON{', { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      // rotateIdentityToken must throw error and fail closed
+      expect(() => rotateIdentityToken('bob-fail@test.example')).toThrow('delegation_store_corrupt');
+
+      // Verify Bob's tokenHash is UNCHANGED in identities.json
+      const identitiesAfter = JSON.parse(readFileSync(join(config.dataDir, 'identities.json'), 'utf8'));
+      const bobAfter = identitiesAfter.find((i: any) => i.address === 'bob-fail@test.example');
+      expect(bobAfter.tokenHash).toBe(originalTokenHash);
+    });
+  });
+
+  describe('5. Edge cases, normalization & UI session isolation', () => {
+    test('case normalization works across API and store', async () => {
+      const alice = createIdentity({ localpart: 'alice-case' })!;
+      const bob = createIdentity({ localpart: 'bob-case', scopes: ['read:messages'] })!;
+
+      // Grant created with upper/mixed case
+      const res = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${alice.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mailbox: 'Alice-Case@Test.Example',
+          grantee: 'Bob-Case@Test.Example',
+        }),
+      });
+      expect(res.status).toBe(201);
+      const data = (await res.json()) as any;
+      expect(data.mailbox).toBe('alice-case@test.example');
+      expect(data.grantee).toBe('bob-case@test.example');
+
+      // Accessing with mixed case in query
+      const readRes = await app.request('/v1/messages?address=ALICE-CASE@TEST.EXAMPLE', {
+        headers: { Authorization: `Bearer ${bob.token}` },
+      });
+      expect(readRes.status).toBe(200);
+    });
+
+    test('UI session rejects scoped credential even if delegation grant exists', async () => {
+      const alice = createIdentity({ localpart: 'alice-ui' })!;
+      const bob = createIdentity({ localpart: 'bob-ui', scopes: ['read:messages'] })!;
+
+      createDelegation({
+        mailbox: 'alice-ui@test.example',
+        grantee: 'bob-ui@test.example',
+        createdBy: 'alice-ui@test.example',
+      });
+
+      // Try logging into UI with scoped token
+      const sessionRes = await app.request('/ui/api/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'http://localhost',
+        },
+        body: JSON.stringify({ token: bob.token }),
+      });
+      expect(sessionRes.status).toBe(401);
+    });
+  });
+
+  describe('6. Issue #136: Delegation ACL hardening follow-ups', () => {
+    test('Item 1: wait periodically re-verifies active delegation in loop and aborts with 403 on mid-wait revocation', async () => {
+      const origMessages = fakeMessages;
+      fakeMessages = []; // no immediate match so wait must loop
+      try {
+        const alice = createIdentity({ localpart: 'alice-wait-toctou' })!;
+        const bob = createIdentity({ localpart: 'bob-wait-toctou', scopes: ['read:messages'] })!;
+        const aliceAddr = alice.identity.address;
+        const bobAddr = bob.identity.address;
+
+        const grant = createDelegation({
+          mailbox: aliceAddr,
+          grantee: bobAddr,
+          createdBy: aliceAddr,
+        });
+
+        // Revoke the delegation 40ms into wait
+        setTimeout(() => {
+          revokeDelegation(grant.id, aliceAddr);
+        }, 40);
+
+        const waitRes = await app.request('/v1/messages/wait', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${bob.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: aliceAddr, timeoutSec: 2 }),
+        });
+
+        expect(waitRes.status).toBe(403);
+        expect(await waitRes.json()).toEqual({
+          error: 'forbidden: token is scoped to another address',
+        });
+      } finally {
+        fakeMessages = origMessages;
+      }
+    });
+
+    test('Item 1: wait re-verifies revocation when message is found in idle and polling paths', async () => {
+      const alice = createIdentity({ localpart: 'alice-wait-found' })!;
+      const bob = createIdentity({ localpart: 'bob-wait-found', scopes: ['read:messages'] })!;
+      const aliceAddr = alice.identity.address;
+      const bobAddr = bob.identity.address;
+
+      const grant = createDelegation({
+        mailbox: aliceAddr,
+        grantee: bobAddr,
+        createdBy: aliceAddr,
+      });
+
+      const origMessages = fakeMessages;
+      fakeMessages = [
+        {
+          uid: 501,
+          flags: new Set(),
+          envelope: {
+            date: new Date(),
+            subject: 'Found message test',
+            from: [{ address: 'sender@example.net', name: 'Sender' }],
+            to: [{ address: aliceAddr, name: 'Alice' }],
+          },
+          internalDate: new Date(),
+          source: Buffer.from(`From: sender@example.net\r\nTo: ${aliceAddr}\r\nSubject: Found\r\n\r\nBody`),
+        },
+      ];
+
+      try {
+        // Revoke before waitForMessage executes
+        revokeDelegation(grant.id, aliceAddr);
+
+        let invoked = false;
+        const shouldContinue = () => {
+          invoked = true;
+          return hasActiveDelegation(aliceAddr, bobAddr, 'read:messages');
+        };
+
+        await expect(
+          waitForMessage(aliceAddr, {}, 2, shouldContinue),
+        ).rejects.toThrow(DelegationRevokedError);
+        expect(invoked).toBe(true);
+
+        // Also test via API endpoint: when revoked, endpoint returns 403 instead of 200 with message
+        const waitRes = await app.request('/v1/messages/wait', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${bob.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: aliceAddr, timeoutSec: 1 }),
+        });
+        expect(waitRes.status).toBe(403);
+        expect(await waitRes.json()).toEqual({
+          error: 'forbidden: token is scoped to another address',
+        });
+      } finally {
+        fakeMessages = origMessages;
+      }
+    });
+
+    test('Item 1b (R3): revocation landing in the final sleep surfaces as DelegationRevokedError, not a masked timeout', async () => {
+      const alice = createIdentity({ localpart: 'alice-wait-tail' })!;
+      const bob = createIdentity({ localpart: 'bob-wait-tail', scopes: ['read:messages'] })!;
+      const aliceAddr = alice.identity.address;
+      const bobAddr = bob.identity.address;
+      createDelegation({ mailbox: aliceAddr, grantee: bobAddr, createdBy: aliceAddr });
+
+      // Force the polling fallback (IDLE wait dies on mailbox lock) and make
+      // every poll fail fast, so iteration 1 is the ONLY one before its
+      // sleep spans straight to the deadline. shouldContinue therefore sees
+      // exactly one top-of-loop check (call #1, delegation live) and then
+      // only the pre-timeout re-verify (call #2, delegation "revoked") —
+      // without the R3 tail re-check this wait would resolve null (408)
+      // and mask the revocation.
+      const origLock = FakeImapFlow.prototype.getMailboxLock;
+      FakeImapFlow.prototype.getMailboxLock = async () => {
+        throw new Error('lock boom');
+      };
+      let calls = 0;
+      const shouldContinue = () => ++calls < 2;
+      try {
+        await expect(
+          waitForMessage(aliceAddr, {}, 0.2, shouldContinue),
+        ).rejects.toThrow(DelegationRevokedError);
+        expect(calls).toBe(2);
+      } finally {
+        FakeImapFlow.prototype.getMailboxLock = origLock;
+      }
+    });
+
+    test('Item 2: wait slot key caller+address prevents delegate from starving owner slots', async () => {
+      const alice = createIdentity({ localpart: 'alice-wait-slot' })!;
+      const bob = createIdentity({ localpart: 'bob-wait-slot', scopes: ['read:messages'] })!;
+      const aliceAddr = alice.identity.address;
+      const bobAddr = bob.identity.address;
+
+      createDelegation({
+        mailbox: aliceAddr,
+        grantee: bobAddr,
+        createdBy: aliceAddr,
+      });
+
+      // Bob occupies 3 slots for Alice's mailbox
+      expect(acquireWaitSlot(bobAddr, aliceAddr)).toBe(true);
+      expect(acquireWaitSlot(bobAddr, aliceAddr)).toBe(true);
+      expect(acquireWaitSlot(bobAddr, aliceAddr)).toBe(true);
+      expect(acquireWaitSlot(bobAddr, aliceAddr)).toBe(false);
+
+      // Alice (mailbox owner) can still acquire wait slots on her own mailbox
+      expect(acquireWaitSlot(aliceAddr, aliceAddr)).toBe(true);
+
+      // Clean up
+      releaseWaitSlot(aliceAddr, aliceAddr);
+      releaseWaitSlot(bobAddr, aliceAddr);
+      releaseWaitSlot(bobAddr, aliceAddr);
+      releaseWaitSlot(bobAddr, aliceAddr);
+    });
+
+    test('Item 3: POST /v1/delegations rejects external domains (400) and unregistered localparts (404)', async () => {
+      const alice = createIdentity({ localpart: 'alice-item3' })!;
+      const bob = createIdentity({ localpart: 'bob-item3' })!;
+      const aliceAddr = alice.identity.address;
+      const bobAddr = bob.identity.address;
+
+      // 1. External mailbox domain -> 400 invalid_domain
+      const extMailbox = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'alice@external.com', grantee: bobAddr }),
+      });
+      expect(extMailbox.status).toBe(400);
+      expect((await extMailbox.json() as any).error).toBe('invalid_domain');
+
+      // 2. Unregistered mailbox on hosted domain -> 404 not_found
+      const unregMailbox = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: 'ghost-owner@test.example', grantee: bobAddr }),
+      });
+      expect(unregMailbox.status).toBe(404);
+      expect((await unregMailbox.json() as any).error).toBe('not_found');
+
+      // 3. External grantee domain -> 400 invalid_domain
+      const extGrantee = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${alice.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: aliceAddr, grantee: 'bob@external.com' }),
+      });
+      expect(extGrantee.status).toBe(400);
+      expect((await extGrantee.json() as any).error).toBe('invalid_domain');
+
+      // 4. Unregistered grantee on hosted domain (fail-fast, no sleeping grants) -> 404 not_found
+      const unregGrantee = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${alice.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: aliceAddr, grantee: 'ghost-grantee@test.example' }),
+      });
+      expect(unregGrantee.status).toBe(404);
+      expect((await unregGrantee.json() as any).error).toBe('not_found');
+    });
+
+    test('Item 4: load() narrows scopes to SUPPORTED_SCOPES and refuses to load grant if empty', () => {
+      const storeFile = join(config.dataDir, 'delegations.json');
+      const mockStore = {
+        schemaVersion: 1,
+        grants: [
+          {
+            id: 'delg_supported_and_dirty',
+            mailbox: 'alice@test.example',
+            grantee: 'bob@test.example',
+            scopes: ['read:messages', 'admin:dirty', 'bogus:action'],
+            createdAt: '2026-09-06T00:00:00Z',
+            createdBy: 'admin',
+            revokedAt: null,
+            revokedBy: null,
+          },
+          {
+            id: 'delg_dirty_only',
+            mailbox: 'alice@test.example',
+            grantee: 'carol@test.example',
+            scopes: ['dirty:only', 'unsupported:action'],
+            createdAt: '2026-09-06T00:00:00Z',
+            createdBy: 'admin',
+            revokedAt: null,
+            revokedBy: null,
+          },
+        ],
+      };
+      writeFileSync(storeFile, JSON.stringify(mockStore, null, 2), { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      const warnings: string[] = [];
+      const originalWarn = console.warn;
+      console.warn = (...args: unknown[]) => { warnings.push(args.map(String).join(' ')); };
+      let loaded: ReturnType<typeof listDelegations>;
+      try {
+        loaded = listDelegations();
+      } finally {
+        console.warn = originalWarn;
+      }
+      // delg_dirty_only is refused/omitted because its filtered scopes is empty
+      expect(loaded.length).toBe(1);
+      expect(loaded[0]!.id).toBe('delg_supported_and_dirty');
+      expect(loaded[0]!.scopes).toEqual(['read:messages']);
+
+      // #136 R2 顺清 2：收窄/剔除不能静默——必须各留一条可观测警告
+      expect(
+        warnings.some((w) => w.includes('delg_dirty_only') && w.includes('dropped at load')),
+      ).toBe(true);
+      expect(
+        warnings.some((w) => w.includes('delg_supported_and_dirty') && w.includes('scopes narrowed at load')),
+      ).toBe(true);
+    });
+
+    test('Item 4b (R2 顺清 3): load-dropped grant stays revocable via DELETE with idempotent disk tombstone', async () => {
+      const owner = createIdentity({ localpart: 'dropped-owner' })!;
+      const storeFile = join(config.dataDir, 'delegations.json');
+      writeFileSync(storeFile, JSON.stringify({
+        schemaVersion: DELEGATION_STORE_SCHEMA_VERSION,
+        grants: [
+          {
+            id: 'delg_dropped_revoke',
+            mailbox: owner.identity.address,
+            grantee: 'bob@test.example',
+            scopes: ['totally:unsupported'],
+            createdAt: '2026-09-06T00:00:00Z',
+            createdBy: 'admin',
+            revokedAt: null,
+            revokedBy: null,
+          },
+        ],
+      }, null, 2), { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      // coerce 后的世界看不到它，但原始视图可查——否则磁盘残留永远删不掉
+      expect(getDelegation('delg_dropped_revoke')).toBeUndefined();
+      expect(getDroppedDelegation('delg_dropped_revoke')?.mailbox).toBe(owner.identity.address);
+
+      // owner 撤销 → 200，就地落墓碑
+      const res = await app.request('/v1/delegations/delg_dropped_revoke', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${owner.token}` },
+      });
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as any;
+      expect(body.revoked).toBe(true);
+      expect(typeof body.revokedAt).toBe('string');
+      expect(Date.parse(body.revokedAt)).not.toBeNaN();
+
+      // 磁盘原始记录（含不合规 scopes）被保留并落了墓碑，而不是被改写
+      const onDisk = JSON.parse(readFileSync(storeFile, 'utf8')) as any;
+      const entry = onDisk.grants.find((g: any) => g.id === 'delg_dropped_revoke');
+      expect(entry).toBeDefined();
+      expect(entry.revokedAt).toBe(body.revokedAt);
+      expect(entry.revokedBy).toBe(owner.identity.address);
+      expect(entry.scopes).toEqual(['totally:unsupported']);
+
+      // 重复撤销幂等：200 + 原 revokedAt（墓碑语义）
+      const res2 = await app.request('/v1/delegations/delg_dropped_revoke', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${owner.token}` },
+      });
+      expect(res2.status).toBe(200);
+      expect(((await res2.json()) as any).revokedAt).toBe(body.revokedAt);
+    });
+
+    test('Item 4c (R4): save() writes droppedGrants back — ordinary mutations never wipe disk residue', async () => {
+      const storeFile = join(config.dataDir, 'delegations.json');
+      writeFileSync(storeFile, JSON.stringify({
+        schemaVersion: DELEGATION_STORE_SCHEMA_VERSION,
+        grants: [
+          {
+            id: 'delg_dropped_keep',
+            mailbox: 'alice@test.example',
+            grantee: 'bob@test.example',
+            scopes: ['nope:unsupported'],
+            createdAt: '2026-09-06T00:00:00Z',
+            createdBy: 'admin',
+            revokedAt: null,
+            revokedBy: null,
+          },
+        ],
+      }, null, 2), { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      // Any ordinary mutation rewrites the WHOLE file through save().
+      createDelegation({
+        mailbox: 'carol@test.example',
+        grantee: 'dave@test.example',
+        createdBy: 'admin',
+      });
+
+      const onDisk = JSON.parse(readFileSync(storeFile, 'utf8')) as any;
+      const droppedEntry = onDisk.grants.find((g: any) => g.id === 'delg_dropped_keep');
+      // P1①: the dropped record survived the full rewrite, raw scopes intact
+      expect(droppedEntry).toBeDefined();
+      expect(droppedEntry.scopes).toEqual(['nope:unsupported']);
+      expect(droppedEntry.revokedAt).toBeNull();
+      expect(onDisk.grants.some((g: any) => g.mailbox === 'carol@test.example')).toBe(true);
+
+      // ...and it is still revocable afterwards (DELETE must not 404)
+      const alice = createIdentity({ localpart: 'alice' })!;
+      const del = await app.request('/v1/delegations/delg_dropped_keep', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${alice.token}` },
+      });
+      expect(del.status).toBe(200);
+      const tomb = (await del.json()) as any;
+      expect(tomb.revoked).toBe(true);
+      const afterDisk = JSON.parse(readFileSync(storeFile, 'utf8')) as any;
+      expect(afterDisk.grants.find((g: any) => g.id === 'delg_dropped_keep')?.revokedAt)
+        .toBe(tomb.revokedAt);
+    });
+
+    test('Item 4d (R4): cascade revocation covers load-dropped grants — no resurrection', () => {
+      const storeFile = join(config.dataDir, 'delegations.json');
+      writeFileSync(storeFile, JSON.stringify({
+        schemaVersion: DELEGATION_STORE_SCHEMA_VERSION,
+        grants: [
+          {
+            id: 'delg_dropped_cascade',
+            mailbox: 'alice@test.example',
+            grantee: 'bob@test.example',
+            scopes: ['future:unsupported'],
+            createdAt: '2026-09-06T00:00:00Z',
+            createdBy: 'admin',
+            revokedAt: null,
+            revokedBy: null,
+          },
+        ],
+      }, null, 2), { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      // Owner identity deletion cascades across BOTH coerced and dropped grants
+      const revoked = revokeDelegationsForAddress('alice@test.example');
+      expect(revoked).toBe(1);
+
+      // P1②: the dropped record carries a tombstone on disk (and in the raw view)
+      const onDisk = JSON.parse(readFileSync(storeFile, 'utf8')) as any;
+      const entry = onDisk.grants.find((g: any) => g.id === 'delg_dropped_cascade');
+      expect(entry.revokedAt).toBeTruthy();
+      expect(entry.revokedBy).toBe('cascade');
+      expect(entry.scopes).toEqual(['future:unsupported']);
+      expect(getDroppedDelegation('delg_dropped_cascade')?.revokedAt).toBeTruthy();
+
+      // ...and the cascade audit trail records it
+      const audit = readAuditEvents().find(
+        (e) => e.event === 'delegation.revoke.cascade' && e.grantId === 'delg_dropped_cascade',
+      );
+      expect(audit).toBeDefined();
+      expect(audit?.mailbox).toBe('alice@test.example');
+    });
+
+    test('Item 5: load() re-wraps corruption errors preserving { cause: err } error chain', () => {
+      const storeFile = join(config.dataDir, 'delegations.json');
+      writeFileSync(storeFile, 'INVALID_CORRUPTED_JSON{{{', { mode: 0o600 });
+      invalidateDelegationStoreCache();
+
+      try {
+        listDelegations();
+        expect.unreachable();
+      } catch (err: any) {
+        expect(err.message).toBe('delegation_store_corrupt');
+        expect(err.cause).toBeDefined();
+        expect(err.cause instanceof SyntaxError).toBe(true);
+      }
+    });
+
+    test('Item 6: POST /v1/delegations returns 409 when matching existing active grant with different scopes', async () => {
+      const alice = createIdentity({ localpart: 'alice-cfl' })!;
+      const bob = createIdentity({ localpart: 'bob-cfl' })!;
+      const aliceAddr = alice.identity.address;
+      const bobAddr = bob.identity.address;
+
+      // 1. Initial grant created -> 201
+      const res1 = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${alice.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: aliceAddr, grantee: bobAddr, scopes: ['read:messages'] }),
+      });
+      expect(res1.status).toBe(201);
+
+      // 2. Idempotent repeat with identical scopes -> 200
+      const res2 = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${alice.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: aliceAddr, grantee: bobAddr, scopes: ['read:messages'] }),
+      });
+      expect(res2.status).toBe(200);
+
+      // 3. Simulate existing active grant having different scopes in memory/store
+      const existing = findActiveDelegation(aliceAddr, bobAddr)!;
+      existing.scopes = ['different:scope'];
+
+      const resConflict = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${alice.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mailbox: aliceAddr, grantee: bobAddr, scopes: ['read:messages'] }),
+      });
+      expect(resConflict.status).toBe(409);
+      const conflictBody = (await resConflict.json()) as any;
+      expect(conflictBody.error).toBe('conflict');
+      expect(conflictBody.details).toBe('active delegation grant exists with different scopes');
+    });
+
+    test('Item 7: delegation.grant.denied audit writes are throttled to 10/min per IP (returning 403)', async () => {
+      resetDelegationDeniedAuditLimits();
+      resetAuditForTests();
+
+      const alice = createIdentity({ localpart: 'alice-denied-throttle' })!;
+      const carol = createIdentity({ localpart: 'carol-denied-throttle' })!;
+      const aliceAddr = alice.identity.address;
+      const carolAddr = carol.identity.address;
+
+      // Send 15 unauthorized requests from unprivileged Carol attempting to grant Alice's mailbox
+      for (let i = 0; i < 15; i++) {
+        const res = await app.request('/v1/delegations', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${carol.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ mailbox: aliceAddr, grantee: carolAddr }),
+        });
+        expect(res.status).toBe(403);
+      }
+
+      // Exactly DEFAULT_DELEGATION_DENIED_AUDIT_LIMIT (10) audit entries recorded, 5 throttled
+      const deniedAudits = readAuditEvents().filter((e) => e.event === 'delegation.grant.denied');
+      expect(deniedAudits.length).toBe(10);
+    });
+
+    test('Item 7b (R2 顺清 1): delegation.revoke denied audit writes on DELETE are throttled to 10/min per IP (returning 403)', async () => {
+      resetDelegationDeniedAuditLimits();
+      resetAuditForTests();
+
+      const alice = createIdentity({ localpart: 'alice-del-throttle' })!;
+      const carol = createIdentity({ localpart: 'carol-del-throttle' })!;
+      const grant = createDelegation({
+        mailbox: alice.identity.address,
+        grantee: carol.identity.address,
+        createdBy: alice.identity.address,
+      });
+
+      // Grantee (nor anyone but owner/admin) may revoke: 15 denied DELETEs from the same IP
+      for (let i = 0; i < 15; i++) {
+        const res = await app.request(`/v1/delegations/${grant.id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${carol.token}` },
+        });
+        expect(res.status).toBe(403);
+      }
+
+      // Audit flush is capped at 10; the 403 itself is unaffected by throttling
+      const deniedAudits = readAuditEvents().filter(
+        (e) => e.event === 'delegation.revoke' && e.outcome === 'denied',
+      );
+      expect(deniedAudits.length).toBe(10);
+      expect(getDelegation(grant.id)?.revokedAt).toBeNull();
+    });
+
+    test('Item 8: OAuth credentials remain forbidden from managing delegations (403)', async () => {
+      const alice = createIdentity({ localpart: 'alice-oauth-cascade' })!;
+      const bob = createIdentity({ localpart: 'bob-oauth-cascade' })!;
+      const aliceAddr = alice.identity.address;
+      const bobAddr = bob.identity.address;
+
+      const resource = resolveResourceUri('http://localhost');
+      const oauthToken = 'oa_oauth_token_delg_manage';
+      putAccessTokenForTests({
+        token: oauthToken,
+        grantId: 'grant_delg_manage',
+        address: aliceAddr,
+        aud: resource,
+        expiresAt: Date.now() + 3600_000,
+        ensureGrant: { clientId: 'client-delg-manage', clientName: 'Client Delg Manage' },
+      });
+
+      const res = await app.request('/v1/delegations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${oauthToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mailbox: aliceAddr, grantee: bobAddr }),
+      });
+      expect(res.status).toBe(403);
+      expect((await res.json() as any).error).toContain('delegation management requires direct identity credentials');
+    });
+  });
+});

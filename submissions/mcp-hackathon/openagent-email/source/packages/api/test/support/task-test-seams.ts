@@ -1,0 +1,31 @@
+import {
+  setTaskNowForTests,
+  setTaskListAllForTests,
+  setTaskGetForTests,
+  setTaskSendMailForTests,
+  clearQueuedEventsForTests,
+  scanDurableTasksForTests,
+  takeApprovalWatcherParseCallsForTests,
+  takeLeaseOverlayReplayExpiredCountForTests,
+  getTaskSnapshot,
+  LEASE_OVERLAY_MAX_LIFETIME_MS,
+  LEASE_OVERLAY_REPLAY_EXPIRED_SEEN_CAP,
+  LEASE_OVERLAY_REPLAY_EXPIRED_WARN_INTERVAL_MS,
+  queueLeaseOverlayForTests,
+} from '../../src/lib/tasks-internal.ts';
+
+export {
+  setTaskNowForTests,
+  setTaskListAllForTests,
+  setTaskGetForTests,
+  setTaskSendMailForTests,
+  clearQueuedEventsForTests,
+  scanDurableTasksForTests,
+  takeApprovalWatcherParseCallsForTests,
+  takeLeaseOverlayReplayExpiredCountForTests,
+  getTaskSnapshot,
+  LEASE_OVERLAY_MAX_LIFETIME_MS,
+  LEASE_OVERLAY_REPLAY_EXPIRED_SEEN_CAP,
+  LEASE_OVERLAY_REPLAY_EXPIRED_WARN_INTERVAL_MS,
+  queueLeaseOverlayForTests,
+};

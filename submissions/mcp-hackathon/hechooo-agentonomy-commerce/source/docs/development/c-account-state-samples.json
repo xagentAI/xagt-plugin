@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "provenance": "Synthetic Core/Prediction inputs compared against current Node projections, with separate Core mandate schema validation; not complete Core API/Repository acceptance, live-user captures, deployment evidence, or payment evidence.",
+  "as_of": "2026-09-10T12:00:00Z",
+  "endpoint": "GET /v1/c/agents/{agent_id}/account",
+  "notes": [
+    "Successful bodies are complete C account responses with no omitted fields.",
+    "The Core-unavailable body is the actual Node HTTP error shape and intentionally has no account or balances object.",
+    "Agent/user IDs, owner wallets, mandates, bindings and amounts are synthetic. eip155:80002 and its USDC contract are public Polygon Amoy testnet values, not synthetic addresses.",
+    "The dual-product mandate is a legacy-compatible sample; new embedded C authorization is Marketplace-only."
+  ],
+  "samples": [
+    {
+      "case": "wallet_unbound",
+      "description": "No wallet identity is bound for the C user.",
+      "http_status": 200,
+      "synthetic": true,
+      "body": {
+        "agent_id": "agent_c_contract_demo",
+        "account": {
+          "user_id": "agent:v1:c_account_demo",
+          "status": "attention_required",
+          "core": {
+            "user_id": "agent:v1:c_account_demo",
+            "wallet_bound": false,
+            "wallet_address": null,
+            "wallet_identity_id": null,
+            "spending_grant_active": false,
+            "active_spending_mandate": null,
+            "chain_allowances": {
+              "eip155:80002": false
+            },
+            "ready": false
+          },
+          "products": {
+            "marketplace": {
+              "ready": false,
+              "next_action": "complete_core_account_setup"
+            },
+            "prediction_markets": {
+              "ready": false,
+              "wallet_matches_core": false,
+              "account": {
+                "status": "not_configured",
+                "next_action": "create_polymarket_account_binding"
+              },
+              "next_action": "complete_core_account_setup"
+            }
+          },
+          "next_action": "complete_core_account_setup",
+          "hosted_execution": {
+            "ready": false,
+            "credential_routing": "per_wallet",
+            "reason_code": "WALLET_NOT_READY"
+          }
+        },
+        "balances": {
+          "status": "partial",
+          "user_id": "agent:v1:c_account_demo",
+          "wallet_funds": {
+            "user_id": "agent:v1:c_account_demo",
+            "status": "not_bound",
+            "wallet_bound": false,
+            "wallet_address": null,
+            "balances": {}
+          },
+          "agent_spending_authorization": {
+            "status": "not_configured",
+            "limits_usdc": null,
+            "remaining_usdc": null,
+            "meaning": "authorization_budget_not_wallet_balance"
+          },
+          "polymarket_funds": {
+            "status": "unavailable"
+          }
+        },
+        "permissions_editable_by_agent": false
+      }
+    },
+    {
+      "case": "wallet_bound_no_mandate",
+      "description": "A wallet is bound, but no valid active Spending Mandate is selected.",
+      "http_status": 200,
+      "synthetic": true,
+      "body": {
+        "agent_id": "agent_c_contract_demo",
+        "account": {
+          "user_id": "agent:v1:c_account_demo",
+          "status": "attention_required",
+          "core": {
+            "user_id": "agent:v1:c_account_demo",
+            "wallet_bound": true,
+            "wallet_address": "0x1111111111111111111111111111111111111111",
+            "wallet_identity_id": "wallet_c_contract_demo",
+            "spending_grant_active": false,
+            "active_spending_mandate": null,
+            "chain_allowances": {
+              "eip155:80002": false
+            },
+            "ready": false
+          },
+          "products": {
+            "marketplace": {
+              "ready": false,
+              "next_action": "complete_core_account_setup"
+            },
+            "prediction_markets": {
+              "ready": false,
+              "wallet_matches_core": false,
+              "account": {
+                "status": "not_configured",
+                "next_action": "create_polymarket_account_binding"
+              },
+              "next_action": "complete_core_account_setup"
+            }
+          },
+          "next_action": "complete_core_account_setup",
+          "hosted_execution": {
+            "ready": true,
+            "credential_routing": "per_wallet",
+            "reason_code": null
+          }
+        },
+        "balances": {
+          "status": "partial",
+          "user_id": "agent:v1:c_account_demo",
+          "wallet_funds": {
+            "user_id": "agent:v1:c_account_demo",
+            "status": "ready",
+            "wallet_bound": true,
+            "wallet_address": "0x1111111111111111111111111111111111111111",
+            "balances": {
+              "eip155:80002": {
+                "status": "ready",
+                "network": "eip155:80002",
+                "asset": "USDC",
+                "token_address": "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582",
+                "amount_atomic": "12500000",
+                "amount_usdc": "12.500000"
+              }
+            }
+          },
+          "agent_spending_authorization": {
+            "status": "not_configured",
+            "limits_usdc": null,
+            "remaining_usdc": null,
+            "meaning": "authorization_budget_not_wallet_balance"
+          },
+          "polymarket_funds": {
+            "status": "unavailable"
+          }
+        },
+        "permissions_editable_by_agent": false
+      }
+    },
+    {
+      "case": "wallet_mandate_allowance_hosted_ready",
+      "description": "Core wallet, Mandate, positive allowance and Hosted execution are ready; Marketplace is ready while Prediction Markets is not configured.",
+      "http_status": 200,
+      "synthetic": true,
+      "body": {
+        "agent_id": "agent_c_contract_demo",
+        "account": {
+          "user_id": "agent:v1:c_account_demo",
+          "status": "attention_required",
+          "core": {
+            "user_id": "agent:v1:c_account_demo",
+            "wallet_bound": true,
+            "wallet_address": "0x1111111111111111111111111111111111111111",
+            "wallet_identity_id": "wallet_c_contract_demo",
+            "spending_grant_active": true,
+            "active_spending_mandate": {
+              "spending_grant_id": "grant_c_contract_demo",
+              "agent_id": "hermes",
+              "limits_usdc": {
+                "per_transaction": "1",
+                "rolling_hour": "2",
+                "daily": "3",
+                "total": "5"
+              },
+              "remaining_usdc": {
+                "rolling_hour": "1.5",
+                "daily": "2.5",
+                "total": "4.5"
+              },
+              "product_scopes": [
+                "marketplace",
+                "prediction_markets"
+              ],
+              "venue_scopes": [],
+              "merchant_scopes": [],
+              "merchant_trust_scopes": [
+                "clink_verified"
+              ],
+              "network_scopes": [
+                "eip155:80002"
+              ],
+              "asset_scopes": [
+                "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582"
+              ],
+              "notification_mode": "notify_all",
+              "expires_at": "2026-10-01T00:00:00Z"
+            },
+            "chain_allowances": {
+              "eip155:80002": true
+            },
+            "ready": true
+          },
+          "products": {
+            "marketplace": {
+              "ready": true,
+              "next_action": "marketplace_ready"
+            },
+            "prediction_markets": {
+              "ready": false,
+              "wallet_matches_core": false,
+              "account": {
+                "status": "not_configured",
+                "next_action": "create_polymarket_account_binding"
+              },
+              "next_action": "create_polymarket_account_binding"
+            }
+          },
+          "next_action": "create_polymarket_account_binding",
+          "hosted_execution": {
+            "ready": true,
+            "credential_routing": "per_wallet",
+            "reason_code": null
+          }
+        },
+        "balances": {
+          "status": "partial",
+          "user_id": "agent:v1:c_account_demo",
+          "wallet_funds": {
+            "user_id": "agent:v1:c_account_demo",
+            "status": "ready",
+            "wallet_bound": true,
+            "wallet_address": "0x1111111111111111111111111111111111111111",
+            "balances": {
+              "eip155:80002": {
+                "status": "ready",
+                "network": "eip155:80002",
+                "asset": "USDC",
+                "token_address": "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582",
+                "amount_atomic": "12500000",
+                "amount_usdc": "12.500000"
+              }
+            }
+          },
+          "agent_spending_authorization": {
+            "status": "ready",
+            "limits_usdc": {
+              "per_transaction": "1",
+              "rolling_hour": "2",
+              "daily": "3",
+              "total": "5"
+            },
+            "remaining_usdc": {
+              "rolling_hour": "1.5",
+              "daily": "2.5",
+              "total": "4.5"
+            },
+            "meaning": "authorization_budget_not_wallet_balance"
+          },
+          "polymarket_funds": {
+            "status": "unavailable"
+          }
+        },
+        "permissions_editable_by_agent": false
+      }
+    },
+    {
+      "case": "wallet_mandate_hosted_enrollment_required",
+      "description": "The same wallet, Mandate and positive allowance are ready, but the per-wallet Hosted mapping still needs operator enrollment.",
+      "http_status": 200,
+      "synthetic": true,
+      "body": {
+        "agent_id": "agent_c_contract_demo",
+        "account": {
+          "user_id": "agent:v1:c_account_demo",
+          "status": "attention_required",
+          "core": {
+            "user_id": "agent:v1:c_account_demo",
+            "wallet_bound": true,
+            "wallet_address": "0x1111111111111111111111111111111111111111",
+            "wallet_identity_id": "wallet_c_contract_demo",
+            "spending_grant_active": true,
+            "active_spending_mandate": {
+              "spending_grant_id": "grant_c_contract_demo",
+              "agent_id": "hermes",
+              "limits_usdc": {
+                "per_transaction": "1",
+                "rolling_hour": "2",
+                "daily": "3",
+                "total": "5"
+              },
+              "remaining_usdc": {
+                "rolling_hour": "1.5",
+                "daily": "2.5",
+                "total": "4.5"
+              },
+              "product_scopes": [
+                "marketplace",
+                "prediction_markets"
+              ],
+              "venue_scopes": [],
+              "merchant_scopes": [],
+              "merchant_trust_scopes": [
+                "clink_verified"
+              ],
+              "network_scopes": [
+                "eip155:80002"
+              ],
+              "asset_scopes": [
+                "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582"
+              ],
+              "notification_mode": "notify_all",
+              "expires_at": "2026-10-01T00:00:00Z"
+            },
+            "chain_allowances": {
+              "eip155:80002": true
+            },
+            "ready": true
+          },
+          "products": {
+            "marketplace": {
+              "ready": false,
+              "next_action": "contact_service_operator"
+            },
+            "prediction_markets": {
+              "ready": false,
+              "wallet_matches_core": true,
+              "account": {
+                "binding_id": "binding_c_contract_demo",
+                "status": "active",
+                "wallet_address": "0x1111111111111111111111111111111111111111",
+                "has_api_credentials": true
+              },
+              "next_action": "contact_service_operator"
+            }
+          },
+          "next_action": "contact_service_operator",
+          "hosted_execution": {
+            "ready": false,
+            "credential_routing": "per_wallet",
+            "reason_code": "HOSTED_ENROLLMENT_REQUIRED"
+          }
+        },
+        "balances": {
+          "status": "ready",
+          "user_id": "agent:v1:c_account_demo",
+          "wallet_funds": {
+            "user_id": "agent:v1:c_account_demo",
+            "status": "ready",
+            "wallet_bound": true,
+            "wallet_address": "0x1111111111111111111111111111111111111111",
+            "balances": {
+              "eip155:80002": {
+                "status": "ready",
+                "network": "eip155:80002",
+                "asset": "USDC",
+                "token_address": "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582",
+                "amount_atomic": "12500000",
+                "amount_usdc": "12.500000"
+              }
+            }
+          },
+          "agent_spending_authorization": {
+            "status": "ready",
+            "limits_usdc": {
+              "per_transaction": "1",
+              "rolling_hour": "2",
+              "daily": "3",
+              "total": "5"
+            },
+            "remaining_usdc": {
+              "rolling_hour": "1.5",
+              "daily": "2.5",
+              "total": "4.5"
+            },
+            "meaning": "authorization_budget_not_wallet_balance"
+          },
+          "polymarket_funds": {
+            "status": "ready",
+            "user_id": "agent:v1:c_account_demo",
+            "venue": "polymarket",
+            "venue_wallet_address": "0x2222222222222222222222222222222222222222",
+            "asset": "USDC",
+            "available_amount_atomic": "2000000",
+            "available_amount_usdc": "2.000000"
+          }
+        },
+        "permissions_editable_by_agent": false
+      }
+    },
+    {
+      "case": "core_unavailable",
+      "description": "Core cannot serve the account projection; do not turn this transport error into an unbound account.",
+      "http_status": 503,
+      "synthetic": true,
+      "body": {
+        "error": "service_unavailable",
+        "retry_safe": false
+      }
+    }
+  ]
+}

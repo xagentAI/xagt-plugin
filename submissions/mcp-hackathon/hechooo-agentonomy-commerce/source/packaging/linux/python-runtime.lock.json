@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "status": "locked",
+  "platform": "linux-x86_64",
+  "python_version": "3.12",
+  "implementation": "cpython",
+  "artifacts": [
+    {
+      "version": "3.12.9",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20250317/cpython-3.12.9%2B20250317-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz",
+      "sha256": "a36bc60c38fe146e908e2e71fc21266c8558b24a9407226b1d887212839437ef",
+      "size_bytes": 21295465
+    }
+  ],
+  "generation": {
+    "source": "uv embedded catalog",
+    "catalog": "20250317",
+    "requires_operator_proof": true
+  }
+}

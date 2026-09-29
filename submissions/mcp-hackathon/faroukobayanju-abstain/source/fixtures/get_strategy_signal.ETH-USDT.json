@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "name": "get_strategy_signal",
+  "strategy_id": "str_515920d047ca",
+  "_provenance": "SYNTHETIC — shape copied verbatim from the live BTC/USDT response, trade_intent changed HOLD->BUY so the EXECUTE and ABSTAIN paths are demonstrable on demand. The live strategy emits BUY only when its agents converge; see fixtures/README.md.",
+  "content": {
+    "symbol": "ETH/USDT",
+    "trade_intent": "BUY",
+    "reasoning_log": "SYNTHETIC FIXTURE - not a live signal. Shape mirrors the recorded BTC/USDT response.",
+    "timestamp": 1789682946,
+    "confidence": 0.61
+  }
+}

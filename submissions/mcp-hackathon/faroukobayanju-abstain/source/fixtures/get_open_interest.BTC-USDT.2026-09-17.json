@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "name": "get_open_interest",
+  "strategy_id": "str_515920d047ca",
+  "content": {
+    "symbol": "BTC/USDT",
+    "as_of_date": "2026-09-17",
+    "open_interest": 1000000,
+    "open_interest_prev": 970000,
+    "long_short_ratio": 1.04
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "run_id": "bt-7a0daf243c06",
+  "trades": [
+    {"run_id":"bt-7a0daf243c06","symbol":"ETH/USDT","direction":1,"entry_price":1719.66555,"exit_price":1574.18184447,"size":12.62252,"leverage":3.0,"pnl":-1836.37098273,"pnl_pct":-25.38,"exit_reason":"stop_loss","holding_bars":5,"commission":20.78832731,"entry_bar_index":50,"exit_bar_index":55,"entry_ts_ms":1781827200000,"exit_ts_ms":1782259200000},
+    {"run_id":"bt-7a0daf243c06","symbol":"BTC/USDT","direction":1,"entry_price":63272.80005,"exit_price":57919.92116577,"size":0.317909,"leverage":3.0,"pnl":-1701.72837321,"pnl_pct":-25.38,"exit_reason":"stop_loss","holding_bars":6,"commission":19.2641284,"entry_bar_index":50,"exit_bar_index":56,"entry_ts_ms":1781827200000,"exit_ts_ms":1782345600000},
+    {"run_id":"bt-7a0daf243c06","symbol":"SOL/USDT","direction":1,"entry_price":70.0686,"exit_price":64.14079644,"size":313.276439,"leverage":3.0,"pnl":-1857.04119037,"pnl_pct":-25.38,"exit_reason":"stop_loss","holding_bars":6,"commission":21.0223209,"entry_bar_index":50,"exit_bar_index":56,"entry_ts_ms":1781827200000,"exit_ts_ms":1782345600000}
+  ]
+}

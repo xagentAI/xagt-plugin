@@ -1,0 +1,76 @@
+name: Code Review Agent
+
+on:
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        run: |
+          git diff origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > pr.diff
+          echo "DIFF_LINES=$(wc -l < pr.diff)" >> $GITHUB_ENV
+
+      - name: Skip if empty
+        if: env.DIFF_LINES == '0'
+        run: echo "No changes to review"; exit 0
+
+      - name: Review with Code Review Agent
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            https://code-review-agent-ashy-six.vercel.app/v1/review_diff \
+            -H "Content-Type: application/json" \
+            -d "$(jq -Rs '{diff: .}' < pr.diff)")
+
+          echo "$RESPONSE" > review_result.json
+
+          SCORE=$(echo "$RESPONSE" | jq -r '.report.score // 0')
+          ISSUES=$(echo "$RESPONSE" | jq -r '.report.issues | length')
+          CRITICAL=$(echo "$RESPONSE" | jq -r '[.report.issues[] | select(.severity == "critical")] | length')
+
+          echo "::notice::Score: $SCORE/100 | Issues: $ISSUES | Critical: $CRITICAL"
+
+          if [ "$CRITICAL" -gt "0" ]; then
+            echo "::error::Found $CRITICAL critical issues. Review failed."
+            exit 1
+          fi
+
+      - name: Export SARIF
+        if: always()
+        run: |
+          python3 -c "
+          import json, sys
+          data = json.load(open('review_result.json'))
+          report = data.get('report', {})
+          sev_map = {'critical': 'error', 'major': 'error', 'minor': 'warning', 'info': 'note'}
+          results = []
+          for i in report.get('issues', []):
+              results.append({
+                  'ruleId': str(i.get('rule_id') or 'llm'),
+                  'level': sev_map.get(i.get('severity', 'info'), 'note'),
+                  'message': {'text': str(i.get('title', '')) + ' — ' + str(i.get('description', ''))},
+                  'locations': [{'physicalLocation': {
+                      'artifactLocation': {'uri': str(i.get('file', 'diff'))},
+                      'region': {'startLine': int(i.get('line', 1))},
+                  }}],
+              })
+          sarif = {'\$schema': 'https://json.schemastore.org/sarif-2.1.0.json', 'version': '2.1.0', 'runs': [{'tool': {'driver': {'name': 'Code Review Agent', 'version': '1.0'}}, 'results': results}]}
+          json.dump(sarif, open('results.sarif', 'w'), indent=2)
+          "
+
+      - name: Upload SARIF to GitHub Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: code-review-agent

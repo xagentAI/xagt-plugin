@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1",
+  "mode": "full",
+  "task": {
+    "task_id": "leo-dashboard-owned-media-curation-20260701",
+    "buyer_goal": "Review Cursor's broad owned-media site branch and prepare a tomorrow-continuation packet without approving publish or deploy.",
+    "surface": "repo",
+    "allowed_actions": [
+      "read-only acceptance review",
+      "validation summary",
+      "risk summary",
+      "next-step packet"
+    ],
+    "forbidden_actions": [
+      "commit",
+      "push",
+      "deploy",
+      "cleanup",
+      "public publish"
+    ],
+    "acceptance_criteria": [
+      "Branch scope is described",
+      "Dirty files are named",
+      "Validation already run is listed",
+      "Release risks are named",
+      "Tomorrow sequence is actionable"
+    ]
+  },
+  "delivery": {
+    "writeback_text": "Read-only acceptance packet for cursor/owned-media-content-curation. Branch changed 42 files with theme/navigation/product page/content cleanup. Dirty files are public/llms-full.txt, siteData.ts, stackData.ts. Validation passed: diff check, lint, tsc, internal routes, owned-media routes, pricing copy. Build and visual smoke intentionally deferred to avoid generated churn before Leo's decision.",
+    "artifact_paths": [
+      "/Users/zhangxu/Projects/_inventory/2026-07-01/leo-dashboard-cursor-owned-media-content-curation-readout-20260701.md"
+    ],
+    "changed_files": [
+      "public/llms-full.txt",
+      "src/data/siteData.ts",
+      "src/data/stackData.ts"
+    ],
+    "validation": [
+      "git diff --check PASS",
+      "npm run lint PASS",
+      "npx tsc -b --pretty false PASS",
+      "npm run check:internal-routes PASS",
+      "npm run check:owned-media-routes PASS",
+      "npm run check:pricing-copy PASS"
+    ],
+    "validation_output": "npm run build and visual smoke were deferred because build generators may rewrite public generated files.",
+    "rollback_plan": "No cleanup or restore performed; dirty copy edits require owner decision.",
+    "hard_gates_declared": [
+      "commit",
+      "push",
+      "PR",
+      "deploy",
+      "cleanup",
+      "public publish"
+    ],
+    "next_gate": "Leo chooses whether to include dirty copy edits and run release-grade build/visual smoke."
+  },
+  "context": {
+    "repo_state": "dirty",
+    "public_publish_requested": false,
+    "payments_or_wallets_in_scope": false,
+    "credentials_in_scope": false,
+    "notes": "This is a review packet, not a release approval."
+  }
+}
+

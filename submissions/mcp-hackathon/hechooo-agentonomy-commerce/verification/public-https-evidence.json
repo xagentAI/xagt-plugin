@@ -1,0 +1,108 @@
+{
+  "passed": true,
+  "checked_at": "2026-09-22T08:32:02.823071+00:00",
+  "base_url": "https://review.agentonomy.xyz",
+  "responses": {
+    "GET /health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+        "real_funds": false,
+        "settlement_mode": "simulated",
+        "service_transport": "http"
+      }
+    },
+    "GET /.well-known/xagent-verification.json": {
+      "status": 200,
+      "body": {
+        "schemaVersion": 1,
+        "slug": "hechooo-agentonomy-commerce",
+        "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b"
+      }
+    },
+    "GET /deployment-status.json": {
+      "status": 200,
+      "body": {
+        "status": "ready",
+        "mode": "upgrade_replay",
+        "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+        "actual_source_commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+        "original_commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "boot_id": "e1976e1a-f8a5-446f-a140-a42f5d470309",
+        "same_purchase": true,
+        "budget": {
+          "before_used_amount_usdc": "0.30",
+          "after_used_amount_usdc": "0.30",
+          "remaining_amount_usdc": "0.70",
+          "settlement_submissions": 1,
+          "merchant_deliveries": 1
+        },
+        "image_id": "sha256:2cb37aa24d36440daa742d7b7d1e35f5954c49b7bca811d79d468057d141c080",
+        "container_restart_verified": true,
+        "https_verified": true,
+        "upgrade_verified": true,
+        "verified_at": "2026-09-22T08:28:29.941012+00:00",
+        "public_demo": {
+          "before_restart": {
+            "status": "passed",
+            "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+            "real_funds": false,
+            "public_browser_session": true,
+            "manual_token_required": false,
+            "session_restored": false,
+            "cross_visitor_isolation_checked": true,
+            "same_purchase_on_replay": true,
+            "budget": {
+              "used_amount_usdc": "0.30",
+              "remaining_amount_usdc": "0.70",
+              "settlement_submissions": 1,
+              "merchant_deliveries": 1
+            }
+          },
+          "after_restart": {
+            "status": "passed",
+            "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+            "real_funds": false,
+            "public_browser_session": true,
+            "manual_token_required": false,
+            "session_restored": true,
+            "cross_visitor_isolation_checked": false,
+            "same_purchase_on_replay": true,
+            "budget": {
+              "used_amount_usdc": "0.30",
+              "remaining_amount_usdc": "0.70",
+              "settlement_submissions": 1,
+              "merchant_deliveries": 1
+            }
+          }
+        }
+      }
+    },
+    "GET /demo/session": {
+      "status": 200,
+      "body": {
+        "enabled": true,
+        "authenticated": false
+      }
+    },
+    "GET /demo/v1/budget": {
+      "status": 401,
+      "body": {
+        "error": "session_required"
+      }
+    },
+    "GET /v1/budget": {
+      "status": 401,
+      "body": {
+        "error": "unauthorized"
+      }
+    },
+    "POST /v1/purchases": {
+      "status": 401,
+      "body": {
+        "error": "unauthorized"
+      }
+    }
+  }
+}

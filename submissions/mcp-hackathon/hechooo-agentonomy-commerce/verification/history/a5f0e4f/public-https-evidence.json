@@ -1,0 +1,37 @@
+{
+  "base_url": "https://review.agentonomy.xyz",
+  "checked_at": "2026-09-22T06:10:59.587645+00:00",
+  "responses": {
+    "GET /health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+        "real_funds": false,
+        "settlement_mode": "simulated",
+        "service_transport": "http"
+      }
+    },
+    "GET /.well-known/xagent-verification.json": {
+      "status": 200,
+      "body": {
+        "schemaVersion": 1,
+        "slug": "hechooo-agentonomy-commerce",
+        "commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7"
+      }
+    },
+    "GET /v1/budget": {
+      "status": 401,
+      "body": {
+        "error": "unauthorized"
+      }
+    },
+    "POST /v1/purchases": {
+      "status": 401,
+      "body": {
+        "error": "unauthorized"
+      }
+    }
+  },
+  "passed": true
+}

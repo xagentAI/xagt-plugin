@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="900" height="440" role="img" aria-label="Gate threshold frontier">
+  <style>
+    .bg{fill:#0b0d12}.grid{stroke:#1e2430}
+    .axis{fill:#6b7688;font:11px ui-monospace,Menlo,monospace}
+    .lbl{fill:#8b95a7;font:10px ui-monospace,Menlo,monospace}
+    .title{fill:#e6e9ef;font:600 15px ui-sans-serif,system-ui,sans-serif}
+    .sub{fill:#8b95a7;font:12px ui-monospace,Menlo,monospace}
+    .pt{fill:#7c6aef}.base{fill:#e5484d}.ship{fill:#46a758}
+    .zero{stroke:#3a4152;stroke-dasharray:4 4}
+  </style>
+  <rect class="bg" width="900" height="440"/>
+  <text x="86" y="26" class="title">Every threshold, including the unflattering ones</text>
+  <text x="86" y="422" class="sub">max drawdown % (lower is better) →   ·   red = no gate, green = shipped policy   ·   n=19 trades</text>
+  <line x1="86" y1="384.0" x2="870" y2="384.0" class="grid"/><text x="76" y="388" class="axis" text-anchor="end">-6345</text>
+  <line x1="86" y1="299.5" x2="870" y2="299.5" class="grid"/><text x="76" y="303.5" class="axis" text-anchor="end">-3969</text>
+  <line x1="86" y1="215.0" x2="870" y2="215.0" class="grid"/><text x="76" y="219" class="axis" text-anchor="end">-1593</text>
+  <line x1="86" y1="130.5" x2="870" y2="130.5" class="grid"/><text x="76" y="134.5" class="axis" text-anchor="end">783</text>
+  <line x1="86" y1="46.0" x2="870" y2="46.0" class="grid"/><text x="76" y="50" class="axis" text-anchor="end">3160</text>
+  <line x1="86" y1="158.4" x2="870" y2="158.4" class="zero"/>
+  <circle cx="590.3" cy="92.7" r="7" class="base"/>
+  <text x="600.3" y="96.7" class="lbl">no gate (every check off) · 19/19</text>
+  <circle cx="228.9" cy="64.7" r="5" class="pt"/>
+  <text x="238.9" y="68.7" class="lbl">max_cluster_size = 2 · 3/19</text>
+  <circle cx="444.6" cy="191.1" r="5" class="pt"/>
+  <text x="454.6" y="195.1" class="lbl">max_cluster_size = 3 · 7/19</text>
+  <circle cx="609.0" cy="209.2" r="5" class="pt"/>
+  <text x="619.0" y="213.2" class="lbl">max_cluster_size = 4 · 16/19</text>
+  <circle cx="590.3" cy="92.7" r="5" class="pt"/>
+  <text x="600.3" y="96.7" class="lbl">max_cluster_size = 5 · 19/19</text>
+  <circle cx="767.7" cy="346.4" r="5" class="pt"/>
+  <text x="777.7" y="350.4" class="lbl">max_drawdown_pct = 3 · 15/19</text>
+  <circle cx="590.3" cy="263.7" r="5" class="pt"/>
+  <text x="600.3" y="267.7" class="lbl">max_drawdown_pct = 5 · 16/19</text>
+  <circle cx="590.3" cy="92.7" r="5" class="pt"/>
+  <text x="600.3" y="96.7" class="lbl">max_drawdown_pct = 10 · 19/19</text>
+  <circle cx="590.3" cy="284.0" r="5" class="pt"/>
+  <text x="600.3" y="288.0" class="lbl">max_loss_streak = 2 · 14/19</text>
+  <circle cx="662.2" cy="339.3" r="5" class="pt"/>
+  <text x="672.2" y="343.3" class="lbl">max_loss_streak = 3 · 15/19</text>
+  <circle cx="590.3" cy="92.7" r="5" class="pt"/>
+  <text x="600.3" y="96.7" class="lbl">max_loss_streak = 4 · 19/19</text>
+  <circle cx="231.7" cy="213.7" r="7" class="ship"/>
+  <text x="241.7" y="217.7" class="lbl">shipped policy (all checks) · 1/19</text>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "name": "get_open_interest",
+  "content": {
+    "symbol": "BTC/USDT",
+    "as_of_date": "2026-08-17",
+    "price": 64504.1,
+    "open_interest": 102994.606,
+    "open_interest_usd": 6666039336.797489,
+    "long_short_ratio": 1.18125863,
+    "funding_rate": 0.00005664
+  }
+}

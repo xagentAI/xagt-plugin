@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "checked_at": "2026-09-22T08:32:02.823071+00:00",
+  "method": "Dedicated review VM graceful stop/start and source upgrade; original private order replay unchanged; isolated public visitor purchase and replay before/after container restart over HTTPS.",
+  "source_commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+  "previous_commit": "79b657e7c63158fafc657cf6370048bcde384c57",
+  "original_commit": "a5f0e4ffd5f5fb69323227cf85435c30dc6177f7",
+  "boot_id_before": "807dfa4d-0879-46b0-938f-8afe4d31dd80",
+  "boot_id_after": "e1976e1a-f8a5-446f-a140-a42f5d470309",
+  "image_id": "sha256:2cb37aa24d36440daa742d7b7d1e35f5954c49b7bca811d79d468057d141c080",
+  "same_purchase": true,
+  "private_budget_before": {
+    "before_used_amount_usdc": "0.30",
+    "after_used_amount_usdc": "0.30",
+    "remaining_amount_usdc": "0.70",
+    "settlement_submissions": 1,
+    "merchant_deliveries": 1
+  },
+  "private_budget_after": {
+    "before_used_amount_usdc": "0.30",
+    "after_used_amount_usdc": "0.30",
+    "remaining_amount_usdc": "0.70",
+    "settlement_submissions": 1,
+    "merchant_deliveries": 1
+  },
+  "public_demo": {
+    "before_restart": {
+      "status": "passed",
+      "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+      "real_funds": false,
+      "public_browser_session": true,
+      "manual_token_required": false,
+      "session_restored": false,
+      "cross_visitor_isolation_checked": true,
+      "same_purchase_on_replay": true,
+      "budget": {
+        "used_amount_usdc": "0.30",
+        "remaining_amount_usdc": "0.70",
+        "settlement_submissions": 1,
+        "merchant_deliveries": 1
+      }
+    },
+    "after_restart": {
+      "status": "passed",
+      "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+      "real_funds": false,
+      "public_browser_session": true,
+      "manual_token_required": false,
+      "session_restored": true,
+      "cross_visitor_isolation_checked": false,
+      "same_purchase_on_replay": true,
+      "budget": {
+        "used_amount_usdc": "0.30",
+        "remaining_amount_usdc": "0.70",
+        "settlement_submissions": 1,
+        "merchant_deliveries": 1
+      }
+    }
+  },
+  "real_funds": false,
+  "settlement_mode": "simulated",
+  "service_transport": "http"
+}

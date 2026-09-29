@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "checked_at": "2026-09-22T08:33:46.445358+00:00",
+  "source_commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+  "base_url": "https://review.agentonomy.xyz",
+  "browser": {
+    "passed": true,
+    "no_manual_token": true,
+    "purchase_delivered": true,
+    "reload_read_only": true,
+    "replay_single_charge": true,
+    "second_visitor_isolated": true,
+    "pending_preview_survives_prior_order_restore": true,
+    "cookie_http_only": true,
+    "expired_session_requires_explicit_start": true
+  },
+  "public_api": {
+    "status": "passed",
+    "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+    "real_funds": false,
+    "public_browser_session": true,
+    "manual_token_required": false,
+    "session_restored": false,
+    "cross_visitor_isolation_checked": true,
+    "same_purchase_on_replay": true,
+    "budget": {
+      "used_amount_usdc": "0.30",
+      "remaining_amount_usdc": "0.70",
+      "settlement_submissions": 1,
+      "merchant_deliveries": 1
+    }
+  },
+  "container_restart": {
+    "before_restart": {
+      "status": "passed",
+      "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+      "real_funds": false,
+      "public_browser_session": true,
+      "manual_token_required": false,
+      "session_restored": false,
+      "cross_visitor_isolation_checked": true,
+      "same_purchase_on_replay": true,
+      "budget": {
+        "used_amount_usdc": "0.30",
+        "remaining_amount_usdc": "0.70",
+        "settlement_submissions": 1,
+        "merchant_deliveries": 1
+      }
+    },
+    "after_restart": {
+      "status": "passed",
+      "commit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+      "real_funds": false,
+      "public_browser_session": true,
+      "manual_token_required": false,
+      "session_restored": true,
+      "cross_visitor_isolation_checked": false,
+      "same_purchase_on_replay": true,
+      "budget": {
+        "used_amount_usdc": "0.30",
+        "remaining_amount_usdc": "0.70",
+        "settlement_submissions": 1,
+        "merchant_deliveries": 1
+      }
+    }
+  },
+  "notes": [
+    "Browser and API verifier use independent simulated visitor sessions.",
+    "Browser also purchases a second edited report to verify pending-preview restoration; API verifier checks a single 0.30 purchase and replay.",
+    "No cookie, private API token, raw verifier state file, company deployment config or user data is included."
+  ]
+}

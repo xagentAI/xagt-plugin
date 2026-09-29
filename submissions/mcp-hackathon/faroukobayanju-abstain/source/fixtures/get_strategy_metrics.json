@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "name": "get_strategy_metrics",
+  "strategy_id": "str_515920d047ca",
+  "content": {
+    "sharpe_ratio": 0.2989,
+    "trading_period_days": 90,
+    "estimated_aum_usdt": 100000.0,
+    "profit_factor": 1.1497,
+    "max_drawdown": "7.62%",
+    "total_return_pct": 1.0697,
+    "win_rate_pct": 52.63,
+    "trade_count": 19,
+    "status": "NOT_QUALIFIED"
+  }
+}

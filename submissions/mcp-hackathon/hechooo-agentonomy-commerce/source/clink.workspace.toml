@@ -1,0 +1,41 @@
+schema_version = 1
+
+[[apps]]
+name = "core"
+path = "apps/core"
+
+[apps.commands]
+start = ["bash", "run_demo.sh"]
+stop = ["bash", "run_demo_stop.sh"]
+status = ["bash", "run_demo_status.sh"]
+test = ["python3", "-m", "pytest", "-q"]
+
+[[apps]]
+name = "marketplace"
+path = "apps/marketplace"
+
+[apps.commands]
+start = ["bash", "run_demo.sh"]
+stop = ["bash", "run_demo_stop.sh"]
+status = ["bash", "run_demo_status.sh"]
+test = ["python3", "-m", "pytest", "-q"]
+
+[[apps]]
+name = "prediction-markets"
+path = "apps/prediction-markets"
+
+[apps.commands]
+start = ["bash", "run_demo.sh"]
+stop = ["bash", "run_demo_stop.sh"]
+status = ["bash", "run_demo_status.sh"]
+test = ["python3", "scripts/router_unit_smoke.py"]
+
+[[apps]]
+name = "node"
+path = "apps/node"
+
+[apps.commands]
+start = ["python3", "-m", "clink_node", "start", "--detach"]
+stop = ["python3", "-m", "clink_node", "stop"]
+status = ["python3", "-m", "clink_node", "status"]
+test = ["python3", "-m", "unittest", "discover", "-s", "tests", "-v"]

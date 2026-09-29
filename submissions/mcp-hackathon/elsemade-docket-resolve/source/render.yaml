@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: docket-resolve
+    runtime: node
+    plan: free
+    buildCommand: npm test
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.0
+      - key: XAGT_SLUG
+        value: elsemade-docket-resolve

@@ -1,0 +1,28 @@
+{
+  "blockedReasons": [],
+  "manifestSha256": "f75296217b3b815dd623294fcfd7f3c2cfc744299bed4c341aeeec58ac088966",
+  "ownerInputs": {
+    "api_base_url": "https://review.agentonomy.xyz",
+    "contact": "fengjie@alvinsclub.ai",
+    "health_check_url": "https://review.agentonomy.xyz/health",
+    "rights_confirmed": true,
+    "source_repository": "https://github.com/HEchooo/agentonomy-commerce",
+    "submitter": "Agentonomy",
+    "late_submission_eligibility": "Owner confirmed in conversation; no organizer written proof asserted",
+    "sample_identity_sanitized": true
+  },
+  "reviewCommit": "029cd0ba9aff3c25fffa33ae27f94615c1eebe2b",
+  "secretFindings": [],
+  "source": {
+    "fileCount": 738,
+    "totalBytes": 10588079,
+    "trackedChanges": []
+  },
+  "status": "ready",
+  "deploymentVerification": {
+    "status": "passed",
+    "evidence": "verification/upgrade-evidence.json",
+    "publicHttpsEvidence": "verification/public-https-evidence.json",
+    "publicDemoEvidence": "verification/public-demo-evidence.json"
+  }
+}

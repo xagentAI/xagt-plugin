@@ -1,0 +1,49 @@
+{
+  "schema_version": "0.1",
+  "service_id": "agent_delivery_acceptance_audit",
+  "verdict": "needs_review",
+  "score": 84,
+  "dimension_scores": {
+    "delivery_completeness": 30,
+    "validation_and_evidence": 16,
+    "safety_and_hard_gates": 24,
+    "buyer_usability": 9,
+    "dispute_readiness": 10
+  },
+  "missing": [
+    "actual validation result"
+  ],
+  "risks": [
+    "Public release gate remains open."
+  ],
+  "positive_evidence": [
+    "Artifact or evidence path is named.",
+    "Changed files or touched surface are declared.",
+    "Task goal and writeback are understandable.",
+    "Rollback or non-impact path is declared.",
+    "Next gate is explicit.",
+    "Validation checks are listed.",
+    "Hard gates are explicitly declared.",
+    "No critical hard-gate breach is detected from the supplied delivery text.",
+    "Buyer-facing decision path is mostly clear.",
+    "Evidence is reasonably dispute-ready.",
+    "Read-only boundary is explicitly documented."
+  ],
+  "questions_for_seller": [],
+  "next_gate": "Owner explicitly approves public push and deployment.",
+  "buyer_summary": "this delivery: useful delivery, but needs review before acceptance. Main gap: actual validation result.",
+  "buyer_summary_zh": "本次交付：有用但需复核后再验收。主要缺口：actual validation result。",
+  "evaluator_notes": "Delivery is read-only and should be evaluated mainly on boundary clarity, observations, limitations, and next gate.",
+  "machine_flags": [
+    "hard_gates_declared",
+    "public_release_gate",
+    "read_only_delivery"
+  ],
+  "value_loop": {
+    "why_pay_again": "Each delivery is a new artifact set; re-run on every submit before accept/pay.",
+    "stale_after_minutes": null,
+    "best_used_in": "buyer_acceptance_gate_per_task",
+    "paid_value_tier": "A_repeat_workflow",
+    "fulfillment": "edge_on_demand_no_llm"
+  }
+}
