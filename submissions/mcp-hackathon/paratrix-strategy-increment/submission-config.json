@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "name": "Strategy Increment",
+  "slug": "paratrix-strategy-increment",
+  "sourceRepository": "https://github.com/karpak-labs/strategy-increment",
+  "apiBaseUrl": "https://strategy-increment.raspy-boat-dbb0.workers.dev/v1",
+  "healthCheckUrl": "https://strategy-increment.raspy-boat-dbb0.workers.dev/health",
+  "deploymentProofUrl": "https://strategy-increment.raspy-boat-dbb0.workers.dev/.well-known/xagent-verification.json"
+}

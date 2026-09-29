@@ -1,0 +1,171 @@
+{
+  "checks": {
+    "aimm": {
+      "comparable": true,
+      "created": 201,
+      "evidence_json_bytes": 45820,
+      "experiment_id": "e_953dc2d4a6ce47691b4ae0c001cca621",
+      "history_count": 1,
+      "reproduction": {
+        "method_version": "fixed-initial-80-20/v1",
+        "payload_sha256": "ed8cb85b7ccfea76c36d95878ab005504a2f55512f4d3fd29020bcd866e024f3",
+        "verified": true
+      },
+      "result_display_language": "en",
+      "round_trip_equal": true,
+      "wall_seconds": {
+        "create": 0.417960291961208,
+        "export": 0.32753504102583975
+      }
+    },
+    "assets_and_schema": {
+      "html_js_css_openapi": 200,
+      "unlisted_static_asset": 404
+    },
+    "external_source": {
+      "nexus_configured": false,
+      "nexus_import": 503
+    },
+    "large_record": {
+      "daily_points_per_curve": 5000,
+      "evidence_json_bytes": 3837883,
+      "experiment_id": "e_70aa021ac4d722894935aae1e811d8c9",
+      "history_count": 1,
+      "history_json_bytes": 224,
+      "reproduction": {
+        "method_version": "fixed-initial-80-20/v1",
+        "payload_sha256": "0495c6a4916c28be57edb97a8445c0a5fad61c0877480d8a0900c4b92331eaf4",
+        "verified": true
+      },
+      "result_json_bytes": 2278883,
+      "round_trip_equal": true,
+      "wall_seconds": {
+        "create": 1.7575111250625923,
+        "export": 1.0770394579740241,
+        "history": 0.31844191695563495,
+        "read": 0.920897166011855
+      }
+    },
+    "release_binding": {
+      "health": {
+        "commit": "040c70f5ca044a8c38610952b4ba174b559474ba",
+        "method_version": "fixed-initial-80-20/v1",
+        "release_bound": true,
+        "source_sha256": "13dd11cec44dfd723c073ae2b0e1d1ef10e502852f6fd190dce92cfe8ce36b73",
+        "status": "ok"
+      },
+      "health_wall_seconds": 3.1316484169801697,
+      "proof": {
+        "commit": "040c70f5ca044a8c38610952b4ba174b559474ba",
+        "schemaVersion": 1,
+        "slug": "paratrix-strategy-increment"
+      }
+    },
+    "security": {
+      "cross_origin_write": 403,
+      "cross_session_detail": 404,
+      "cross_session_evidence": 404,
+      "cross_session_pair": 404,
+      "duplicate_json_key": 422,
+      "technical_errors_ascii": true
+    }
+  },
+  "client_compatibility": {
+    "explicit_client_user_agent_health_status": 200,
+    "python_default_user_agent_edge_error": "Cloudflare 1010",
+    "python_default_user_agent_health_status": 403,
+    "verification_user_agent": "StrategyIncrement-Verification/1.0"
+  },
+  "completed_at_utc": "2026-09-25T08:34:00.287626Z",
+  "expected_review_commit": "040c70f5ca044a8c38610952b4ba174b559474ba",
+  "expected_source_sha256": "13dd11cec44dfd723c073ae2b0e1d1ef10e502852f6fd190dce92cfe8ce36b73",
+  "origin": "https://strategy-increment.raspy-boat-dbb0.workers.dev",
+  "passed": true,
+  "runtime": "Hosted Cloudflare Workers with Python and SQLite Durable Objects",
+  "scope": {
+    "data": "Bundled public AIMM example and generated simulation; no live trading account data.",
+    "production_deployment": true,
+    "quota_load_test": false,
+    "timing": "HTTPS end-to-end wall time; not Cloudflare CPU measurements or a performance guarantee."
+  },
+  "started_at_utc": "2026-09-25T08:33:38.009956Z",
+  "previous_release_persistence": {
+    "checked_at_utc": "2026-09-25T08:36:29.963128Z",
+    "origin": "https://strategy-increment.raspy-boat-dbb0.workers.dev",
+    "scope": "Read-only verification of previously created disposable simulation sessions after redeployment; no records or experiments were created.",
+    "transport": "TLS maximum 1.2 with normal certificate and hostname verification; local network TLS 1.3 handshake failed before the checks.",
+    "current_health": {
+      "status": "ok",
+      "commit": "040c70f5ca044a8c38610952b4ba174b559474ba",
+      "source_sha256": "13dd11cec44dfd723c073ae2b0e1d1ef10e502852f6fd190dce92cfe8ce36b73",
+      "method_version": "fixed-initial-80-20/v1",
+      "release_bound": true
+    },
+    "current_deployment_proof": {
+      "schemaVersion": 1,
+      "slug": "paratrix-strategy-increment",
+      "commit": "040c70f5ca044a8c38610952b4ba174b559474ba"
+    },
+    "sessions": {
+      "aimm": {
+        "checks": {
+          "same_session_cookie_retained": true,
+          "detail_hash_unchanged": true,
+          "history_hash_unchanged": true,
+          "evidence_hash_unchanged": true
+        },
+        "experiment_id": "e_5812ac3b737196bacdb108f9a0306d13",
+        "created_at": "2026-09-25T07:42:41.417999Z",
+        "original_provenance": {
+          "review_commit": "778327c87d80ba18bcac54693a985e3502dc8895",
+          "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+          "application_version": "0.1.0"
+        },
+        "daily_return_observations": 60,
+        "hashes": {
+          "detail": "001393028a9984c53f42bab5ea9205d33939364eb38c40dda537aff47c19ed14",
+          "history": "bf164ac4d9c5fc25e7f50c509c97e82331b06208c3499e3d82c95a1e76176d7b",
+          "evidence": "0a573fdbb0db143c7acde21f3938559cc67c1697d056c8511c81724b1fe9f37f"
+        },
+        "offline_reproduction": {
+          "verified": true,
+          "experiment_id": "e_5812ac3b737196bacdb108f9a0306d13",
+          "method_version": "fixed-initial-80-20/v1",
+          "status": "comparison_only",
+          "payload_sha256": "4aea48740f8fa4219c1d9f52d7ef844600e0427e51fd889f4c3bf7eeaa96da06",
+          "note": "Hashes and reproduced results match; this does not authenticate data, authorship, or unseen holdout claims."
+        }
+      },
+      "large": {
+        "checks": {
+          "same_session_cookie_retained": true,
+          "detail_hash_unchanged": true,
+          "history_hash_unchanged": true,
+          "evidence_hash_unchanged": true
+        },
+        "experiment_id": "e_1db0a81b48884e3b90a11d6f15cee6f6",
+        "created_at": "2026-09-25T07:42:50.923000Z",
+        "original_provenance": {
+          "review_commit": "778327c87d80ba18bcac54693a985e3502dc8895",
+          "source_sha256": "fbdc2333aaed620aed5bac16ff636f59a950dae8d9bfd4eae7060d3f32efb4f0",
+          "application_version": "0.1.0"
+        },
+        "daily_return_observations": 5000,
+        "hashes": {
+          "detail": "3d3340ffd13c2673493707a390e87aa9d1c553c8549a91e328048b25719d5735",
+          "history": "c805fd043d87dcab2acc9921655d58c07142e4600cad20d71b9eb5fff4fdc293",
+          "evidence": "e019fa08cdd72591f86b3b8666acf9a9bc0e3f4efac2e3be6b4346be5be2299d"
+        },
+        "offline_reproduction": {
+          "verified": true,
+          "experiment_id": "e_1db0a81b48884e3b90a11d6f15cee6f6",
+          "method_version": "fixed-initial-80-20/v1",
+          "status": "comparison_only",
+          "payload_sha256": "b644b3774aaae2f07434d1133d68abe1229dc68f83d8e769473fe2e1b9f8f823",
+          "note": "Hashes and reproduced results match; this does not authenticate data, authorship, or unseen holdout claims."
+        }
+      }
+    },
+    "all_checks_passed": true
+  }
+}
