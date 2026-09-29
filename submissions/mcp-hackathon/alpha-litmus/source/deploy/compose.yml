@@ -1,0 +1,51 @@
+name: alphalitmus
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        ALPHALITMUS_COMMIT: ${ALPHALITMUS_COMMIT:-local-dev}
+    image: alpha-litmus:${ALPHALITMUS_IMAGE_TAG:-local}
+    container_name: alpha-litmus
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    expose:
+      - "8040"
+    environment:
+      ALPHALITMUS_ENV: ${ALPHALITMUS_ENV:-development}
+      ALPHALITMUS_ENABLE_NEXUS: "false"
+      ALPHALITMUS_ENABLE_LIVE_NEXUS: ${ALPHALITMUS_ENABLE_LIVE_NEXUS:-false}
+      ALPHALITMUS_ENABLE_NEXUS_BACKTEST: "false"
+      NEXUS_API_KEY_FILE: /run/secrets/nexus_api_key
+    secrets:
+      - nexus_api_key
+    pids_limit: 256
+    mem_limit: 1g
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    networks:
+      edge:
+        aliases:
+          - alpha-litmus
+
+networks:
+  edge:
+    external: true
+    name: ${ALPHALITMUS_EDGE_NETWORK:-apivouch_edge}
+
+secrets:
+  nexus_api_key:
+    file: ${ALPHALITMUS_NEXUS_KEY_FILE:-./no-nexus-key}

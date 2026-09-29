@@ -1,0 +1,169 @@
+{
+  "schema_version": "0.1",
+  "server": {
+    "name": "agent-acceptance-gate",
+    "description": "MCP/API service for checking whether AI agent transactions can continue before task acceptance, paid service calls, delivery acceptance, payment release, or dispute review.",
+    "status": "local_only_not_published"
+  },
+  "tools": [
+    {
+      "name": "world_cup_smart_money_radar",
+      "title": "World Cup Smart Money Radar",
+      "description": "Use this when an agent needs World Cup prediction-market smart-money movement signals. It returns wallet labels, position changes, market side, notional size, confidence, rationale, and caveats. Data and analytics only; no custody, no trading, no investment advice.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "market": {
+            "type": "string",
+            "description": "Optional market hint, market id, or all."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["schema_version", "service_id", "mode", "summary", "signals", "caveats", "next_gate"],
+        "properties": {
+          "schema_version": { "type": "string" },
+          "service_id": { "type": "string", "const": "world_cup_smart_money_radar" },
+          "mode": { "type": "string" },
+          "summary": { "type": "string" },
+          "signals": { "type": "array", "items": { "type": "object" } },
+          "caveats": { "type": "array", "items": { "type": "string" } },
+          "next_gate": { "type": "string" }
+        }
+      },
+      "routing_hints": [
+        "call for World Cup prediction-market smart-money movement",
+        "call when an agent needs a compact Polymarket-derived signal report",
+        "do not call for trade execution, custody, or investment advice"
+      ]
+    },
+    {
+      "name": "polymarket_smart_money_radar",
+      "title": "Polymarket Smart Money Radar",
+      "description": "Use this when an agent needs all-market Polymarket smart-money movement signals. Data and analytics only; no custody, no trading, no investment advice.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 10 }
+        }
+      }
+    },
+    {
+      "name": "event_probability_crypto_divergence",
+      "title": "Event Probability Crypto Divergence",
+      "description": "Use this when an agent needs event probability versus crypto spot/funding divergence signals. Data and analytics only.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event": { "type": "string" },
+          "asset": { "type": "string" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 10 }
+        }
+      }
+    },
+    {
+      "name": "crypto_market_pulse_report",
+      "title": "Crypto Market Pulse Report",
+      "description": "Use this when an agent needs a compact crypto market pulse report with flows, anomalies, and watch items.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 10 }
+        }
+      }
+    },
+    {
+      "name": "audit_agent_delivery",
+      "title": "Audit Agent Delivery",
+      "description": "Use this before accepting an AI agent delivery, releasing escrow/payment, submitting a seller delivery, or voting on a dispute. It checks artifacts, changed files, validation, rollback, hard gates, and next gate, then returns pass/needs_review/fail with buyer-ready reasoning.",
+      "input_schema": {
+        "type": "object",
+        "required": ["schema_version", "mode", "task", "delivery", "context"],
+        "properties": {
+          "schema_version": { "type": "string", "const": "0.1" },
+          "mode": { "type": "string", "enum": ["quick", "full", "evaluator"] },
+          "task": {
+            "type": "object",
+            "required": ["buyer_goal", "surface"],
+            "properties": {
+              "task_id": { "type": "string" },
+              "buyer_goal": { "type": "string" },
+              "surface": { "type": "string", "enum": ["repo", "website", "research", "data", "ops", "other"] },
+              "allowed_actions": { "type": "array", "items": { "type": "string" } },
+              "forbidden_actions": { "type": "array", "items": { "type": "string" } },
+              "acceptance_criteria": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "delivery": {
+            "type": "object",
+            "required": ["writeback_text", "next_gate"],
+            "properties": {
+              "writeback_text": { "type": "string" },
+              "artifact_paths": { "type": "array", "items": { "type": "string" } },
+              "changed_files": { "type": "array", "items": { "type": "string" } },
+              "validation": { "type": "array", "items": { "type": "string" } },
+              "validation_output": { "type": "string" },
+              "rollback_plan": { "type": "string" },
+              "hard_gates_declared": { "type": "array", "items": { "type": "string" } },
+              "next_gate": { "type": "string" }
+            }
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "repo_state": { "type": "string", "enum": ["clean", "dirty", "unknown", "not_applicable"] },
+              "public_publish_requested": { "type": "boolean" },
+              "payments_or_wallets_in_scope": { "type": "boolean" },
+              "credentials_in_scope": { "type": "boolean" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["schema_version", "verdict", "score", "dimension_scores", "missing", "risks", "next_gate", "buyer_summary", "machine_flags"],
+        "properties": {
+          "schema_version": { "type": "string" },
+          "verdict": { "type": "string", "enum": ["pass", "needs_review", "fail"] },
+          "score": { "type": "number" },
+          "dimension_scores": { "type": "object" },
+          "missing": { "type": "array", "items": { "type": "string" } },
+          "risks": { "type": "array", "items": { "type": "string" } },
+          "positive_evidence": { "type": "array", "items": { "type": "string" } },
+          "questions_for_seller": { "type": "array", "items": { "type": "string" } },
+          "next_gate": { "type": "string" },
+          "buyer_summary": { "type": "string" },
+          "evaluator_notes": { "type": "string" },
+          "machine_flags": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "routing_hints": [
+        "call when user asks if an agent delivery is safe to accept",
+        "call before payment release or escrow release",
+        "call before public deployment if the delivery includes release claims",
+        "call when dispute evidence needs structure"
+      ]
+    },
+    {
+      "name": "assess_agent_transaction",
+      "title": "Assess Agent Transaction",
+      "status": "planned",
+      "description": "Future tool: use before an agent accepts a task, spends budget, buys a service, releases payment, or enters dispute. Returns whether the transaction can continue, what evidence is missing, and which hard gates apply.",
+      "routing_hints": [
+        "call before an agent spends budget",
+        "call before a buyer agent hires a seller agent",
+        "call before a seller agent accepts unclear scope",
+        "call before dispute escalation"
+      ]
+    }
+  ]
+}

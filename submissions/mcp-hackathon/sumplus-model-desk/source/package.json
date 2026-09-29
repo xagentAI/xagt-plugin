@@ -1,0 +1,20 @@
+{
+  "name": "sumplus-model-desk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Prices one job against every offer in a live model catalogue and says which offers can actually take it.",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "snapshot": "tsx scripts/take-snapshot.ts",
+    "test": "tsx tests/run.ts",
+    "verify": "node verify.mjs",
+    "check:upstream": "tsx scripts/check-upstream.ts"
+  },
+  "dependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.2"
+  }
+}

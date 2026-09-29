@@ -1,0 +1,78 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "JSONPlaceholder public REST API (MCPForge live demo)",
+    "version": "1.0.0",
+    "description": "Keyless public REST API returning real JSON resources (posts, users, comments). It is the default live demo endpoint because the hosting egress permits it, while api.github.com is blocked there. It drives the same Build -> Verify -> MCPize -> Monetize chain as the GitHub showcase, proving end-to-end live invocation of a wrapped OpenAPI spec against a real external service."
+  },
+  "servers": [
+    { "url": "https://jsonplaceholder.typicode.com" }
+  ],
+  "paths": {
+    "/posts": {
+      "get": {
+        "operationId": "listPosts",
+        "summary": "List posts",
+        "description": "Returns the post feed; the first step of a reading-brief investigation. An agent lists resources, then verifies each one live instead of trusting a stale summary.",
+        "parameters": [
+          {
+            "name": "_limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "example": 10 },
+            "description": "Cap the number of returned posts"
+          }
+        ],
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "operationId": "getPost",
+        "summary": "Post detail",
+        "description": "Returns one post's live detail (title, body, author id).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 },
+            "description": "Post id"
+          }
+        ],
+        "responses": {
+          "200": { "description": "ok" },
+          "404": { "description": "Post not found" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List users",
+        "description": "Returns the user directory; used to resolve an author's profile.",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "getUser",
+        "summary": "User detail",
+        "description": "Returns one user's profile (name, email, company).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 },
+            "description": "User id"
+          }
+        ],
+        "responses": {
+          "200": { "description": "ok" },
+          "404": { "description": "User not found" }
+        }
+      }
+    }
+  }
+}

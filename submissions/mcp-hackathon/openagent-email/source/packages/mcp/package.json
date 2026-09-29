@@ -1,0 +1,52 @@
+{
+  "name": "@openagentemail/mcp",
+  "version": "0.7.3",
+  "mcpName": "io.github.openagentemail/mcp",
+  "description": "MCP server for openagent.email \u2014 self-hosted agent email, task handoffs, and approvals",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "openagentemail-mcp": "dist/main.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "approval-digest.md",
+    "approval-canonical-vectors.v1.json"
+  ],
+  "scripts": {
+    "build": "bun build src/main.ts --target node --outfile dist/main.js",
+    "check:approval-publication": "node ../api/scripts/sync-approval-publication.mjs --check",
+    "sync:approval-publication": "node ../api/scripts/sync-approval-publication.mjs --write",
+    "prepack": "node ../api/scripts/sync-approval-publication.mjs --check",
+    "prepublishOnly": "bun run check:approval-publication && bun run build",
+    "start": "bun run src/main.ts",
+    "test": "bun test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openagentemail/openagentemail.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://openagent.email",
+  "bugs": "https://github.com/openagentemail/openagentemail/issues",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "email",
+    "agent",
+    "openagentemail"
+  ],
+  "devDependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "zod": "^4.2.0"
+  }
+}

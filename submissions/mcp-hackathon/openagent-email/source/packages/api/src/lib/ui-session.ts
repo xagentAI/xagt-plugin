@@ -1,0 +1,994 @@
+import { createHash, randomBytes } from 'node:crypto';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { dirname } from 'node:path';
+import { bodyLimit } from 'hono/body-limit';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import { createMiddleware } from 'hono/factory';
+import { Hono } from 'hono';
+import { z } from 'zod';
+import type { Auth } from './auth.ts';
+import { clientIp } from './net.ts';
+import { consumeOAuthReturnCookie } from './oauth-return.ts';
+import { recordAuditEvent } from './audit.ts';
+
+export const COOKIE_NAME = 'oae_ui';
+const IDLE_TIMEOUT_MS = 12 * 60 * 60 * 1000;
+const ABSOLUTE_TIMEOUT_MS = 24 * 60 * 60 * 1000;
+const REMEMBER_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000;
+const REMEMBER_COOKIE_MAX_AGE_S = 30 * 24 * 60 * 60;
+const IP_FAILURE_WINDOW_MS = 5 * 60 * 1000;
+const GLOBAL_FAILURE_WINDOW_MS = 60 * 1000;
+const MAX_IP_FAILURES = 10;
+const MAX_GLOBAL_FAILURES = 60;
+const MAX_TRACKED_IPS = 1000;
+export const DENIED_AUDIT_THROTTLE_MS = 60 * 1000;
+const MINT_DENIED_AUDIT_THROTTLE_MS = DENIED_AUDIT_THROTTLE_MS;
+/** Connect 明文 token 下发审计节流窗口（与 denied 审计同为 60s）。 */
+export const CONNECT_REVEAL_AUDIT_THROTTLE_MS = DENIED_AUDIT_THROTTLE_MS;
+/** 测试可见：Connect reveal 节流表与 mint/session denied 共用上限。 */
+export const CONNECT_REVEAL_AUDIT_MAX_TRACKED = MAX_TRACKED_IPS;
+/** authenticate 更新 lastSeenAt 的落盘节流：默认 5 分钟内不重复写盘。 */
+export const LAST_SEEN_PERSIST_INTERVAL_MS = 5 * 60 * 1000;
+/** ?token= 换取的一次性交换码默认 TTL：硬约束 ≤10 分钟。 */
+export const EXCHANGE_CODE_TTL_MS = 10 * 60 * 1000;
+/** 全局活动一次性交换码上限。 */
+export const MAX_GLOBAL_EXCHANGE_CODES = 1000;
+/** 单个令牌同时持有的活动一次性交换码上限。 */
+export const MAX_EXCHANGE_CODES_PER_TOKEN = 5;
+
+type Session = {
+  /** 仅进程内持有；落盘绝不写明文 token。重启后靠 tokenHash 反解。 */
+  token?: string;
+  tokenHash: string;
+  createdAt: number;
+  lastSeenAt: number;
+  remembered: boolean;
+};
+
+type ExchangeCodeRecord = {
+  auth: Auth;
+  tokenHash: string;
+  createdAt: number;
+  expiresAt: number;
+  ip: string;
+};
+
+type ConsumedCodeRecord = {
+  auth: Auth;
+  consumedAt: number;
+  expiresAt: number;
+};
+
+/** 落盘条目：仅 sidHash → 哈希与时间戳，无 sid/token 原文。 */
+type PersistedSession = {
+  tokenHash: string;
+  createdAt: number;
+  lastSeenAt: number;
+  remembered: boolean;
+};
+
+type PersistedStore = Record<string, PersistedSession>;
+
+type CreateResult =
+  | { ok: true; sid: string; auth: Auth; reason?: undefined }
+  | {
+      ok: false;
+      reason: 'invalid_token' | 'rate_limited' | 'capacity';
+      sid?: undefined;
+      auth?: undefined;
+    };
+
+type SessionStoreOptions = {
+  resolveToken: (token: string) => Auth | null;
+  /**
+   * 按 tokenHash 反解 principal（持久化会话 authenticate 必用）。
+   * 未提供时：仅进程内带明文 token 的会话可 authenticate（测试常用）。
+   */
+  resolveTokenHash?: (tokenHash: string) => Auth | null;
+  maxSessions?: number;
+  maxSessionsPerToken?: number;
+  /**
+   * 持久化文件路径。生产由 app.ts 传入 DATA_DIR/ui-sessions.json；
+   * 省略则纯内存（避免测试文件共享 DATA_DIR 时互相污染）。
+   * DATA_DIR 下本 store 与 identities/oauth/audit 等均为单写者，不支持多容器共享。
+   */
+  persistPath?: string;
+  /** lastSeenAt 落盘节流间隔；默认 LAST_SEEN_PERSIST_INTERVAL_MS。 */
+  lastSeenPersistIntervalMs?: number;
+  /**
+   * 一次性交换码 TTL（毫秒）。硬约束 ≤ 10 分钟；测试可注入更短值加速验证。
+   */
+  exchangeCodeTtlMs?: number;
+  /** 全局活动一次性交换码上限（默认 MAX_GLOBAL_EXCHANGE_CODES = 1000）。 */
+  maxExchangeCodes?: number;
+  /** 单个令牌同时持有的活动一次性交换码上限（默认 MAX_EXCHANGE_CODES_PER_TOKEN = 5）。 */
+  maxExchangeCodesPerToken?: number;
+};
+
+function sha256(value: string): string {
+  return createHash('sha256').update(value).digest('hex');
+}
+
+function isExpired(session: Pick<Session, 'lastSeenAt' | 'createdAt' | 'remembered'>, now: number): boolean {
+  // Remembered sessions ("trust this device") use a single 30-day sliding
+  // idle window. There is no extra absolute cap server-side: the persistent
+  // cookie's own 30-day Max-Age bounds the lifetime at the browser.
+  if (session.remembered) {
+    return now - session.lastSeenAt >= REMEMBER_TIMEOUT_MS;
+  }
+  return (
+    now - session.lastSeenAt >= IDLE_TIMEOUT_MS ||
+    now - session.createdAt >= ABSOLUTE_TIMEOUT_MS
+  );
+}
+
+function isPersistedSession(value: unknown): value is PersistedSession {
+  if (!value || typeof value !== 'object') return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row.tokenHash === 'string' &&
+    typeof row.createdAt === 'number' &&
+    typeof row.lastSeenAt === 'number' &&
+    typeof row.remembered === 'boolean'
+  );
+}
+
+function isPersistedStore(value: unknown): value is PersistedStore {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return Object.values(value as object).every(isPersistedSession);
+}
+
+export class UiSessionStore {
+  private readonly sessions = new Map<string, Session>();
+  private readonly ipFailures = new Map<string, number[]>();
+  private globalFailures: number[] = [];
+  private readonly exchangeCodes = new Map<string, ExchangeCodeRecord>();
+  private readonly consumedCodes = new Map<string, ConsumedCodeRecord>();
+  private readonly lastMintDeniedAuditAt = new Map<string, number>();
+  private readonly lastSessionDeniedAuditAt = new Map<string, number>();
+  /** Connect reveal 审计节流：键=`${sid}:${ip}`，cleanup 过期清理 + MAX_TRACKED_IPS 封顶。 */
+  private readonly lastConnectRevealAuditAt = new Map<string, number>();
+  private readonly resolve: (token: string) => Auth | null;
+  private readonly resolveHash: ((tokenHash: string) => Auth | null) | null;
+  private readonly maxSessions: number;
+  private readonly maxSessionsPerToken: number;
+  private readonly maxExchangeCodes: number;
+  private readonly maxExchangeCodesPerToken: number;
+  private readonly persistPath: string | null;
+  private readonly lastSeenPersistIntervalMs: number;
+  private readonly exchangeCodeTtlMs: number;
+  /** 上次因 lastSeenAt 滑动而落盘的时间（按墙钟；节流用）。 */
+  private lastSeenPersistedAt = 0;
+
+  constructor(options: SessionStoreOptions) {
+    this.resolve = options.resolveToken;
+    this.resolveHash = options.resolveTokenHash ?? null;
+    this.maxSessions = options.maxSessions ?? 200;
+    this.maxSessionsPerToken = options.maxSessionsPerToken ?? 5;
+    this.maxExchangeCodes = options.maxExchangeCodes ?? MAX_GLOBAL_EXCHANGE_CODES;
+    this.maxExchangeCodesPerToken =
+      options.maxExchangeCodesPerToken ?? MAX_EXCHANGE_CODES_PER_TOKEN;
+    this.persistPath = options.persistPath ?? null;
+    this.lastSeenPersistIntervalMs =
+      options.lastSeenPersistIntervalMs ?? LAST_SEEN_PERSIST_INTERVAL_MS;
+    this.exchangeCodeTtlMs = Math.min(
+      options.exchangeCodeTtlMs ?? EXCHANGE_CODE_TTL_MS,
+      EXCHANGE_CODE_TTL_MS,
+    );
+    if (this.persistPath) this.loadFromDisk(Date.now());
+  }
+
+  create(
+    token: string,
+    ip: string,
+    now = Date.now(),
+    remember = false,
+    provenance?: string,
+  ): CreateResult {
+    const removed = this.cleanup(now);
+    token = token.trim();
+
+    const ipFailures = this.recentIpFailures(ip, now);
+    if (
+      ipFailures.length >= MAX_IP_FAILURES ||
+      this.globalFailures.length >= MAX_GLOBAL_FAILURES
+    ) {
+      if (removed) this.persist();
+      // 必修 1: create() rate_limited 分支不落审计（防写放大）
+      return { ok: false, reason: 'rate_limited' };
+    }
+
+    const auth = this.resolve(token);
+    if (!auth) {
+      ipFailures.push(now);
+      this.ipFailures.set(ip, ipFailures);
+      this.globalFailures.push(now);
+      if (removed) this.persist();
+
+      // 必修 1: create() denied 分支按 IP 节流（每 IP 每分钟至多 1 条）
+      const lastDenied = this.lastSessionDeniedAuditAt.get(ip) ?? 0;
+      if (now - lastDenied >= DENIED_AUDIT_THROTTLE_MS) {
+        this.lastSessionDeniedAuditAt.set(ip, now);
+        recordAuditEvent({
+          event: 'ui.session.login',
+          outcome: 'denied',
+          ...(provenance !== undefined ? { provenance } : {}),
+          ip,
+        });
+      }
+      return { ok: false, reason: 'invalid_token' };
+    }
+
+    const tokenHash = sha256(token);
+    let principalSessions = 0;
+    let oldestPrincipalHash: string | null = null;
+    let oldestPrincipalSeen = Infinity;
+    for (const [sidHash, session] of this.sessions) {
+      if (session.tokenHash !== tokenHash) continue;
+      principalSessions += 1;
+      if (session.lastSeenAt < oldestPrincipalSeen) {
+        oldestPrincipalSeen = session.lastSeenAt;
+        oldestPrincipalHash = sidHash;
+      }
+    }
+    let evicted = false;
+    if (principalSessions >= this.maxSessionsPerToken) {
+      // The caller just proved they hold this token, so rather than locking
+      // them out for hours, drop their own least-recently-used session.
+      if (oldestPrincipalHash) {
+        this.sessions.delete(oldestPrincipalHash);
+        evicted = true;
+      }
+    }
+    if (this.sessions.size >= this.maxSessions) {
+      if (removed || evicted) this.persist();
+      return { ok: false, reason: 'capacity' };
+    }
+
+    const sid = randomBytes(32).toString('base64url');
+    this.sessions.set(sha256(sid), {
+      token,
+      tokenHash,
+      createdAt: now,
+      lastSeenAt: now,
+      remembered: remember,
+    });
+    // create / 驱逐 / 过期清理 → 必落盘；同时重置节流时钟避免紧随的 authenticate 再写一次
+    this.persist();
+    this.lastSeenPersistedAt = now;
+
+    recordAuditEvent({
+      event: 'ui.session.login',
+      outcome: 'ok',
+      ...(provenance !== undefined ? { provenance } : {}),
+      address: auth.kind === 'identity' ? auth.address : 'admin',
+      ip,
+    });
+
+    return { ok: true, sid, auth };
+  }
+
+  /**
+   * 服务端验令牌并签发一次性交换码（GET /ui?token= 净化流核心）。
+   * 签发时刻落审计；硬约束 TTL ≤ 10 分钟。
+   */
+  mintExchangeCode(
+    token: string,
+    ip: string,
+    now = Date.now(),
+  ):
+    | { ok: true; code: string; auth: Auth }
+    | { ok: false; reason: 'invalid_token' | 'rate_limited' | 'capacity' } {
+    // 必修 1: mint 入口先清理会话与限流窗，防止垃圾 GET 堆积 globalFailures 永久锁死
+    const removed = this.cleanup(now);
+    if (removed) this.persist();
+    this.cleanupExchangeCodes(now);
+    token = token.trim();
+
+    const ipFailures = this.recentIpFailures(ip, now);
+    if (
+      ipFailures.length >= MAX_IP_FAILURES ||
+      this.globalFailures.length >= MAX_GLOBAL_FAILURES
+    ) {
+      // 必修 2: 公开未认证端点防写放大——rate_limited 分支不落审计
+      return { ok: false, reason: 'rate_limited' };
+    }
+
+    // 顺清 3: 全局交换码总量上界检查
+    if (this.exchangeCodes.size >= this.maxExchangeCodes) {
+      return { ok: false, reason: 'capacity' };
+    }
+
+    const auth = this.resolve(token);
+    if (!auth) {
+      ipFailures.push(now);
+      this.ipFailures.set(ip, ipFailures);
+      this.globalFailures.push(now);
+
+      // 必修 2: 公开端点防写放大与冲刷取证——denied 分支按 IP 低频落盘（每 IP 每分钟至多 1 条）
+      const lastDeniedAudit = this.lastMintDeniedAuditAt.get(ip) ?? 0;
+      if (now - lastDeniedAudit >= MINT_DENIED_AUDIT_THROTTLE_MS) {
+        this.lastMintDeniedAuditAt.set(ip, now);
+        recordAuditEvent({
+          event: 'ui.token.exchange_mint',
+          outcome: 'denied',
+          ip,
+        });
+      }
+      return { ok: false, reason: 'invalid_token' };
+    }
+
+    // 顺清 3: 单令牌活动交换码上界检查（≤ maxExchangeCodesPerToken）
+    const tokenHash = sha256(token);
+    let tokenCodes = 0;
+    for (const record of this.exchangeCodes.values()) {
+      if (record.tokenHash === tokenHash) {
+        tokenCodes++;
+      }
+    }
+    if (tokenCodes >= this.maxExchangeCodesPerToken) {
+      return { ok: false, reason: 'capacity' };
+    }
+
+    const code = randomBytes(32).toString('base64url');
+    const codeHash = sha256(code);
+    const expiresAt = now + this.exchangeCodeTtlMs;
+
+    this.exchangeCodes.set(codeHash, {
+      auth,
+      tokenHash,
+      createdAt: now,
+      expiresAt,
+      ip,
+    });
+
+    recordAuditEvent({
+      event: 'ui.token.exchange_mint',
+      outcome: 'ok',
+      address: auth.kind === 'identity' ? auth.address : 'admin',
+      ip,
+    });
+
+    return { ok: true, code, auth };
+  }
+
+  /**
+   * 客户端消费一次性交换码换取会话（POST /ui/api/session { code, provenance: 'link-exchange' }）。
+   * 硬约束 1: 换过即焚，重放 → 401 + 审计 denied。
+   * 硬约束 2: TTL ≤ 10 分钟，过期即废。
+   * 硬约束 3: 严格绑定签发对象（身份地址+签发上下文），不可换他人会话。
+   * 顺清 6: 先全部校验通过再焚毁 code（容量超限不焚码，允许后续重试）。
+   */
+  exchangeCode(
+    code: string,
+    ip: string,
+    now = Date.now(),
+    remember = false,
+    provenance?: string,
+  ): CreateResult {
+    // 边角 R4: exchangeCode 入口先清理会话与限流窗，防止过期 globalFailures 导致 exchange 路径被误锁
+    let removed = this.cleanup(now);
+    if (removed) this.persist();
+    this.cleanupExchangeCodes(now);
+    code = code.trim();
+    const codeHash = sha256(code);
+
+    // 必修 2: exchangeCode 失败计入限流，入口先检查限流桶；超限不落审计（防放大）
+    const ipFailures = this.recentIpFailures(ip, now);
+    if (
+      ipFailures.length >= MAX_IP_FAILURES ||
+      this.globalFailures.length >= MAX_GLOBAL_FAILURES
+    ) {
+      return { ok: false, reason: 'rate_limited' };
+    }
+
+    const recordFailureAndDeniedAudit = (address?: string) => {
+      // 必修 2: 重放/未知码/过期码计入限流桶
+      ipFailures.push(now);
+      this.ipFailures.set(ip, ipFailures);
+      this.globalFailures.push(now);
+
+      // 必修 1: 失败审计写盘节流（每 IP 每分钟至多 1 条）
+      const lastDenied = this.lastSessionDeniedAuditAt.get(ip) ?? 0;
+      if (now - lastDenied >= DENIED_AUDIT_THROTTLE_MS) {
+        this.lastSessionDeniedAuditAt.set(ip, now);
+        recordAuditEvent({
+          event: 'ui.session.login',
+          outcome: 'denied',
+          provenance: provenance ?? 'link-exchange',
+          ...(address ? { address } : {}),
+          ip,
+        });
+      }
+    };
+
+    // 硬约束 1: 重放检测
+    if (this.consumedCodes.has(codeHash)) {
+      const consumed = this.consumedCodes.get(codeHash)!;
+      const address = consumed.auth.kind === 'identity' ? consumed.auth.address : 'admin';
+      recordFailureAndDeniedAudit(address);
+      return { ok: false, reason: 'invalid_token' };
+    }
+
+    const record = this.exchangeCodes.get(codeHash);
+    if (!record) {
+      recordFailureAndDeniedAudit();
+      return { ok: false, reason: 'invalid_token' };
+    }
+
+    // 硬约束 2: TTL 检测
+    if (now >= record.expiresAt) {
+      this.exchangeCodes.delete(codeHash);
+      const address = record.auth.kind === 'identity' ? record.auth.address : 'admin';
+      recordFailureAndDeniedAudit(address);
+      return { ok: false, reason: 'invalid_token' };
+    }
+
+    // 顺清 6: 校验容量与清理，先全部校验通过再焚毁 code
+    if (this.cleanup(now)) removed = true;
+
+    let principalSessions = 0;
+    let oldestPrincipalHash: string | null = null;
+    let oldestPrincipalSeen = Infinity;
+    for (const [sidHash, session] of this.sessions) {
+      if (session.tokenHash !== record.tokenHash) continue;
+      principalSessions += 1;
+      if (session.lastSeenAt < oldestPrincipalSeen) {
+        oldestPrincipalSeen = session.lastSeenAt;
+        oldestPrincipalHash = sidHash;
+      }
+    }
+
+    const willEvict = principalSessions >= this.maxSessionsPerToken && oldestPrincipalHash !== null;
+    const projectedSessionsSize = this.sessions.size - (willEvict ? 1 : 0);
+    if (projectedSessionsSize >= this.maxSessions) {
+      if (removed) this.persist();
+      return { ok: false, reason: 'capacity' };
+    }
+
+    // 容量与校验已全部通过：执行驱逐、原子焚码并建会话
+    if (willEvict && oldestPrincipalHash) {
+      this.sessions.delete(oldestPrincipalHash);
+    }
+
+    // 硬约束 1: 换过即焚，进入已消费墓碑表
+    this.exchangeCodes.delete(codeHash);
+    this.consumedCodes.set(codeHash, {
+      auth: record.auth,
+      consumedAt: now,
+      expiresAt: record.expiresAt,
+    });
+
+    const sid = randomBytes(32).toString('base64url');
+    this.sessions.set(sha256(sid), {
+      tokenHash: record.tokenHash,
+      createdAt: now,
+      lastSeenAt: now,
+      remembered: remember,
+    });
+    this.persist();
+    this.lastSeenPersistedAt = now;
+
+    recordAuditEvent({
+      event: 'ui.session.login',
+      outcome: 'ok',
+      provenance: provenance ?? 'link-exchange',
+      address: record.auth.kind === 'identity' ? record.auth.address : 'admin',
+      ip,
+    });
+
+    return { ok: true, sid, auth: record.auth };
+  }
+
+  private cleanupExchangeCodes(now: number): void {
+    for (const [hash, record] of this.exchangeCodes) {
+      if (now >= record.expiresAt) {
+        this.exchangeCodes.delete(hash);
+      }
+    }
+    for (const [hash, record] of this.consumedCodes) {
+      if (now >= record.expiresAt) {
+        this.consumedCodes.delete(hash);
+      }
+    }
+  }
+
+  authenticate(sid: string, now = Date.now()): { auth: Auth } | null {
+    const sidHash = sha256(sid);
+    const session = this.sessions.get(sidHash);
+    if (!session) return null;
+
+    if (isExpired(session, now)) {
+      this.sessions.delete(sidHash);
+      this.persist();
+      return null;
+    }
+
+    const auth = this.resolveSession(session);
+    if (!auth) {
+      this.sessions.delete(sidHash);
+      this.persist();
+      return null;
+    }
+
+    session.lastSeenAt = now;
+    // 节流：lastSeenAt 滑动不每请求写盘；间隔到了才落盘。
+    if (now - this.lastSeenPersistedAt >= this.lastSeenPersistIntervalMs) {
+      this.persist();
+      this.lastSeenPersistedAt = now;
+    }
+    return { auth };
+  }
+
+  /**
+   * Return the plaintext credential already held by a live, directly-created
+   * identity session.  Persistent and exchange-code sessions intentionally do
+   * not have plaintext credentials, and admin credentials are never exposed.
+   *
+   * The caller must authenticate the session first.  Re-resolving the token
+   * here also makes a rotation between authentication and reveal fail closed.
+   */
+  identityTokenForSession(sid: string, expectedAddress: string): string | null {
+    const session = this.sessions.get(sha256(sid));
+    if (!session?.token) return null;
+    const auth = this.resolve(session.token);
+    if (auth?.kind !== 'identity' || auth.address !== expectedAddress) return null;
+    return session.token;
+  }
+
+  /**
+   * Connect 明文 token 下发审计节流：每会话+IP 每分钟至多认领 1 次。
+   * 认领前顺手清过期；插入新键时若已满则剪最旧（读路径自封顶，不依赖 cleanup）。
+   * @returns true 时调用方应落 identity.token.reveal
+   */
+  claimConnectRevealAudit(sid: string, ip: string, now = Date.now()): boolean {
+    for (const [trackedKey, trackedAt] of this.lastConnectRevealAuditAt) {
+      if (now - trackedAt > CONNECT_REVEAL_AUDIT_THROTTLE_MS) {
+        this.lastConnectRevealAuditAt.delete(trackedKey);
+      }
+    }
+    const key = `${sid}:${ip}`;
+    const lastAt = this.lastConnectRevealAuditAt.get(key) ?? 0;
+    if (now - lastAt < CONNECT_REVEAL_AUDIT_THROTTLE_MS) return false;
+    if (!this.lastConnectRevealAuditAt.has(key)) {
+      while (this.lastConnectRevealAuditAt.size >= MAX_TRACKED_IPS) {
+        const oldest = this.lastConnectRevealAuditAt.keys().next().value;
+        if (oldest === undefined) break;
+        this.lastConnectRevealAuditAt.delete(oldest);
+      }
+    }
+    this.lastConnectRevealAuditAt.set(key, now);
+    return true;
+  }
+
+  /** 测试辅助：当前 Connect reveal 节流表大小。 */
+  connectRevealAuditSizeForTests(): number {
+    return this.lastConnectRevealAuditAt.size;
+  }
+
+  /** 测试辅助：直接写入节流表（填充上限 / 过期清理场景）。 */
+  seedConnectRevealAuditForTests(key: string, at: number): void {
+    this.lastConnectRevealAuditAt.set(key, at);
+  }
+
+  /** 测试辅助：触发 cleanup（含节流 Map 过期清理与 MAX_TRACKED_IPS 封顶）。 */
+  cleanupThrottleMapsForTests(now = Date.now()): void {
+    this.cleanup(now);
+  }
+
+  destroy(sid: string): void {
+    const sidHash = sha256(sid);
+    if (!this.sessions.has(sidHash)) return;
+    this.sessions.delete(sidHash);
+    this.persist();
+  }
+
+  /** 测试辅助：当前内存会话数。 */
+  sizeForTests(): number {
+    return this.sessions.size;
+  }
+
+  /** 测试辅助：当前活动一次性交换码数。 */
+  activeCodesCountForTests(): number {
+    return this.exchangeCodes.size;
+  }
+
+  /** 测试辅助：当前已消费交换码墓碑数。 */
+  consumedCodesCountForTests(): number {
+    return this.consumedCodes.size;
+  }
+
+  /** 测试辅助：lastSeen 落盘节流时钟（墙钟 ms）。 */
+  lastSeenPersistedAtForTests(): number {
+    return this.lastSeenPersistedAt;
+  }
+
+  private resolveSession(session: Session): Auth | null {
+    if (session.token !== undefined) return this.resolve(session.token);
+    if (this.resolveHash) return this.resolveHash(session.tokenHash);
+    return null;
+  }
+
+  /** @returns 是否删除了过期会话（调用方据此决定是否落盘）。 */
+  private cleanup(now: number): boolean {
+    let removed = false;
+    for (const [sidHash, session] of this.sessions) {
+      if (isExpired(session, now)) {
+        this.sessions.delete(sidHash);
+        removed = true;
+      }
+    }
+
+    this.globalFailures = this.globalFailures.filter(
+      (failureAt) => now - failureAt <= GLOBAL_FAILURE_WINDOW_MS,
+    );
+    for (const [ip, failures] of this.ipFailures) {
+      const recent = failures.filter(
+        (failureAt) => now - failureAt <= IP_FAILURE_WINDOW_MS,
+      );
+      if (recent.length === 0) this.ipFailures.delete(ip);
+      else this.ipFailures.set(ip, recent);
+    }
+    if (this.ipFailures.size > MAX_TRACKED_IPS) {
+      const excess = this.ipFailures.size - MAX_TRACKED_IPS;
+      let count = 0;
+      for (const key of this.ipFailures.keys()) {
+        this.ipFailures.delete(key);
+        count++;
+        if (count >= excess) break;
+      }
+    }
+    for (const [ip, lastAt] of this.lastMintDeniedAuditAt) {
+      if (now - lastAt > MINT_DENIED_AUDIT_THROTTLE_MS) {
+        this.lastMintDeniedAuditAt.delete(ip);
+      }
+    }
+    if (this.lastMintDeniedAuditAt.size > MAX_TRACKED_IPS) {
+      const excess = this.lastMintDeniedAuditAt.size - MAX_TRACKED_IPS;
+      let count = 0;
+      for (const key of this.lastMintDeniedAuditAt.keys()) {
+        this.lastMintDeniedAuditAt.delete(key);
+        count++;
+        if (count >= excess) break;
+      }
+    }
+    for (const [ip, lastAt] of this.lastSessionDeniedAuditAt) {
+      if (now - lastAt > DENIED_AUDIT_THROTTLE_MS) {
+        this.lastSessionDeniedAuditAt.delete(ip);
+      }
+    }
+    if (this.lastSessionDeniedAuditAt.size > MAX_TRACKED_IPS) {
+      const excess = this.lastSessionDeniedAuditAt.size - MAX_TRACKED_IPS;
+      let count = 0;
+      for (const key of this.lastSessionDeniedAuditAt.keys()) {
+        this.lastSessionDeniedAuditAt.delete(key);
+        count++;
+        if (count >= excess) break;
+      }
+    }
+    // Connect reveal 审计节流：过期条目清理 + 与 mint/session denied 同上限
+    for (const [key, lastAt] of this.lastConnectRevealAuditAt) {
+      if (now - lastAt > CONNECT_REVEAL_AUDIT_THROTTLE_MS) {
+        this.lastConnectRevealAuditAt.delete(key);
+      }
+    }
+    if (this.lastConnectRevealAuditAt.size > MAX_TRACKED_IPS) {
+      const excess = this.lastConnectRevealAuditAt.size - MAX_TRACKED_IPS;
+      let count = 0;
+      for (const key of this.lastConnectRevealAuditAt.keys()) {
+        this.lastConnectRevealAuditAt.delete(key);
+        count++;
+        if (count >= excess) break;
+      }
+    }
+    return removed;
+  }
+
+  private recentIpFailures(ip: string, now: number): number[] {
+    const recent = (this.ipFailures.get(ip) ?? []).filter(
+      (failureAt) => now - failureAt <= IP_FAILURE_WINDOW_MS,
+    );
+    if (recent.length === 0) this.ipFailures.delete(ip);
+    else this.ipFailures.set(ip, recent);
+    return recent;
+  }
+
+  /** 进程在 write/rename 之间被杀会留 .tmp；启动时顺手删掉（无明文、无安全影响）。 */
+  private discardStaleTmp(path: string): void {
+    const tmp = `${path}.tmp`;
+    if (!existsSync(tmp)) return;
+    try {
+      unlinkSync(tmp);
+    } catch {
+      // best effort：删不掉不得阻断启动
+    }
+  }
+
+  private loadFromDisk(now: number): void {
+    const path = this.persistPath;
+    if (!path) return;
+    this.discardStaleTmp(path);
+    // 文件不存在也要钉节流时钟，否则随后 authenticate 会因 lastSeenPersistedAt=0 立刻写盘
+    if (!existsSync(path)) {
+      this.lastSeenPersistedAt = now;
+      return;
+    }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(readFileSync(path, 'utf8'));
+    } catch {
+      throw new Error('ui_session_store_corrupt');
+    }
+    if (!isPersistedStore(parsed)) {
+      throw new Error('ui_session_store_corrupt');
+    }
+
+    let pruned = false;
+    for (const [sidHash, row] of Object.entries(parsed)) {
+      if (isExpired(row, now)) {
+        pruned = true;
+        continue;
+      }
+      // 重启后无明文 token；authenticate 走 resolveTokenHash
+      this.sessions.set(sidHash, {
+        tokenHash: row.tokenHash,
+        createdAt: row.createdAt,
+        lastSeenAt: row.lastSeenAt,
+        remembered: row.remembered,
+      });
+    }
+    if (pruned) this.persist();
+    // 启动加载后的首批 authenticate 不必立刻再写盘
+    this.lastSeenPersistedAt = now;
+  }
+
+  private persist(): void {
+    const path = this.persistPath;
+    if (!path) return;
+
+    const data: PersistedStore = {};
+    for (const [sidHash, session] of this.sessions) {
+      data[sidHash] = {
+        tokenHash: session.tokenHash,
+        createdAt: session.createdAt,
+        lastSeenAt: session.lastSeenAt,
+        remembered: session.remembered,
+      };
+    }
+
+    const dir = dirname(path);
+    mkdirSync(dir, { recursive: true, mode: 0o700 });
+    try {
+      chmodSync(dir, 0o700);
+    } catch {
+      // bind mount 可能属主不同；文件 mode 仍会设置
+    }
+    const tmp = `${path}.tmp`;
+    writeFileSync(tmp, JSON.stringify(data, null, 2), { mode: 0o600 });
+    chmodSync(tmp, 0o600);
+    renameSync(tmp, path);
+    try {
+      // rename 后目标文件 mode 可能继承旧 inode；再钉一次 0600
+      if (existsSync(path) && (statSync(path).mode & 0o777) !== 0o600) {
+        chmodSync(path, 0o600);
+      }
+    } catch {
+      // best effort
+    }
+  }
+}
+
+declare module 'hono' {
+  interface ContextVariableMap {
+    uiSessionSid: string;
+  }
+}
+
+const loginSchema = z
+  .object({
+    token: z.string().min(1).max(512).optional(),
+    code: z.string().min(1).max(512).optional(),
+    remember: z.boolean().optional(),
+    /** 顺清 3: 客户端自报 provenance 标记忽略（死输入面），服务端凭证分支单向推导。 */
+    provenance: z.unknown().optional(),
+  })
+  .strict()
+  .refine(
+    (data) => (data.token !== undefined) !== (data.code !== undefined),
+    { message: 'Either token or code must be provided, but not both' },
+  );
+
+function cookieSecure(url: string): boolean {
+  const parsed = new URL(url);
+  const localHost =
+    parsed.hostname === 'localhost' ||
+    parsed.hostname === '127.0.0.1' ||
+    parsed.hostname === '[::1]';
+  return !(parsed.protocol === 'http:' && localHost);
+}
+
+function setSessionCookie(
+  c: Parameters<typeof setCookie>[0],
+  sid: string,
+  remember: boolean,
+): void {
+  setCookie(c, COOKIE_NAME, sid, {
+    httpOnly: true,
+    sameSite: 'Strict',
+    path: '/ui',
+    secure: cookieSecure(c.req.url),
+    // Only remembered sessions get a persistent cookie; the default stays a
+    // browser-session cookie so closing the browser signs the user out.
+    ...(remember ? { maxAge: REMEMBER_COOKIE_MAX_AGE_S } : {}),
+  });
+}
+
+function expireSessionCookie(c: Parameters<typeof deleteCookie>[0]): void {
+  deleteCookie(c, COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: 'Strict',
+    path: '/ui',
+    secure: cookieSecure(c.req.url),
+  });
+}
+
+/**
+ * UI 登录失败桶键：走共享 clientIp（TRUST_PROXY_HEADERS 控制 XFF）。
+ * 默认关 XFF——测试客户端无 conninfo 时为 `unknown`，与旧行为一致。
+ */
+function connectionIp(c: Parameters<typeof clientIp>[0]): string {
+  return clientIp(c);
+}
+
+export const uiSessionBodyLimit = bodyLimit({
+  maxSize: 4 * 1024,
+  onError: (c) => c.json({ error: 'request_too_large' }, 413),
+});
+
+/**
+ * UI 非安全方法 Origin / Fetch Metadata 闸。
+ *
+ * 判定序以 Sec-Fetch-Site 为主（forbidden header，页面 JS 不可伪造）：
+ * - same-origin：Origin 缺席 / 字面 "null" / 可解析同源 → 放
+ *   （"null" 是 Referrer-Policy: no-referrer 下 Chrome 表单 POST 的合法序列化，#234）
+ * - cross-site / same-site：任意 Origin → 403 锁死
+ * - SFS 缺席：仅当 Origin 可解析且同源时放（保持现行，不收紧）；null/缺席 → 403
+ * - https→http 同 host 的 TLS 反代特例仅在 same-origin 信号下保留
+ */
+export const requireUiOrigin = createMiddleware(async (c, next) => {
+  if (c.req.method === 'GET' || c.req.method === 'HEAD' || c.req.method === 'OPTIONS') {
+    await next();
+    return;
+  }
+
+  const expectedUrl = new URL(c.req.url);
+  const origin = c.req.header('origin');
+  const site = c.req.header('sec-fetch-site');
+
+  // 跨站 / 同站异源信号一律拒绝（含 Origin:null / 缺席 / 看似同源）
+  if (site === 'cross-site' || site === 'same-site') {
+    return c.json({ error: 'forbidden_origin' }, 403);
+  }
+
+  const tlsProxyOk = (originUrl: URL): boolean =>
+    site === 'same-origin' &&
+    originUrl.protocol === 'https:' &&
+    expectedUrl.protocol === 'http:' &&
+    originUrl.host === expectedUrl.host;
+
+  const parseableSameOrigin = (): boolean => {
+    if (!origin || origin === 'null') return false;
+    try {
+      const originUrl = new URL(origin);
+      return originUrl.origin === expectedUrl.origin || tlsProxyOk(originUrl);
+    } catch {
+      return false;
+    }
+  };
+
+  let allowed = false;
+  if (site === 'same-origin') {
+    // 修复点：字面 Origin:null + same-origin → 放；缺席同样放
+    allowed = !origin || origin === 'null' || parseableSameOrigin();
+  } else if (!site) {
+    // SFS 缺席：不收紧现行——可解析同源仍放；null/缺席 fail-closed
+    allowed = parseableSameOrigin();
+  }
+  // 其它 SFS 值（如 none）未列入放行矩阵 → fail-closed
+
+  if (!allowed) {
+    return c.json({ error: 'forbidden_origin' }, 403);
+  }
+
+  await next();
+});
+
+export const uiPrivateHeaders = createMiddleware(async (c, next) => {
+  c.header('Cache-Control', 'no-store');
+  c.header('Vary', 'Authorization, Cookie');
+  await next();
+});
+
+export function uiSessionAuth(store: UiSessionStore) {
+  return createMiddleware(async (c, next) => {
+    const sid = getCookie(c, COOKIE_NAME);
+    if (!sid) return c.json({ error: 'invalid_token' }, 401);
+
+    const result = store.authenticate(sid);
+    if (!result) {
+      expireSessionCookie(c);
+      return c.json({ error: 'invalid_token' }, 401);
+    }
+
+    c.set('auth', result.auth);
+    c.set('uiSessionSid', sid);
+    await next();
+  });
+}
+
+export function createUiSessionRoutes(store: UiSessionStore): Hono {
+  const routes = new Hono();
+
+  routes.use('*', uiPrivateHeaders);
+
+  routes.post('/', async (c) => {
+    try {
+      if (!/^application\/json(?:\s*;|$)/i.test(c.req.header('content-type') ?? '')) {
+        return c.json({ error: 'unsupported_media_type' }, 415);
+      }
+
+      const parsedBody: unknown = await c.req.json();
+      const parsed = loginSchema.safeParse(parsedBody);
+      if (!parsed.success) return c.json({ error: 'invalid_request' }, 400);
+
+      const isCode = parsed.data.code !== undefined;
+      // 顺清 4: provenance 由服务端推导（code 兑换=link-exchange，令牌直换=undefined），客户端自报不予采信
+      // 顺清 5: 交换码换会话强制 remember: false，不信客户端自报的 remember
+      const remember = isCode ? false : parsed.data.remember === true;
+      const provenance = isCode ? 'link-exchange' : undefined;
+
+      const result = isCode
+        ? store.exchangeCode(parsed.data.code!, connectionIp(c), undefined, false, provenance)
+        : store.create(parsed.data.token!, connectionIp(c), undefined, remember, provenance);
+      if (!result.ok) {
+        if (result.reason === 'invalid_token') {
+          return c.json({ error: 'invalid_token' }, 401);
+        }
+        return c.json(
+          {
+            error:
+              result.reason === 'rate_limited' ? 'rate_limited' : 'too_many_sessions',
+          },
+          429,
+        );
+      }
+
+      setSessionCookie(c, result.sid, remember);
+      // OAuth 同意页登录回跳（若有）；一次性消费，不进会话长期状态。
+      const returnTo = consumeOAuthReturnCookie(c);
+      return c.json(returnTo ? { ...result.auth, returnTo } : result.auth);
+    } catch {
+      // Keep credentials out of the global error logger even if parsing or the
+      // backing token resolver fails with an error containing request data.
+      return c.json({ error: 'invalid_request' }, 400);
+    }
+  });
+
+  routes.delete('/', (c) => {
+    const sid = getCookie(c, COOKIE_NAME);
+    if (sid) store.destroy(sid);
+    expireSessionCookie(c);
+    return c.body(null, 204);
+  });
+
+  return routes;
+}

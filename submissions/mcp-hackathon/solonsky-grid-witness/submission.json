@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Grid Witness",
+  "slug": "solonsky-grid-witness",
+  "sourceRepository": "https://github.com/alexsolonsky/grid-witness",
+  "reviewCommit": "9102fa95b06ec90b43d7c8dc397e2a03fbd0bf35",
+  "apiBaseUrl": "https://bestdeeplearning-grid-witness.hf.space/v1",
+  "healthCheckUrl": "https://bestdeeplearning-grid-witness.hf.space/health",
+  "deploymentProofUrl": "https://bestdeeplearning-grid-witness.hf.space/.well-known/xagent-verification.json"
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Sumplus Model Desk",
+  "slug": "sumplus-model-desk",
+  "sourceRepository": "https://github.com/sumplus-real/sumplus-model-desk",
+  "reviewCommit": "08b2edf8b5e14ac6702e2a27d56b36a5ce578a19",
+  "apiBaseUrl": "https://sumplus-model-desk-production.up.railway.app/v1",
+  "healthCheckUrl": "https://sumplus-model-desk-production.up.railway.app/health",
+  "deploymentProofUrl": "https://sumplus-model-desk-production.up.railway.app/.well-known/xagent-verification.json"
+}

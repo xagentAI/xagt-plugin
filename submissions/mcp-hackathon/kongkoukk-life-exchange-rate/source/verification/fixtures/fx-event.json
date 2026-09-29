@@ -1,0 +1,36 @@
+{
+  "event_id": "demo-jpy-sek-8pct",
+  "event_type": "fx_move",
+  "title": "JPY strengthens sharply against SEK",
+  "source": "synthetic judging fixture",
+  "observed_at": "2026-09-10T16:00:00Z",
+  "old_value": 15.0,
+  "new_value": 13.8,
+  "unit": "JPY per SEK",
+  "change_pct": -7.9999999999999964,
+  "base_currency": "SEK",
+  "quote_currency": "JPY",
+  "affected_currencies": [
+    "SEK",
+    "JPY"
+  ],
+  "jurisdiction": null,
+  "evidence_url": null,
+  "window_start": "2026-09-03T16:00:00Z",
+  "window_end": "2026-09-10T16:00:00Z",
+  "confidence": "scenario",
+  "provenance": {
+    "provider": "demo-fixture",
+    "source_type": "fixture",
+    "retrieved_at": "2026-09-10T16:00:00Z",
+    "series_id": null,
+    "source_url": null,
+    "notes": [
+      "Synthetic scenario; values and z-score are illustrative, not official observations."
+    ]
+  },
+  "metadata": {
+    "demo": true,
+    "z_score": -3.2
+  }
+}

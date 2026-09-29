@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+tests/
+.git/
+.env
+.env.*
+dist/
+README.zh.md
+CHANGELOG.md
+REVIEW-codex-pass.md

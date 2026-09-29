@@ -1,0 +1,52 @@
+{
+  "name": "arcway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arcway pays contractors and remote staff in USDC using only their email address: each payee gets a Privy embedded wallet, and payouts settle through Circle on Arc.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "db:generate": "node scripts/with-env.mjs prisma generate",
+    "db:migrate": "node scripts/with-env.mjs node scripts/migrate-dev.mjs",
+    "db:deploy": "node scripts/with-env.mjs node scripts/migrate-deploy.mjs",
+    "db:studio": "node scripts/with-env.mjs prisma studio",
+    "db:clean": "node scripts/with-env.mjs node scripts/db-clean.mjs",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && node scripts/migrate-deploy.mjs && next build",
+    "keys:reviewer": "node scripts/with-env.mjs node scripts/seed-reviewer-key.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@circle-fin/developer-controlled-wallets": "^10.8.0",
+    "@neon/config": "^1.3.0",
+    "@neon/env": "^1.2.1",
+    "@prisma/client": "6.19.3",
+    "@privy-io/react-auth": "^3.40.0",
+    "@privy-io/server-auth": "^1.32.5",
+    "@solana-program/memo": "^0.13.1",
+    "@solana-program/system": "^0.14.1",
+    "@solana-program/token": "^0.16.1",
+    "@solana/kit": "^8.2.0",
+    "@stripe/stripe-js": "^1.54.2",
+    "next": "^16.3.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "viem": "^2.56.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.4",
+    "postcss": "^8.5.28",
+    "prisma": "6.19.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}

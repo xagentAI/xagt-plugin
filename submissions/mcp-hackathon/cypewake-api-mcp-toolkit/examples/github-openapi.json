@@ -1,0 +1,105 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GitHub public REST API (MCPForge showcase)",
+    "version": "1.1.0",
+    "description": "Real, keyless endpoints usable within unauthenticated rate limits, and commonly called by developers. They cover a complete agent workflow: probe reachability → search by topic → pull concrete metrics to decide. They drive the full MCPForge Build → Verify → MCPize → Monetize chain and support a real task, “produce a technology selection brief”, which depends on live star and issue data that a prompt cannot fabricate."
+  },
+  "servers": [
+    { "url": "https://api.github.com" }
+  ],
+  "paths": {
+    "/zen": {
+      "get": {
+        "operationId": "getZen",
+        "summary": "Motto liveness probe",
+        "description": "Returns a short design motto, used for liveness and connectivity self-checks.",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/rate_limit": {
+      "get": {
+        "operationId": "getRateLimit",
+        "summary": "Rate limit quota",
+        "description": "Returns the API rate limit for the current IP, which an agent uses to decide whether to back off.",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/events": {
+      "get": {
+        "operationId": "listPublicEvents",
+        "summary": "Public event stream",
+        "description": "Returns public events across the network; an agent uses them for activity monitoring and trend awareness.",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/search/repositories": {
+      "get": {
+        "operationId": "searchRepositories",
+        "summary": "Search repositories by topic",
+        "description": "Returns repositories matching the keywords, including star counts and descriptions. This is the first step of a technology selection investigation, and because results track the real world, a prompt cannot answer from memory.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "example": "MCP" },
+            "description": "Search keywords, e.g. MCP, agents, llm"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "example": "stars" },
+            "description": "Sort field: stars / forks / updated"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "example": "desc" },
+            "description": "Sort direction: asc / desc"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "int", "example": 5 },
+            "description": "Results per page, maximum 100"
+          }
+        ],
+        "responses": {
+          "200": { "description": "ok" },
+          "422": { "description": "Invalid query parameters" }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}": {
+      "get": {
+        "operationId": "getRepository",
+        "summary": "Repository live metrics",
+        "description": "Returns live metrics for one repository: stars, forks, open issues, primary language, and last update time. An agent uses it to verify candidates instead of trusting stale search summaries.",
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "modelcontextprotocol" },
+            "description": "Repository owner (user or organization)"
+          },
+          {
+            "name": "repo",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "servers" },
+            "description": "Repository name"
+          }
+        ],
+        "responses": {
+          "200": { "description": "ok" },
+          "404": { "description": "Repository not found or not accessible" }
+        }
+      }
+    }
+  }
+}

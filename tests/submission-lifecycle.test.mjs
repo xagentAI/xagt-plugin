@@ -424,7 +424,9 @@ describe("workflow configuration contract", () => {
     }
     expect(validation).toMatch(/\n  pull_request:\n/);
     expect(validation).not.toContain(": write");
-    expect(validation).toContain("ref: ${{ github.event.pull_request.base.sha }}");
+    expect(validation).toContain("repository: ${{ github.event.pull_request.base.repo.full_name }}");
+    expect(validation).toContain("ref: ${{ github.event.pull_request.base.ref }}");
+    expect(validation).not.toContain("ref: ${{ github.event.pull_request.base.sha }}");
     expect(receipt).toContain("pull-requests: write");
     expect(receipt).not.toContain("contents: write");
     expect(archive).toContain("workflow_run:");

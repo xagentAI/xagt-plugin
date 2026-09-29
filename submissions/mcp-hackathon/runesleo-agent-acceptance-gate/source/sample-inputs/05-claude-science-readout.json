@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1",
+  "mode": "quick",
+  "task": {
+    "task_id": "claude-science-hands-on-example-20260701",
+    "buyer_goal": "Inspect Claude Science using only the built-in example project and produce a read-only product-learning artifact.",
+    "surface": "research",
+    "allowed_actions": [
+      "read built-in example project",
+      "summarize observed product mechanics",
+      "write local readout"
+    ],
+    "forbidden_actions": [
+      "new project",
+      "private file upload",
+      "SSH connection",
+      "HPC connection",
+      "Modal connection",
+      "download",
+      "external account permission change",
+      "new message to Claude Science run"
+    ],
+    "acceptance_criteria": [
+      "Scope is read-only",
+      "Observed mechanics are concrete",
+      "Transferable workflow pattern is extracted",
+      "Limitations are stated",
+      "Next gate requires explicit approval"
+    ]
+  },
+  "delivery": {
+    "writeback_text": "Read-only example project observation. No new project, private file, SSH/HPC/Modal, download, account permission change, or new message. The readout explains sessions as project workstreams, expandable execution artifacts, failure/recovery preservation, split-view artifacts, and reproducible final reports. It recommends studying the UX rather than replacing Research DD.",
+    "artifact_paths": [
+      "/Users/zhangxu/Projects/_inventory/2026-07-01/claude-science-hands-on-example-project-readout-2026-07-01.md"
+    ],
+    "changed_files": [
+      "/Users/zhangxu/Projects/_inventory/2026-07-01/claude-science-hands-on-example-project-readout-2026-07-01.md"
+    ],
+    "validation": [
+      "scope boundary declared",
+      "no private file action declared",
+      "no external account mutation declared",
+      "next live test gate declared"
+    ],
+    "validation_output": "No executable validation required because task is read-only observation.",
+    "rollback_plan": "Local readout can be ignored or archived; no external state was mutated.",
+    "hard_gates_declared": [
+      "new Claude Science project",
+      "private files",
+      "SSH",
+      "HPC",
+      "Modal",
+      "download",
+      "account permissions",
+      "new message"
+    ],
+    "next_gate": "If Leo wants live test later, explicitly approve one small public-source project."
+  },
+  "context": {
+    "repo_state": "not_applicable",
+    "public_publish_requested": false,
+    "payments_or_wallets_in_scope": false,
+    "credentials_in_scope": false,
+    "notes": "Good positive-control sample for safe read-only research delivery."
+  }
+}
+

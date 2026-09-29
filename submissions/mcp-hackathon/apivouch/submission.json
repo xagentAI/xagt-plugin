@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "APIVouch",
+  "slug": "apivouch",
+  "sourceRepository": "https://github.com/ShahadatTest/apivouch",
+  "reviewCommit": "6f2aa31842eaf7c50d11cc8e3ef46570a0e17107",
+  "apiBaseUrl": "https://apivouch.sklab.cc",
+  "healthCheckUrl": "https://apivouch.sklab.cc/health",
+  "deploymentProofUrl": "https://apivouch.sklab.cc/.well-known/xagent-verification.json"
+}
