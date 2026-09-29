@@ -1,0 +1,24 @@
+{
+  "name": "agent3-handshake",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Turns an Agent3 registry entry into the request an agent would actually send, and names every field that stops it.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
+    "test": "tsx tests/run.ts",
+    "snapshot": "tsx scripts/take-snapshot.ts"
+  },
+  "dependencies": {
+    "tsx": "4.23.13",
+    "typescript": "5.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43"
+  }
+}

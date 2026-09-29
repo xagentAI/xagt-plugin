@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Env / secrets
+.env
+*.local
+
+# 本地 SQLite 记忆库与 WAL 旁车文件（含用户对话，绝不入库）
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# 本地 AI 协作者约定，只留本机、不推远端
+AGENTS.md
+
+# Test / tool caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 由 scripts/build_walkthrough_docx.py 生成的讲义产物（需要时本地构建）
+docs/exports/
+
+# 杭州参赛材料截图（含个人信息，永不入库；目录由用户录材料时本地创建）
+docs/competitions/hangzhou/evidence/

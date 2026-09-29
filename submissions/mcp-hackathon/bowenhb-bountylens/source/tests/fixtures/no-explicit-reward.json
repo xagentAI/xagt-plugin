@@ -1,0 +1,38 @@
+{
+  "fixtureVersion": 1,
+  "sanitized": true,
+  "scenario": "no-explicit-reward",
+  "sourceUrl": "https://github.com/fastify/fastify/issues/7030",
+  "capturedAt": "2026-09-17",
+  "context": {
+    "issue": {
+      "title": "reply.trailer() breaks bodyless responses because transfer-encoding survives",
+      "body": "### Environment\n\nFastify 6.0.0-alpha.3 on Node.js 26.8.1.\n\n### Description\n\nUsing `reply.trailer()` with a status code that cannot carry a body produces broken responses. The trailer path adds `Transfer-Encoding: chunked`, while the bodyless response path removes `content-type` and `content-length` but leaves `transfer-encoding`.\n\n### Observed behavior\n\n1. Responses with status 204 or 304 become a 500 after Node throws `ERR_HTTP_TRAILER_INVALID`.\n2. A 205 response still sends a chunked body.\n3. An automatically exposed HEAD route sends `Content-Length` and `Transfer-Encoding` together.\n\n### Steps to reproduce\n\nCreate routes for 200, 204, 205, 304, explicit HEAD, and automatic HEAD. Add a trailer and inspect the raw HTTP response bytes.\n\n### Expected behavior\n\nBodyless statuses and HEAD routes should not emit contradictory transfer or content-length headers.",
+      "state": "open",
+      "labels": [],
+      "assignees": [],
+      "author": "reporter",
+      "createdAt": "2026-09-15T09:42:44Z",
+      "updatedAt": "2026-09-15T09:45:17Z"
+    },
+    "comments": [
+      {
+        "author": "reporter",
+        "body": "Should trailers on 204 and 304 throw a dedicated error, be ignored, or use another documented behavior?",
+        "createdAt": "2026-09-15T09:44:43Z",
+        "authorAssociation": "NONE"
+      }
+    ],
+    "repository": {
+      "fullName": "fastify/fastify",
+      "pushedAt": "2026-09-16T10:20:37Z",
+      "updatedAt": "2026-09-16T13:04:24Z",
+      "openIssuesCount": 160,
+      "languages": {
+        "JavaScript": 1868161,
+        "TypeScript": 180185,
+        "Shell": 911
+      }
+    }
+  }
+}

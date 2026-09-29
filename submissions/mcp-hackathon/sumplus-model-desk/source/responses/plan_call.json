@@ -1,0 +1,389 @@
+{
+  "request": {
+    "inputTokens": 100000,
+    "outputTokens": 10000,
+    "baselineModelId": "gpt-5.5",
+    "limit": 10
+  },
+  "eligible": [
+    {
+      "modelId": "glm-4.5-flash",
+      "name": "GLM-4.5 Flash",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 128000,
+      "maxOutput": 16000,
+      "availability": "live",
+      "listedAtZero": true
+    },
+    {
+      "modelId": "glm-4.7-flash",
+      "name": "GLM-4.7 Flash",
+      "line": "glm",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "outputCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      },
+      "context": 200000,
+      "maxOutput": 16000,
+      "availability": "live",
+      "listedAtZero": true
+    },
+    {
+      "modelId": "gemini-2.5-flash-lite",
+      "name": "gemini-2.5-flash-lite [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 10000,
+        "display": "$0.01"
+      },
+      "outputCost": {
+        "microUsd": 4000,
+        "display": "$0.004"
+      },
+      "totalCost": {
+        "microUsd": 14000,
+        "display": "$0.014"
+      },
+      "context": 1000000,
+      "maxOutput": 65536,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-flash",
+      "name": "deepseek-v4-flash-0731 [C]",
+      "line": "cm",
+      "lineCode": "C",
+      "inputCost": {
+        "microUsd": 14000,
+        "display": "$0.014"
+      },
+      "outputCost": {
+        "microUsd": 2800,
+        "display": "$0.0028"
+      },
+      "totalCost": {
+        "microUsd": 16800,
+        "display": "$0.0168"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-flash",
+      "name": "DeepSeek V4.1 Flash-0910",
+      "line": "deepseek",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 15000,
+        "display": "$0.015"
+      },
+      "outputCost": {
+        "microUsd": 6000,
+        "display": "$0.006"
+      },
+      "totalCost": {
+        "microUsd": 21000,
+        "display": "$0.021"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "deepseek-v4-flash",
+      "name": "DeepSeek V4 Flash-0731",
+      "line": "deepseek",
+      "lineCode": "",
+      "inputCost": {
+        "microUsd": 15000,
+        "display": "$0.015"
+      },
+      "outputCost": {
+        "microUsd": 6000,
+        "display": "$0.006"
+      },
+      "totalCost": {
+        "microUsd": 21000,
+        "display": "$0.021"
+      },
+      "context": 1000000,
+      "maxOutput": 384000,
+      "availability": "live"
+    },
+    {
+      "modelId": "grok-4-1-fast-non-reasoning",
+      "name": "grok-4-1-fast-non-reasoning [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 20000,
+        "display": "$0.02"
+      },
+      "outputCost": {
+        "microUsd": 5000,
+        "display": "$0.005"
+      },
+      "totalCost": {
+        "microUsd": 25000,
+        "display": "$0.025"
+      },
+      "context": 256000,
+      "maxOutput": 32000,
+      "availability": "live"
+    },
+    {
+      "modelId": "grok-4-1-fast-reasoning",
+      "name": "grok-4-1-fast-reasoning [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 20000,
+        "display": "$0.02"
+      },
+      "outputCost": {
+        "microUsd": 5000,
+        "display": "$0.005"
+      },
+      "totalCost": {
+        "microUsd": 25000,
+        "display": "$0.025"
+      },
+      "context": 256000,
+      "maxOutput": 32000,
+      "availability": "live"
+    },
+    {
+      "modelId": "grok-4-fast-non-reasoning",
+      "name": "grok-4-fast-non-reasoning [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 20000,
+        "display": "$0.02"
+      },
+      "outputCost": {
+        "microUsd": 5000,
+        "display": "$0.005"
+      },
+      "totalCost": {
+        "microUsd": 25000,
+        "display": "$0.025"
+      },
+      "context": 256000,
+      "maxOutput": 32000,
+      "availability": "live"
+    },
+    {
+      "modelId": "grok-4-fast-reasoning",
+      "name": "grok-4-fast-reasoning [M]",
+      "line": "mixai",
+      "lineCode": "M",
+      "inputCost": {
+        "microUsd": 20000,
+        "display": "$0.02"
+      },
+      "outputCost": {
+        "microUsd": 5000,
+        "display": "$0.005"
+      },
+      "totalCost": {
+        "microUsd": 25000,
+        "display": "$0.025"
+      },
+      "context": 256000,
+      "maxOutput": 32000,
+      "availability": "live"
+    }
+  ],
+  "rejected": [
+    {
+      "modelId": "deepseek-v4-flash",
+      "line": "mixai",
+      "lineCode": "M",
+      "reason": "It will return at most 8192 tokens, and this job asks for 10000. The answer would be cut off and still billed.",
+      "bindingConstraint": "max_output",
+      "requiredValue": 10000,
+      "actualValue": 8192
+    },
+    {
+      "modelId": "deepseek-v4-pro",
+      "line": "mixai",
+      "lineCode": "M",
+      "reason": "It will return at most 8192 tokens, and this job asks for 10000. The answer would be cut off and still billed.",
+      "bindingConstraint": "max_output",
+      "requiredValue": 10000,
+      "actualValue": 8192
+    },
+    {
+      "modelId": "deepseek-v3.2",
+      "line": "mixai",
+      "lineCode": "M",
+      "reason": "It will return at most 8192 tokens, and this job asks for 10000. The answer would be cut off and still billed.",
+      "bindingConstraint": "max_output",
+      "requiredValue": 10000,
+      "actualValue": 8192
+    },
+    {
+      "modelId": "deepseek-v3-0324",
+      "line": "mixai",
+      "lineCode": "M",
+      "reason": "It will return at most 8192 tokens, and this job asks for 10000. The answer would be cut off and still billed.",
+      "bindingConstraint": "max_output",
+      "requiredValue": 10000,
+      "actualValue": 8192
+    },
+    {
+      "modelId": "qwen3.8-max",
+      "line": "mixai",
+      "lineCode": "M",
+      "reason": "This offer is marked preview, not live. Set includePreview to consider it.",
+      "bindingConstraint": "availability",
+      "requiredValue": "live",
+      "actualValue": "preview"
+    },
+    {
+      "modelId": "doubao-seedance-2-0-fast",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "doubao-seedance-2.0",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0-fast",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0-lite",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "dreamina-seedance-2-0-fast-lite",
+      "line": "arklin",
+      "lineCode": "A",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "seedance-2-0-mini",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "seedance-2-0-fast",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "seedance-2-0",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    },
+    {
+      "modelId": "doubao-seedream-4-0",
+      "line": "ark",
+      "lineCode": "R",
+      "reason": "This offer is not sold by the token: the catalogue gives it no context window or output ceiling, so its per-million figures do not price this job.",
+      "bindingConstraint": "not_token_priced",
+      "requiredValue": "priced per token",
+      "actualValue": "context 0, maxOutput 0"
+    }
+  ],
+  "eligibleCount": 78,
+  "rejectedCount": 15,
+  "truncated": true,
+  "omittedCount": 68,
+  "snapshotId": "c4675be6df4d0a9bf65d8c70eb3e2a37f5509bf0d22b42b8ea17382316fab64b",
+  "pricedAt": "2026-09-16T18:47:47.077Z",
+  "staleSeconds": 0,
+  "savingsVsBaseline": {
+    "baselineModelId": "gpt-5.5",
+    "baselineOffer": {
+      "line": "arklin",
+      "totalCost": {
+        "microUsd": 800000,
+        "display": "$0.80"
+      }
+    },
+    "cheapestOffer": {
+      "modelId": "glm-4.5-flash",
+      "line": "glm",
+      "totalCost": {
+        "microUsd": 0,
+        "display": "$0.00"
+      }
+    },
+    "absolute": {
+      "microUsd": 800000,
+      "display": "$0.80"
+    },
+    "ratio": "n/a"
+  }
+}
