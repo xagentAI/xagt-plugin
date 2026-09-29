@@ -1,0 +1,20 @@
+# 评审期保活：X-Agent 自动门槛对 GET /health 的超时是 10 秒，而 Render 免费层
+# 15 分钟无流量会休眠（冷启动 30–90 秒）。评审窗口（2026-09-20 ~ 10-04）内每 10 分钟
+# 轻量唤醒一次；只打 GET /health（返回体 <200B，不触达模型、不花额度、不受限流影响）。
+# 评审结束后（10-04 之后）请手动停用本工作流（GitHub Actions 页 disable 即可）。
+name: keepwarm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping-health:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Wake review instance via GET /health
+        run: |
+          curl -sS --fail --max-time 90 https://yai-agent-core.onrender.com/health

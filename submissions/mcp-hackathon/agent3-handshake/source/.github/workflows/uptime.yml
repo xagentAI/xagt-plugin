@@ -1,0 +1,77 @@
+# Daily sentinel for the review window.
+#
+# The judgement is not "did it return 200". It reads the registry through the
+# service and asserts the answer is still computable, because a service that
+# answers 200 with an empty or broken body looks identical to a healthy one
+# from the outside.
+name: uptime
+
+on:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Pin the health check to this 40-character commit"
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe the live service
+        id: probe
+        env:
+          BASE: https://agent3-handshake-production.up.railway.app
+          PINNED: ${{ inputs.commit }}
+        run: |
+          set -euo pipefail
+          fail() { echo "PROBE FAILED: $*" >&2; exit 1; }
+
+          health=$(curl -sS --max-time 30 "$BASE/health")
+          proof=$(curl -sS --max-time 30 "$BASE/.well-known/xagent-verification.json")
+
+          hc=$(printf '%s' "$health" | jq -r '.commit // ""')
+          pc=$(printf '%s' "$proof"  | jq -r '.commit // ""')
+          sv=$(printf '%s' "$proof"  | jq -r '.schemaVersion // 0')
+          st=$(printf '%s' "$health" | jq -r '.status // ""')
+
+          [ "$st" = "ok" ]            || fail "health status is '$st'"
+          [ "$sv" = "1" ]             || fail "deployment proof schemaVersion is '$sv'"
+          [ -n "$hc" ] && [ "$hc" = "$pc" ] || fail "health commit '$hc' and proof commit '$pc' disagree"
+          if [ -n "${PINNED:-}" ]; then
+            [ "$hc" = "$PINNED" ] || fail "live commit '$hc' is not the pinned '$PINNED'"
+          fi
+
+          # The capability itself, not just the envelope.
+          audit=$(curl -sS --max-time 45 "$BASE/v1/audit")
+          entries=$(printf '%s' "$audit" | jq -r '.totals.entries // 0')
+          sum=$(printf '%s' "$audit" | jq -r '(.totals.callable // 0) + (.totals.blocked // 0)')
+          [ "$entries" -gt 0 ]   || fail "the audit covered zero entries"
+          [ "$entries" = "$sum" ] || fail "audit totals do not add up: $entries vs $sum"
+
+          tools=$(curl -sS --max-time 30 -X POST "$BASE/mcp" \
+            -H 'content-type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq -r '.result.tools | length')
+          [ "$tools" = "5" ] || fail "mcp lists $tools tools, expected 5"
+
+          echo "ok: commit $hc, $entries entries audited, $tools tools"
+
+      - name: Open an issue when the probe fails
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `uptime probe failed on ${new Date().toISOString().slice(0, 10)}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: `The daily probe failed. Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
