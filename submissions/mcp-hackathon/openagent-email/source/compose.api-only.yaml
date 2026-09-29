@@ -1,0 +1,126 @@
+# openagent.email API-only deployment for an existing external mail server.
+#
+# Use this when your mail provider already hosts your domain. It runs only the
+# API: IMAP reads one catch-all mailbox and SMTP sends through that provider.
+# Copy .env.api-only.example to .env, fill every required value, then run this
+# standalone default. If compose.yaml also runs on this host, this API-only
+# stack MUST use an explicitly different -p / COMPOSE_PROJECT_NAME instead:
+#   docker compose -f compose.api-only.yaml up -d
+#   docker compose -p oae-api-only -f compose.api-only.yaml up -d
+#
+# Requires modern Docker Compose v2+ (`docker compose` or a compatible
+# docker-compose that supports `config --format json`). Docker Compose
+# v5.5.1 is also supported. This file does not depend on unverified
+# legacy v1-only interface details.
+
+name: openagentemail
+
+services:
+  api:
+    # H1：build 时钉死 SOURCE_COMMIT；XAGT_VERIFICATION_SLUG 运行时可选
+    build:
+      context: ./packages/api
+      args:
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-}
+    environment:
+      # --- shared API contract env ---
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+      EXTRA_DOMAINS: ${EXTRA_DOMAINS:-}
+      ALLOWED_SEND_DOMAINS: ${ALLOWED_SEND_DOMAINS:-}
+      API_KEYS: ${API_KEYS:?Set API_KEYS in .env (openssl rand -hex 32)}
+      PORT: 3100
+      UI_ENABLED: ${UI_ENABLED:-true}
+      # Single API process per mailbox required when enabled.
+      TASK_LEASES_ENABLED: ${TASK_LEASES_ENABLED:-false}
+      # M3 reclaim decoupling (default false): claim derives expiry; audit SMTP cannot block reclaim.
+      # Late-receipt tolerance is always on and is not gated by this flag.
+      TASK_LEASES_EXPIRY_AUDIT_M3: ${TASK_LEASES_EXPIRY_AUDIT_M3:-false}
+      TASK_LEASES_OVERLAY_BOUND: ${TASK_LEASES_OVERLAY_BOUND:-false}
+      # Public-read lease overlay bound (default false): list/detail stop replaying unindexed lease events after 15 minutes.
+      # M2 pending journal (default false): restart-safe generation fence + claim_lost; records/defers expiry-audit work. Requires TASK_LEASES_ENABLED.
+      # Production emitter stays hard-disabled. First provision: docs/task-lease-journal.md
+      # docker compose -f compose.api-only.yaml run --rm --no-deps --entrypoint bun api dist/task-lease-provision.js
+      TASK_LEASES_PENDING_JOURNAL: ${TASK_LEASES_PENDING_JOURNAL:-false}
+      # --- external catch-all mailbox access ---
+      IMAP_HOST: ${IMAP_HOST:?Set IMAP_HOST in .env}
+      IMAP_PORT: ${IMAP_PORT:?Set IMAP_PORT in .env}
+      IMAP_TLS: ${IMAP_TLS:?Set IMAP_TLS in .env}
+      IMAP_TLS_REJECT_UNAUTHORIZED: ${IMAP_TLS_REJECT_UNAUTHORIZED:-false}
+      IMAP_USER: ${IMAP_USER:?Set IMAP_USER in .env}
+      IMAP_PASS: ${IMAP_PASS:?Set IMAP_PASS in .env}
+      SMTP_HOST: ${SMTP_HOST:?Set SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:?Set SMTP_PORT in .env}
+      SMTP_TLS_REJECT_UNAUTHORIZED: ${SMTP_TLS_REJECT_UNAUTHORIZED:-false}
+      SMTP_USER: ${SMTP_USER:?Set SMTP_USER in .env}
+      SMTP_PASS: ${SMTP_PASS:?Set SMTP_PASS in .env}
+      # Optional envelope-only compliance archive recipient; blank = disabled.
+      ALWAYS_BCC: ${ALWAYS_BCC:-}
+      TASK_SIGNING_SECRET: ${TASK_SIGNING_SECRET:?Set TASK_SIGNING_SECRET in .env (openssl rand -hex 32)}
+      # Optional dashboard origin for ntfy click actions on mail-arrival pushes.
+      DASHBOARD_PUBLIC_URL: ${DASHBOARD_PUBLIC_URL:-}
+      # Optional public origin for MCP RFC 9728 metadata (overrides request Host).
+      MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-}
+      # MCP tools/call per-token rate limits (per minute; 0 = off). Admin exempt.
+      MCP_RATE_READ_PER_MIN: ${MCP_RATE_READ_PER_MIN:-60}
+      MCP_RATE_WRITE_PER_MIN: ${MCP_RATE_WRITE_PER_MIN:-20}
+      # 阻塞等待上限（秒）；mail_wait_for / task wait 静默钳到此值（默认 60，上限 600）
+      MCP_MAX_WAIT_SECONDS: ${MCP_MAX_WAIT_SECONDS:-60}
+      # 信任 X-Forwarded-For 首跳（默认 false；仅确有受信反代时开）
+      TRUST_PROXY_HEADERS: ${TRUST_PROXY_HEADERS:-false}
+      # 公网边缘：关闭 CIMD 私网 SSRF 例外（默认 false）
+      OAE_PUBLIC_EDGE: ${OAE_PUBLIC_EDGE:-false}
+      # 出站 webhook：默认关闭，插值默认与 parseConfig 一致
+      WEBHOOKS_ENABLED: ${WEBHOOKS_ENABLED:-false}
+      # 可选签名根：YAML null 透传宿主值；未设置则缺席，避免 ${VAR:-} 注入空串
+      WEBHOOK_SIGNING_SECRET:
+      WEBHOOK_SIGNING_SECRET_PREVIOUS:
+      # 私网目标例外；OAE_PUBLIC_EDGE=true 时由 parseConfig 强制 false
+      WEBHOOK_ALLOW_PRIVATE_TARGETS: ${WEBHOOK_ALLOW_PRIVATE_TARGETS:-false}
+      WEBHOOK_ALLOWED_PORTS: ${WEBHOOK_ALLOWED_PORTS:-443}
+      # Single API process per mailbox required; multi-process writers can overshoot these caps.
+      WEBHOOK_MAX_SUBSCRIPTIONS: ${WEBHOOK_MAX_SUBSCRIPTIONS:-16}
+      WEBHOOK_MAX_PER_ADDRESS: ${WEBHOOK_MAX_PER_ADDRESS:-4}
+      WEBHOOK_MAX_ATTEMPTS: ${WEBHOOK_MAX_ATTEMPTS:-11}
+      WEBHOOK_DELIVERY_TIMEOUT_MS: ${WEBHOOK_DELIVERY_TIMEOUT_MS:-10000}
+      WEBHOOK_MAX_CONCURRENT: ${WEBHOOK_MAX_CONCURRENT:-8}
+      WEBHOOK_POOL_RETRY_MS: ${WEBHOOK_POOL_RETRY_MS:-5000}
+      WEBHOOK_PAYLOAD_MAX_BYTES: ${WEBHOOK_PAYLOAD_MAX_BYTES:-16384}
+      WEBHOOK_APPROVAL_ARGS_MAX_BYTES: ${WEBHOOK_APPROVAL_ARGS_MAX_BYTES:-4096}
+      WEBHOOK_APPROVAL_ARGS_MAX_DEPTH: ${WEBHOOK_APPROVAL_ARGS_MAX_DEPTH:-4}
+      WEBHOOK_RESPONSE_MAX_BYTES: ${WEBHOOK_RESPONSE_MAX_BYTES:-4096}
+      WEBHOOK_TIMESTAMP_TOLERANCE_SEC: ${WEBHOOK_TIMESTAMP_TOLERANCE_SEC:-300}
+      WEBHOOK_DISABLE_THRESHOLD: ${WEBHOOK_DISABLE_THRESHOLD:-10}
+      WEBHOOK_ROTATION_OVERLAP_MS: ${WEBHOOK_ROTATION_OVERLAP_MS:-86400000}
+      WEBHOOK_LOG_RETENTION_DAYS: ${WEBHOOK_LOG_RETENTION_DAYS:-30}
+      WEBHOOK_RATE_CREATE_PER_MIN: ${WEBHOOK_RATE_CREATE_PER_MIN:-10}
+      WEBHOOK_RATE_TEST_PER_MIN: ${WEBHOOK_RATE_TEST_PER_MIN:-3}
+      WEBHOOK_RATE_DELIVER_PER_MIN: ${WEBHOOK_RATE_DELIVER_PER_MIN:-60}
+      # 预鉴权 IP 限量（每分钟；0 = 关）
+      OAUTH_RATE_PER_MIN: ${OAUTH_RATE_PER_MIN:-30}
+      MCP_PREAUTH_RATE_PER_MIN: ${MCP_PREAUTH_RATE_PER_MIN:-120}
+      # Identity store (json) survives container recreation:
+      DATA_DIR: /app/data
+      # Per-identity send limit (messages/hour, 0 = off):
+      SEND_RATE_LIMIT: ${SEND_RATE_LIMIT:-20}
+      # Auto-delete mail older than this many days (0 = keep forever):
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      # H1 / X-Agent：可选验证 slug（与镜像内 SOURCE_COMMIT 同时配置才挂 well-known）
+      XAGT_VERIFICATION_SLUG: ${XAGT_VERIFICATION_SLUG:-}
+    volumes:
+      - api-data:/app/data
+    ports:
+      # SAFETY DEFAULT: localhost only. Reach it from your agent host over an
+      # SSH tunnel (ssh -L 3100:127.0.0.1:3100 user@server) or put a TLS
+      # reverse proxy in front (see docs/security.md). Set API_BIND=0.0.0.0
+      # in .env only if you know exactly why you need it.
+      - "${API_BIND:-127.0.0.1}:${API_PORT:-3100}:3100"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "bun -e 'fetch(\"http://localhost:3100/healthz\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  api-data:

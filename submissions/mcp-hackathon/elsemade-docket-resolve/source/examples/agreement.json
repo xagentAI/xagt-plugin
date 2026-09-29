@@ -1,0 +1,90 @@
+{
+  "agreementId": "agent-build-2026-019",
+  "amountAtomic": 250000000,
+  "asset": {
+    "symbol": "USDC",
+    "decimals": 6
+  },
+  "policy": {
+    "conflictSpread": 35,
+    "criticalFailureCapPercent": 20
+  },
+  "criteria": [
+    {
+      "id": "api-live",
+      "description": "Production API is reachable and returns the documented schema.",
+      "weight": 50,
+      "critical": true,
+      "minimumEvidence": 1
+    },
+    {
+      "id": "docs",
+      "description": "A new agent can reproduce one real call from the documentation.",
+      "weight": 30,
+      "critical": false,
+      "minimumEvidence": 1
+    },
+    {
+      "id": "edge-cases",
+      "description": "Invalid and conflicting inputs fail safely with useful errors.",
+      "weight": 20,
+      "critical": false,
+      "minimumEvidence": 1
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-smoke",
+      "criterionId": "api-live",
+      "kind": "automated_test",
+      "uri": "https://docket-resolve.vercel.app/fixtures/evidence/ev-smoke.txt",
+      "digest": "sha256:7a06fea670b648b816b370c13260b8ea0e43fbe40407f783b7b48be78d6b6188",
+      "result": "pass"
+    },
+    {
+      "id": "ev-docs",
+      "criterionId": "docs",
+      "kind": "artifact",
+      "uri": "https://docket-resolve.vercel.app/fixtures/evidence/ev-docs.txt",
+      "digest": "sha256:7fae5aa4fbdcda611ce6166302da0dddda7fe3628ccd702ed9b214e8b07af9b5",
+      "result": "pass"
+    },
+    {
+      "id": "ev-errors",
+      "criterionId": "edge-cases",
+      "kind": "automated_test",
+      "uri": "https://docket-resolve.vercel.app/fixtures/evidence/ev-errors.txt",
+      "digest": "sha256:825a550e10bc7cb366385f3932effcae419432e1f4c21fc860dc1a405f16c0da",
+      "result": "pass"
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-api",
+      "criterionId": "api-live",
+      "evaluator": "review-agent-a",
+      "score": 100,
+      "confidence": 1,
+      "evidenceIds": ["ev-smoke"],
+      "rationale": "The production smoke test passed twice."
+    },
+    {
+      "id": "finding-docs",
+      "criterionId": "docs",
+      "evaluator": "review-agent-a",
+      "score": 90,
+      "confidence": 0.95,
+      "evidenceIds": ["ev-docs"],
+      "rationale": "The documented call reproduced with one minor wording ambiguity."
+    },
+    {
+      "id": "finding-errors",
+      "criterionId": "edge-cases",
+      "evaluator": "review-agent-b",
+      "score": 75,
+      "confidence": 0.9,
+      "evidenceIds": ["ev-errors"],
+      "rationale": "Malformed requests fail safely; one optional boundary case is absent."
+    }
+  ]
+}

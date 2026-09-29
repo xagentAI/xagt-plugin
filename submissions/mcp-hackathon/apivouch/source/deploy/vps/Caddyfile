@@ -1,0 +1,28 @@
+{
+    email {$ACME_EMAIL}
+    servers {
+        timeouts {
+            read_header 10s
+            read_body 30s
+            write 120s
+            idle 60s
+        }
+    }
+}
+
+{$PUBLIC_BASE_URL} {
+    request_body {
+        max_size 1MB
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        -Server
+    }
+    reverse_proxy app:8000 {
+        transport http {
+            dial_timeout 5s
+            response_header_timeout 110s
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": "0.1",
+  "mode": "quick",
+  "transaction": {
+    "transaction_id": "agent-budget-spend-precall-001",
+    "intent": "A buyer agent wants to pay for a third-party analysis API before checking whether the task scope and input evidence are complete.",
+    "value_at_risk": "$2 API call plus downstream acceptance risk",
+    "requested_action": "spend_budget",
+    "deadline": "none"
+  },
+  "actor": {
+    "role": "buyer_agent",
+    "goal": "Avoid unnecessary paid tool calls and only spend budget when inputs are sufficient."
+  },
+  "counterparty": {
+    "role": "paid_analysis_service",
+    "claim": "Can produce an analysis if provided a complete brief and source artifact."
+  },
+  "evidence": {
+    "task_scope": "Analyze whether a seller agent's delivery is acceptable.",
+    "artifacts": [],
+    "validation": [],
+    "prior_messages": [
+      "Seller says the task is complete.",
+      "Buyer has not attached artifact paths or validation output."
+    ],
+    "delivery_summary": "No concrete artifact or validation evidence provided yet."
+  },
+  "constraints": {
+    "allowed_actions": ["read task brief", "request missing evidence", "call paid analysis service after evidence is complete"],
+    "forbidden_actions": ["spend budget without artifact", "release payment", "sign transaction"],
+    "budget_limit": "$5",
+    "hard_gates": ["wallet signing", "payment release", "credential access"]
+  }
+}
+

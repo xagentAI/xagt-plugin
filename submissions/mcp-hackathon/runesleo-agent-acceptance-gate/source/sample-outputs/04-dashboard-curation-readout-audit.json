@@ -1,0 +1,47 @@
+{
+  "schema_version": "0.1",
+  "verdict": "needs_review",
+  "score": 78,
+  "dimension_scores": {
+    "delivery_completeness": 26,
+    "validation_and_evidence": 19,
+    "safety_and_hard_gates": 21,
+    "buyer_usability": 7,
+    "dispute_readiness": 5
+  },
+  "missing": [
+    "release build",
+    "desktop and mobile visual smoke",
+    "owner decision on dirty copy edits",
+    "generated-file inclusion policy"
+  ],
+  "risks": [
+    "Broad branch has visual regression risk across core pages.",
+    "Dirty files remain unresolved.",
+    "Build generators may expand dirty generated output if run without owner decision.",
+    "This is a read-only acceptance packet, not a publish packet."
+  ],
+  "positive_evidence": [
+    "Branch scope and commit history are summarized.",
+    "Dirty files are named.",
+    "Six validation checks are listed as passed.",
+    "Build deferral reason is explained.",
+    "Tomorrow release sequence is actionable.",
+    "Hard gates are listed."
+  ],
+  "questions_for_seller": [
+    "Should the three dirty copy edits be included, left dirty, or folded into a final copy commit?",
+    "Will generated public files be regenerated in a controlled build?",
+    "Which pages require visual smoke before release?"
+  ],
+  "next_gate": "Owner chooses dirty-file policy, then approves release-grade build and visual smoke before any commit, push, deploy, cleanup, or public publish.",
+  "buyer_summary": "The review packet is useful and well-scoped, but the underlying branch is not ready for acceptance as a release until build, visual smoke, and dirty-file decisions are completed.",
+  "evaluator_notes": "No forbidden action is reported. The main issue is incomplete release evidence for a broad website branch.",
+  "machine_flags": [
+    "dirty_state",
+    "deferred_build",
+    "deferred_visual_smoke",
+    "public_release_gate"
+  ]
+}
+

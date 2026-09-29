@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f0e7" />
+    <meta name="description" content="Docket reviews agent work and turns evidence into explainable, proportional settlements." />
+    <title>Docket Resolve</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to workspace</a>
+    <div class="shell">
+      <header class="topbar">
+        <a class="identity" href="/" aria-label="Docket Resolve home">
+          <span class="identity-mark" aria-hidden="true">D</span>
+          <span>
+            <strong translate="no">Docket Resolve</strong>
+            <small>AI review. Proportional settlement.</small>
+          </span>
+        </a>
+        <nav aria-label="Service resources">
+          <a href="/openapi.json">OpenAPI</a>
+          <a href="/health">Health</a>
+          <span class="live-pill"><i aria-hidden="true"></i> Case desk ready</span>
+        </nav>
+      </header>
+
+      <main id="main-content">
+        <section class="intro" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">Settlement desk / live case workspace</p>
+            <h1 id="page-title">Resolve the work,<br />not the argument.</h1>
+          </div>
+          <p class="intro-copy">
+            Freeze what was promised. Review cited evidence. Then let the settlement
+            ledger show exactly what should be released and what should remain on hold.
+          </p>
+        </section>
+
+        <section class="workspace" aria-label="Docket case workspace">
+          <div class="panel input-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="label">01 / Open</p>
+                <h2>Case record</h2>
+              </div>
+              <button class="text-button" id="reset-button" type="button">Reset example</button>
+            </div>
+
+            <form class="case-form" id="case-form">
+            <div class="form-stack">
+              <div class="field">
+                <label for="agent-token">Agent token <span>optional in local mode</span></label>
+                <input id="agent-token" name="agent-token" type="password" autocomplete="off" placeholder="Paste a bearer token…" />
+              </div>
+              <div class="field">
+                <label for="agreement-input">Agreement JSON <span>criteria and evidence references</span></label>
+                <textarea id="agreement-input" name="agreement" spellcheck="false"></textarea>
+              </div>
+              <div class="field evidence-field">
+                <label for="evidence-input">Evidence notes <span>used by the review step</span></label>
+                <textarea id="evidence-input" name="evidence-content" spellcheck="false" aria-describedby="evidence-help"></textarea>
+                <small id="evidence-help" class="field-help">Use an array of <code>{ id, content }</code> objects. Production agents can retrieve and digest-check HTTPS evidence instead.</small>
+              </div>
+            </div>
+
+            <div class="action-row">
+              <p id="request-state" role="status" aria-live="polite">Ready to open a case.</p>
+              <div class="action-buttons">
+                <button class="secondary-button" id="create-button" type="button">Open case</button>
+                <button class="primary-button" id="review-button" type="button" disabled>Review evidence <span aria-hidden="true">↗</span></button>
+              </div>
+            </div>
+            <div class="action-row secondary-actions">
+              <button class="text-button" id="retrieve-button" type="button" disabled>Retrieve &amp; verify URLs</button>
+              <button class="text-button" id="resolve-button" type="button" disabled>Resolve settlement</button>
+            </div>
+            </form>
+          </div>
+
+          <div class="panel result-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="label">02 / Resolve</p>
+                <h2>Settlement record</h2>
+              </div>
+              <span class="case-id" id="case-id">NO CASE</span>
+            </div>
+
+            <div class="decision-card" id="decision-card" aria-live="polite">
+              <div class="stamp" id="decision-stamp">READY</div>
+              <div class="decision-copy">
+                <p>Recommended release</p>
+                <strong id="release-amount">—</strong>
+                <small id="release-ratio">Open a case to calculate</small>
+              </div>
+              <div class="hold-metric">
+                <span>Hold</span>
+                <strong id="hold-amount">—</strong>
+              </div>
+            </div>
+
+            <div class="case-meta" id="case-meta">
+              <span class="status-chip" id="case-status">UNFILED</span>
+              <span id="evidence-status">No evidence retrieved</span>
+              <span id="review-status">No review run</span>
+            </div>
+
+            <div class="retrieval-box" id="retrieval-failures-box" hidden>
+              <div class="section-heading compact">
+                <div>
+                  <p class="label">Evidence check</p>
+                  <h3>Retrieval failures</h3>
+                </div>
+                <span class="ledger-total" id="retrieval-summary"></span>
+              </div>
+              <div id="retrieval-failures" aria-live="polite"></div>
+            </div>
+
+            <div class="section-heading">
+              <div>
+                <p class="label">Ledger</p>
+                <h3>Where the amount came from</h3>
+              </div>
+              <span class="ledger-total" id="ledger-total">—</span>
+            </div>
+            <div class="ledger-head">
+              <span>Acceptance criterion</span>
+              <span>Score</span>
+              <span>Earned</span>
+            </div>
+            <div class="ledger" id="criteria-ledger">
+              <p class="empty-state">The proportional ledger will appear here.</p>
+            </div>
+
+            <div class="review-box">
+              <div class="section-heading compact">
+                <div>
+                  <p class="label">Review trail</p>
+                  <h3>Cited findings</h3>
+                </div>
+              </div>
+              <div id="review-findings"><p class="empty-state">No AI review has been recorded.</p></div>
+            </div>
+
+            <div class="timeline-box">
+              <div class="section-heading compact">
+                <div>
+                  <p class="label">Audit trail</p>
+                  <h3>Case events</h3>
+                </div>
+              </div>
+              <div id="case-events"><p class="empty-state">Events will appear after the case is opened.</p></div>
+            </div>
+          </div>
+        </section>
+
+        <footer>
+          <p>Evidence-grounded by design. Docket never moves funds or invents evidence.</p>
+          <p>Built for agent-to-agent work.</p>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

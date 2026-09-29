@@ -1,0 +1,12 @@
+services:
+  apivouch:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      ALLOW_PRIVATE_NETWORK: "true"
+      GIT_COMMIT: ${GIT_COMMIT:-dev-local}
+      PROJECT_SLUG: apivouch
+      DATABASE_URL: sqlite:////tmp/apivouch.db
+      MAX_PROOF_PAGES: "20"
+      MAX_PROOF_RECORDS: "5000"

@@ -1,0 +1,7 @@
+.env*
+data/
+node_modules/
+output/
+.playwright-cli/
+.vercel/
+.git/

@@ -1,0 +1,91 @@
+{
+  "event": {
+    "event_id": "synthetic-brent-2025-12-24-2025-12-31",
+    "event_type": "oil_move",
+    "title": "Synthetic scenario: Brent crude moved +15.00% over the observation window",
+    "source": "synthetic judging fixture",
+    "observed_at": "2025-12-31T00:00:00Z",
+    "old_value": 80.0,
+    "new_value": 92.0,
+    "unit": "USD per barrel",
+    "change_pct": 14.999999999999991,
+    "base_currency": null,
+    "quote_currency": null,
+    "affected_currencies": [],
+    "jurisdiction": null,
+    "evidence_url": null,
+    "window_start": "2025-12-24T00:00:00Z",
+    "window_end": "2025-12-31T00:00:00Z",
+    "confidence": "scenario",
+    "provenance": {
+      "provider": "synthetic-fixture",
+      "source_type": "synthetic_fixture",
+      "retrieved_at": "2026-09-10T16:00:00Z",
+      "series_id": "synthetic-brent-step-v1",
+      "source_url": null,
+      "notes": [
+        "Synthetic fixed step scenario; values and dates are not EIA observations."
+      ]
+    },
+    "metadata": {
+      "requested_lookback_days": 7,
+      "requested_as_of": "2025-12-31",
+      "target_start_date": "2025-12-24",
+      "old_date": "2025-12-24",
+      "new_date": "2025-12-31",
+      "actual_window_days": 7,
+      "observation_lag_days": 0,
+      "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+      "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+      "provider": "synthetic-fixture",
+      "synthetic": true,
+      "mode": "fixture",
+      "fallback_used": false,
+      "commodity": "Brent crude oil",
+      "price_currency": "USD",
+      "scope": "Brent Europe spot benchmark",
+      "fixture_anchor_date": "2025-12-31",
+      "live_request_as_of": "2026-09-10"
+    }
+  },
+  "profile": {
+    "home_currency": "SEK",
+    "home_country": "SE",
+    "net_monthly_income": 32000.0,
+    "monthly_work_hours": 160.0,
+    "travel_budget_home": 20000.0,
+    "travel_target_currency": "JPY",
+    "mortgage": {
+      "principal": 2500000.0,
+      "remaining_years": 25.0,
+      "current_annual_rate_pct": 3.8,
+      "currency": "SEK"
+    },
+    "savings_balance": 100000.0,
+    "commute": {
+      "monthly_fuel_liters": 65.0,
+      "fuel_price_per_liter": 18.5
+    },
+    "life_units": [
+      {
+        "name": "beer",
+        "price": 80.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "coffee",
+        "price": 45.0,
+        "currency": "SEK"
+      },
+      {
+        "name": "lunch",
+        "price": 140.0,
+        "currency": "SEK"
+      }
+    ]
+  },
+  "assumptions": {
+    "interest_rate_pass_through": 0.5,
+    "oil_to_fuel_pass_through": 0.25
+  }
+}

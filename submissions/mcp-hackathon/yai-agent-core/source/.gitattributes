@@ -1,0 +1,11 @@
+# 默认让 Git 以 LF 归一化文本文件，工作区按平台检出
+* text=auto eol=lf
+
+# 二进制产物不做换行符与文本转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.docx binary
+*.zip binary

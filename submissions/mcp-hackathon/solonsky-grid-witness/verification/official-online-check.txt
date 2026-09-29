@@ -1,0 +1,26 @@
+
+> @xagt/agent-plugin@0.5.0 validate:submission
+> node scripts/validate-submission.mjs --dir submissions/mcp-hackathon/solonsky-grid-witness --online
+
+{
+  "status": "pass",
+  "slug": "solonsky-grid-witness",
+  "checks": [
+    "submission structure and manifest are valid",
+    "13 source files are present; all submission files passed the baseline secret scan (not a completeness or security certification)",
+    "verification evidence contains a health check and repeatable curl command",
+    "the declared source version has been verified",
+    "the live health check is reachable and bound to the review commit",
+    "the standard deployment proof confirms control of the live service"
+  ],
+  "manifest": {
+    "schemaVersion": 1,
+    "name": "Grid Witness",
+    "slug": "solonsky-grid-witness",
+    "sourceRepository": "https://github.com/alexsolonsky/grid-witness",
+    "reviewCommit": "9102fa95b06ec90b43d7c8dc397e2a03fbd0bf35",
+    "apiBaseUrl": "https://bestdeeplearning-grid-witness.hf.space/v1",
+    "healthCheckUrl": "https://bestdeeplearning-grid-witness.hf.space/health",
+    "deploymentProofUrl": "https://bestdeeplearning-grid-witness.hf.space/.well-known/xagent-verification.json"
+  }
+}

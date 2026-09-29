@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Checkout Pilot",
+  "slug": "mosesfawole-checkout-pilot",
+  "sourceRepository": "https://github.com/mosesfawole/checkout-pilot",
+  "reviewCommit": "1c4740857de59595f8d2bb4501f6e44d00a160f4",
+  "apiBaseUrl": "https://checkout-pilot.onrender.com/v1",
+  "healthCheckUrl": "https://checkout-pilot.onrender.com/health",
+  "deploymentProofUrl": "https://checkout-pilot.onrender.com/.well-known/xagent-verification.json"
+}
