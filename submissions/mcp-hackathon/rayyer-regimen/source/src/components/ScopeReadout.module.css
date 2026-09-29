@@ -1,0 +1,103 @@
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--void-700);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--v2);
+}
+
+.lamp {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: var(--ion-magenta);
+  box-shadow: 0 0 10px 1px rgba(255, 95, 210, 0.8);
+  flex: 0 0 auto;
+  animation: beat 2.4s ease-in-out infinite;
+}
+
+.lampOff {
+  background: var(--void-600);
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The readout is the only place numbers appear above the fold, and it is a designed
+   artifact rather than a table: one telemetry line, mono, tabular, on the glass. */
+.telemetry {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.9;
+  letter-spacing: 0.04em;
+  color: var(--void-700);
+  margin: 0;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* A key and its value never split across a line break. */
+.field {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.key {
+  color: var(--void-600);
+}
+
+.sep {
+  color: var(--void-500);
+  padding: 0 4px;
+}
+
+.lit {
+  color: var(--p1-green);
+}
+
+.warn {
+  color: var(--p3-amber);
+}
+
+.flare {
+  color: var(--alert-flare);
+}
+
+.plain {
+  color: var(--void-900);
+}
+
+.scrambling {
+  color: var(--void-600);
+}
+
+.unavailable {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  color: var(--p3-amber);
+  margin: 0;
+  border-left: 2px solid var(--p3-amber);
+  padding-left: var(--v3);
+  max-width: 54ch;
+}
+
+.unavailable span {
+  display: block;
+  color: var(--void-700);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "2.0",
+  "generated_by": "MCPForge/2.1.0",
+  "generated_at": "2026-09-16T16:08:15.296109+00:00",
+  "listing": {
+    "name": "fx-mcp",
+    "display_name": "Fx Mcp",
+    "category": "api-tool",
+    "description": "fx-mcp API turned into MCP by MCPForge in one pass, 1 callable tools.",
+    "endpoint": "https://api.exchangerate-api.com/v4",
+    "auth": {
+      "required": false,
+      "schemes": [],
+      "credential_env": null
+    },
+    "capabilities": {
+      "tool_count": 1,
+      "paginated_tools": 0,
+      "deprecated_tools": 0
+    }
+  },
+  "tools": [
+    {
+      "operation_id": "get__latest_{base_currency}",
+      "method": "GET",
+      "path": "/latest/{base_currency}",
+      "summary": "Returns latest exchange rates in parameter-supplied base currency.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "base_currency": {
+            "type": "string",
+            "description": "**Base Currency**. *Example: USD*. You an use any of the ISO 4217 currency codes we support. See https://www.exchangerate-api.com/docs/supported-currencies"
+          }
+        },
+        "required": [
+          "base_currency"
+        ]
+      }
+    }
+  ],
+  "pricing": {
+    "tier": "free",
+    "billing_model": "free",
+    "included_calls": 1000,
+    "price_per_1k_calls": 0.0,
+    "currency": "USD",
+    "all_tiers": {
+      "free": {
+        "price_per_1k_calls": 0.0,
+        "included_calls": 1000
+      },
+      "basic": {
+        "price_per_1k_calls": 2.0,
+        "included_calls": 10000
+      },
+      "pro": {
+        "price_per_1k_calls": 8.0,
+        "included_calls": 50000
+      },
+      "enterprise": {
+        "price_per_1k_calls": 25.0,
+        "included_calls": 500000
+      }
+    }
+  },
+  "compliance": {
+    "note": "produced as an engineering portfolio piece to demonstrate API→MCP wrapping and metering.",
+    "contains_security_audit_capability": false,
+    "crypto_token_speculation": false
+  }
+}

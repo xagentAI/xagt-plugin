@@ -1,0 +1,233 @@
+{
+  "recorded_at": "2026-09-14T15:02:21.201319+00:00",
+  "sdk_version": "2.2.0",
+  "transport": "Streamable HTTP over a real Uvicorn subprocess on loopback",
+  "endpoint": "http://127.0.0.1:53644/mcp/",
+  "live_positive_calls": true,
+  "health": {
+    "status": "ok",
+    "version": "0.2.0",
+    "commit": "dev-local",
+    "mcp": "enabled"
+  },
+  "verification": {
+    "schemaVersion": 1,
+    "slug": "life-exchange-rate",
+    "version": "0.2.0",
+    "commit": "dev-local",
+    "apiBaseUrl": "http://127.0.0.1:53644",
+    "health": "http://127.0.0.1:53644/health",
+    "openapi": "http://127.0.0.1:53644/openapi.json",
+    "mcp": "http://127.0.0.1:53644/mcp/"
+  },
+  "modes": [
+    {
+      "mode": "auto",
+      "protocol_version": "2026-07-28",
+      "server_info": {
+        "name": "Life Exchange Rate",
+        "title": null,
+        "version": "0.2.0",
+        "description": null,
+        "website_url": null,
+        "icons": null
+      },
+      "tool_names": [
+        "compare_event_scenarios",
+        "convert_to_life_units",
+        "get_energy_event",
+        "get_live_fx_event",
+        "get_macro_events",
+        "get_official_macro_headlines",
+        "get_policy_rate_event",
+        "rank_events_for_user",
+        "translate_event_to_life"
+      ],
+      "calls": [
+        {
+          "tool": "get_macro_events",
+          "status": "passed"
+        },
+        {
+          "tool": "get_policy_rate_event",
+          "status": "passed"
+        },
+        {
+          "tool": "get_energy_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        },
+        {
+          "tool": "compare_event_scenarios",
+          "status": "passed"
+        },
+        {
+          "tool": "get_official_macro_headlines",
+          "status": "passed"
+        },
+        {
+          "tool": "get_live_fx_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        }
+      ],
+      "negative_checks": [
+        {
+          "check": "unsupported event mode",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "unknown headline source",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "identical FX currencies",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "out-of-range lookback",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "headline lacks numeric event values",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "conversion currency mismatch",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "invalid scenario multiplier",
+          "status": "rejected_as_expected"
+        }
+      ]
+    },
+    {
+      "mode": "legacy",
+      "protocol_version": "2025-11-25",
+      "server_info": {
+        "name": "Life Exchange Rate",
+        "title": null,
+        "version": "0.2.0",
+        "description": null,
+        "website_url": null,
+        "icons": null
+      },
+      "tool_names": [
+        "compare_event_scenarios",
+        "convert_to_life_units",
+        "get_energy_event",
+        "get_live_fx_event",
+        "get_macro_events",
+        "get_official_macro_headlines",
+        "get_policy_rate_event",
+        "rank_events_for_user",
+        "translate_event_to_life"
+      ],
+      "calls": [
+        {
+          "tool": "get_macro_events",
+          "status": "passed"
+        },
+        {
+          "tool": "get_policy_rate_event",
+          "status": "passed"
+        },
+        {
+          "tool": "get_energy_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        },
+        {
+          "tool": "compare_event_scenarios",
+          "status": "passed"
+        },
+        {
+          "tool": "get_official_macro_headlines",
+          "status": "passed"
+        },
+        {
+          "tool": "get_live_fx_event",
+          "status": "passed"
+        },
+        {
+          "tool": "rank_events_for_user",
+          "status": "passed"
+        },
+        {
+          "tool": "translate_event_to_life",
+          "status": "passed"
+        },
+        {
+          "tool": "convert_to_life_units",
+          "status": "passed"
+        }
+      ],
+      "negative_checks": [
+        {
+          "check": "unsupported event mode",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "unknown headline source",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "identical FX currencies",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "out-of-range lookback",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "headline lacks numeric event values",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "conversion currency mismatch",
+          "status": "rejected_as_expected"
+        },
+        {
+          "check": "invalid scenario multiplier",
+          "status": "rejected_as_expected"
+        }
+      ]
+    }
+  ],
+  "status": "passed",
+  "server_stopped": true
+}

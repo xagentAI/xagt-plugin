@@ -1,0 +1,822 @@
+/**
+ * openagent.email REST 最小客户端（stdio MCP 与 HTTP /mcp 共用）。
+ *
+ * API 契约：
+ *   POST /v1/identities            {name?, localpart?, canNotifyUser?, scopes?} -> 201 {address, name?, token, scopes?}
+ *   GET  /v1/identities            -> {identities:[{address,name?,createdAt,scopes?}]}
+ *   POST /v1/identities/:address/token {scopes?} -> 200 {address, token, scopes?}
+ *   GET  /v1/messages?address&limit -> {messages:[{id,from,to,subject,date,seen,snippet}]}
+ *   GET  /v1/messages/:id?address  -> {id,from,to,subject,date,text,html?,otp:{codes:[],links:[]}}
+ *   POST /v1/messages/:id/seen     {address, seen} -> 200 {id, seen}
+ *   POST /v1/messages/wait         {address, fromContains?, subjectContains?, timeoutSec?} -> message | 408 {error:"timeout"}
+   *   POST /v1/send                  {from,to,subject,text,html?} -> 200 {queued:true, messageId, id?}
+ *   POST /v1/tasks                 {to,subject,body,wait?} -> 201 task
+ *   GET  /v1/tasks?state=          -> {tasks:[task]}
+ *   GET  /v1/tasks/:id             -> task
+ *   POST /v1/tasks/:id/state       {state,body?,result?} -> task
+ */
+
+import { SEND_SOURCE_MAC_HEADER, macForMcpSendSource } from "../lib/send-source.ts";
+import { waitMonotonicNow } from "../lib/wait-clock.ts";
+
+export type OpenAgentEmailClientOptions = {
+  /** 同进程传入 config.taskSigningSecret；stdio 可省略（回退 env）。 */
+  sendSourceSecret?: string;
+};
+
+/**
+ * 可注入的 fetch（HTTP 传输用 app.fetch 做进程内回环）。
+ * 返回类型对齐 Hono `app.fetch`：允许同步 Response。
+ */
+export type FetchLike = (
+  input: string | URL | Request,
+  init?: RequestInit,
+) => Response | Promise<Response>;
+
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+    /** 408 响应体里的有效 timeoutSec（分块再武装用来观察服务端钳制）。 */
+    public readonly timeoutSec?: number,
+    /** 客户端诊断：malformed / early / 总截止。不是新的服务端码。 */
+    public readonly kind?: string,
+    public readonly waitHeaderSec?: number,
+    public readonly bodyError?: string,
+    /** 解析后的错误响应 JSON（create/wait 分层等契约字段从此读取）。 */
+    public readonly errorBody?: unknown,
+    /** 错误体中的 taskId（已创建后 wait 失败时服务端透出）。 */
+    public readonly taskId?: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+/** 仅覆盖调度边界；不可配置。早于 timeoutSec*1000-250ms 的合法外观 408 立即失败。 */
+export const WAIT_TIMEOUT_EARLY_TOLERANCE_MS = 250;
+
+export interface Identity {
+  address: string;
+  name?: string;
+  createdAt?: string;
+  canNotifyUser?: boolean;
+  /** REST publicIdentity 始终带 1|2|3 */
+  pushContentTier?: 1 | 2 | 3;
+  pushContentTierWarning?: string;
+  scopes?: string[];
+}
+
+export interface MessageSummary {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  date: string;
+  seen: boolean;
+  snippet: string;
+}
+
+export interface Message extends MessageSummary {
+  text: string;
+  html?: string;
+  otp: { codes: string[]; links: string[] };
+}
+
+export interface NotificationMessage {
+  id: string;
+  time: number;
+  title: string;
+  message: string;
+  priority: number;
+  tags: string[];
+}
+
+export type TaskState = "submitted" | "working" | "input-required" | "completed" | "failed";
+
+export interface ApprovalAction {
+  type: string;
+  name: string;
+  arguments: unknown;
+}
+
+export interface ApprovalSnapshot {
+  action: ApprovalAction;
+  reviewer: string;
+  expiresAt: string;
+  digest: string;
+}
+
+export type ApprovalEvent =
+  | { type: 'request'; snapshot: ApprovalSnapshot }
+  | { type: 'decision'; digest: string; decision: 'approved' | 'rejected' }
+  | { type: 'expired'; digest: string };
+
+export interface TaskMessage {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  date: string;
+  state: TaskState;
+  body: string;
+  result?: unknown;
+  kind?: 'state' | 'reminder';
+  idempotencyKey?: string;
+  approval?: ApprovalEvent;
+}
+
+export interface Task {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  state: TaskState;
+  createdAt: string;
+  updatedAt: string;
+  parentTaskId?: string;
+  messages: TaskMessage[];
+  result?: unknown;
+  kind?: 'approval';
+  approval?: ApprovalSnapshot;
+  claimedUntil?: string;
+  leaseGeneration?: number;
+  leaseStatus?: 'disabled';
+  /** list/board 过期未物化只读投影；authorized 物化后缺省。 */
+  expiryProjection?: 'past-deadline-unmaterialized';
+}
+
+export interface TaskLeaseGrant {
+  task: Task;
+  leaseToken: string;
+  claimedUntil: string;
+  leaseGeneration: number;
+}
+
+/**
+ * Safe rendering of the configured API URL for diagnostics: the string ends
+ * up in the agent's context and in client logs, and a reverse proxy in front
+ * of the API may well be configured as https://user:pass@host.
+ */
+function stripUserinfo(text: string): string {
+  return text.replace(/(^|\/\/)[^/@\s]*@/, "$1[redacted]@");
+}
+
+const SENSITIVE_PARAM = /token|key|secret|pass|auth|credential/i;
+
+/**
+ * Text-level scrub for strings new URL() could not parse. This is the path
+ * that matters most: a URL is usually malformed *because* the user typed it
+ * by hand, and the credential is sitting right there in the string they typed.
+ */
+function stripSensitiveText(text: string): string {
+  return (
+    stripUserinfo(text)
+      // key=value pairs whose key looks like a credential, anywhere in the
+      // string (no reliable ?/& structure to rely on once parsing failed).
+      .replace(
+        /([?&#;][^=&#;\s]*=)([^&#;\s]*)/g,
+        (match, prefix: string, value: string) =>
+          SENSITIVE_PARAM.test(prefix) && value ? `${prefix}REDACTED` : match,
+      )
+      // A fragment can carry a bare token with no key at all.
+      .replace(/#(?![A-Z]*REDACTED)[^\s]+/gi, "#REDACTED")
+  );
+}
+
+export function apiUrlForDisplay(raw: string): string {
+  try {
+    const url = new URL(raw);
+    if (url.username) url.username = "REDACTED";
+    if (url.password) url.password = "REDACTED";
+    for (const key of [...url.searchParams.keys()]) {
+      if (/token|key|secret|pass|auth/i.test(key)) url.searchParams.set(key, "REDACTED");
+    }
+    if (url.hash) url.hash = "#REDACTED";
+    // stripUserinfo again on the way out: a scheme-less string like
+    // "agent:pw@host:3100" still *parses* (scheme "agent:", the rest is the
+    // path), so URL's username/password fields never see the credentials.
+    return stripUserinfo(url.toString().replace(/\/$/, ""));
+  } catch {
+    // Unparseable — usually a missing scheme or a typo'd host, the two most
+    // common misconfigurations. Show it anyway (hiding it behind "[invalid
+    // URL]" leaves the user guessing), minus userinfo, credential-looking
+    // query parameters and any fragment.
+    return stripSensitiveText(raw);
+  }
+}
+
+/** 单次 REST wait 上限（秒）；总 deadline 内 408 才再武装。 */
+const WAIT_CHUNK_SEC = 50;
+
+/** 可释放的合并 signal：每段 finally 必须恰好 dispose 一次。 */
+type LinkedAbort = { signal: AbortSignal; dispose: () => void };
+
+/** 任一 signal 中止则中止；父原因优先于内部截止。 */
+function abortAny(signals: Array<AbortSignal | undefined>): LinkedAbort {
+  const ac = new AbortController();
+  const cleanups: Array<() => void> = [];
+  let disposed = false;
+  const link = (s: AbortSignal) => {
+    if (ac.signal.aborted) return;
+    ac.abort(s.reason);
+  };
+  for (const s of signals) {
+    if (!s) continue;
+    if (s.aborted) {
+      link(s);
+      continue;
+    }
+    const onAbort = () => link(s);
+    s.addEventListener("abort", onAbort);
+    cleanups.push(() => s.removeEventListener("abort", onAbort));
+  }
+  return {
+    signal: ac.signal,
+    dispose() {
+      if (disposed) return;
+      disposed = true;
+      for (const c of cleanups) c();
+      cleanups.length = 0;
+    },
+  };
+}
+
+/** fetch / AbortSignal 取消，不得当成网络故障或 408 再武装。 */
+function isAbortError(err: unknown): boolean {
+  return (
+    (typeof DOMException !== "undefined" && err instanceof DOMException && err.name === "AbortError") ||
+    (err instanceof Error && err.name === "AbortError")
+  );
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  // 保留 Error/string/symbol/object/null；仅 undefined 才补默认 AbortError。
+  if (signal.reason !== undefined) throw signal.reason;
+  throw new DOMException("The operation was aborted.", "AbortError");
+}
+
+function parseWaitHeaderSec(res: Response): number | undefined {
+  const raw = res.headers.get("X-OAE-Wait-Timeout-Sec");
+  if (raw == null || raw.trim() === "") return undefined;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1) return undefined;
+  return n;
+}
+
+function parseTimeoutSec(data: unknown): number | undefined {
+  if (!data || typeof data !== "object" || !("timeoutSec" in data)) return undefined;
+  const n = (data as { timeoutSec: unknown }).timeoutSec;
+  return typeof n === "number" && Number.isInteger(n) && n >= 1 ? n : undefined;
+}
+
+function parseBodyError(data: unknown): string | undefined {
+  if (!data || typeof data !== "object" || !("error" in data)) return undefined;
+  const e = (data as { error: unknown }).error;
+  return typeof e === "string" ? e : undefined;
+}
+
+/** 从错误 JSON 取出 taskId（create wait 失败契约）。 */
+function parseBodyTaskId(data: unknown): string | undefined {
+  if (!data || typeof data !== "object" || !("taskId" in data)) return undefined;
+  const id = (data as { taskId: unknown }).taskId;
+  return typeof id === "string" && id.length > 0 ? id : undefined;
+}
+
+/** Network failure code (ECONNREFUSED, ENOTFOUND, ...), if the runtime gave one. */
+function networkErrorCode(err: unknown): string | undefined {
+  for (const candidate of [err, (err as { cause?: unknown })?.cause]) {
+    const code = (candidate as { code?: unknown } | undefined)?.code;
+    if (typeof code === "string" && code) return code;
+  }
+  return undefined;
+}
+
+export class OpenAgentEmailClient {
+  private readonly fetchImpl: FetchLike;
+  private readonly sendSourceSecret: string | undefined;
+
+  constructor(
+    private readonly baseUrl: string,
+    private readonly apiKey: string,
+    /** 默认全局 fetch；API 进程内可注入 app.fetch 避免 TCP loopback。 */
+    fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
+    options?: OpenAgentEmailClientOptions,
+  ) {
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+    this.fetchImpl = fetchImpl;
+    this.sendSourceSecret =
+      options?.sendSourceSecret ?? process.env.TASK_SIGNING_SECRET ?? process.env.SMTP_PASS;
+  }
+
+  /** 有共享密钥才签 mcp 来源；无密钥则不加头（API 记 api）。 */
+  private mcpSourceHeaders(): Record<string, string> {
+    if (!this.sendSourceSecret) return {};
+    return { [SEND_SOURCE_MAC_HEADER]: macForMcpSendSource(this.sendSourceSecret) };
+  }
+
+  private async request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    opts?: { sendSource?: "mcp"; signal?: AbortSignal },
+  ): Promise<T> {
+    let res: Response;
+    try {
+      res = await this.fetchImpl(`${this.baseUrl}${path}`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          ...(opts?.sendSource === "mcp" ? this.mcpSourceHeaders() : {}),
+        },
+        body: body === undefined ? undefined : JSON.stringify(body),
+        signal: opts?.signal,
+      });
+    } catch (err) {
+      // 取消必须原样抛出，不能吞成“连不上 API”。
+      if (isAbortError(err) || opts?.signal?.aborted) {
+        throwIfAborted(opts?.signal);
+        throw err instanceof Error
+          ? err
+          : new DOMException("The operation was aborted.", "AbortError");
+      }
+      // Never interpolate err.message: Node's fetch puts the whole URL —
+      // credentials included — into the text when it refuses a URL with
+      // userinfo. The failure code is enough to tell the user what broke.
+      const code = networkErrorCode(err);
+      throw new ApiError(
+        0,
+        `Cannot reach openagent.email API at ${apiUrlForDisplay(this.baseUrl)}` +
+          `${code ? ` (${code})` : ""}. ` +
+          `Is the stack running (docker compose up -d)? Check OPENAGENTEMAIL_API_URL.`,
+      );
+    }
+
+    const text = await res.text();
+    let data: unknown = undefined;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { raw: text };
+      }
+    }
+
+    if (!res.ok) {
+      const serverMsg =
+        data && typeof data === "object" && "error" in data
+          ? String((data as { error: unknown }).error)
+          : text || res.statusText;
+      if (res.status === 401) {
+        throw new ApiError(
+          401,
+          `Unauthorized (401). Check OPENAGENTEMAIL_API_KEY — it must be an identity token (oa_…) or one of the admin API_KEYS configured on the server.`,
+        );
+      }
+      if (res.status === 403) {
+        throw new ApiError(
+          403,
+          `Forbidden (403): ${serverMsg}.`,
+        );
+      }
+      if (res.status === 404) {
+        throw new ApiError(
+          404,
+          `Not found (404): ${serverMsg}. Verify the address/id — list identities with mail_list_identities and messages with mail_list_messages.`,
+        );
+      }
+      if (res.status === 408) {
+        const bodyError = parseBodyError(data);
+        const timeoutSec = parseTimeoutSec(data);
+        const waitHeaderSec = parseWaitHeaderSec(res);
+        const identityOk =
+          bodyError === "timeout" &&
+          timeoutSec !== undefined &&
+          waitHeaderSec !== undefined &&
+          waitHeaderSec === timeoutSec;
+        if (!identityOk) {
+          throw new ApiError(
+            408,
+            `Upstream 408 malformed (kind=upstream_408_malformed).`,
+            timeoutSec,
+            "upstream_408_malformed",
+            waitHeaderSec,
+            bodyError,
+          );
+        }
+        throw new ApiError(
+          408,
+          `Timeout: no matching message arrived in time.`,
+          timeoutSec,
+          "upstream_timeout",
+          waitHeaderSec,
+          bodyError,
+        );
+      }
+      // 502/503/429 等：透出 error body JSON 与 taskId，供 tools 安全重试口径使用。
+      throw new ApiError(
+        res.status,
+        `API error ${res.status}: ${serverMsg}`,
+        undefined,
+        undefined,
+        undefined,
+        parseBodyError(data),
+        data,
+        parseBodyTaskId(data),
+      );
+    }
+
+    return data as T;
+  }
+
+  createIdentity(opts: {
+    name?: string;
+    localpart?: string;
+    domain?: string;
+    canNotifyUser?: boolean;
+    scopes?: string[];
+  }): Promise<{
+    address: string;
+    name?: string;
+    canNotifyUser?: boolean;
+    pushContentTier?: 1 | 2 | 3;
+    /** 仅创建/轮换响应出现一次 */
+    token?: string;
+    scopes?: string[];
+  }> {
+    const body: Record<string, unknown> = {};
+    if (opts.name) body.name = opts.name;
+    if (opts.localpart) body.localpart = opts.localpart;
+    if (opts.domain) body.domain = opts.domain;
+    if (opts.canNotifyUser) body.canNotifyUser = true;
+    if (opts.scopes !== undefined) body.scopes = opts.scopes;
+    return this.request("POST", "/v1/identities", body);
+  }
+
+  rotateIdentityToken(
+    address: string,
+    opts?: { scopes?: string[] | null },
+  ): Promise<{
+    address: string;
+    token: string;
+    scopes?: string[];
+  }> {
+    const body = opts?.scopes !== undefined ? { scopes: opts.scopes } : undefined;
+    return this.request(
+      "POST",
+      `/v1/identities/${encodeURIComponent(address)}/token`,
+      body,
+    );
+  }
+
+  async listIdentities(): Promise<Identity[]> {
+    const data = await this.request<{ identities: Identity[] }>(
+      "GET",
+      "/v1/identities",
+    );
+    return data.identities;
+  }
+
+  async listMessages(address: string, limit?: number): Promise<MessageSummary[]> {
+    const params = new URLSearchParams({ address });
+    if (limit !== undefined) params.set("limit", String(limit));
+    const data = await this.request<{ messages: MessageSummary[] }>(
+      "GET",
+      `/v1/messages?${params.toString()}`,
+    );
+    return data.messages;
+  }
+
+  readMessage(address: string, id: string): Promise<Message> {
+    const params = new URLSearchParams({ address });
+    return this.request("GET", `/v1/messages/${encodeURIComponent(id)}?${params.toString()}`);
+  }
+
+  markSeen(address: string, id: string, seen: boolean): Promise<{ id: string; seen: boolean }> {
+    return this.request("POST", `/v1/messages/${encodeURIComponent(id)}/seen`, { address, seen });
+  }
+
+  /**
+   * 一个内部总截止控制器；REST 每段最多 50s。
+   * 仅完整 v2 谓词（含 elapsed>=N*1000-250）才再武装。无 backoff/sleep/jitter。
+   */
+  async waitFor(
+    address: string,
+    opts: {
+      fromContains?: string;
+      subjectContains?: string;
+      timeoutSec?: number;
+      signal?: AbortSignal;
+    },
+  ): Promise<Message> {
+    const requestedTotal = opts.timeoutSec ?? 120;
+    const totalMs = requestedTotal * 1000;
+    const startedMono = waitMonotonicNow();
+    const remainingMs = () => totalMs - (waitMonotonicNow() - startedMono);
+    const parent = opts.signal;
+    const internal = new AbortController();
+    const throwTotalDeadline = (pollCount: number, observedClamp: number): never => {
+      throw new ApiError(
+        408,
+        `Timeout: no matching message arrived within ${requestedTotal}s (observed per-call clamp ${observedClamp}s, ${pollCount} polls).`,
+        undefined,
+        "total_deadline",
+      );
+    };
+    const throwParentOrInternal = (pollCount: number, observedClamp: number): never => {
+      if (parent?.aborted) {
+        if (parent.reason !== undefined) throw parent.reason;
+        throw new DOMException("The operation was aborted.", "AbortError");
+      }
+      if (internal.signal.aborted || remainingMs() <= 0) {
+        throwTotalDeadline(pollCount, observedClamp);
+      }
+      throwIfAborted(parent);
+      throw new DOMException("The operation was aborted.", "AbortError");
+    };
+    const onParentAbort = () => {
+      if (!internal.signal.aborted) {
+        internal.abort(parent?.reason !== undefined ? parent.reason : undefined);
+      }
+    };
+    parent?.addEventListener("abort", onParentAbort, { once: true });
+    // 唯一真实总截止定时器；分段耗时与剩余只读单调钟。
+    const deadlineTimer = setTimeout(() => {
+      if (!internal.signal.aborted && !parent?.aborted) internal.abort();
+    }, Math.max(0, totalMs));
+    let observedClamp = WAIT_CHUNK_SEC;
+    let pollCount = 0;
+    try {
+      if (parent?.aborted) throwParentOrInternal(pollCount, observedClamp);
+      while (true) {
+        if (parent?.aborted || internal.signal.aborted) {
+          throwParentOrInternal(pollCount, observedClamp);
+        }
+        const leftMs = remainingMs();
+        if (leftMs <= 0) throwTotalDeadline(pollCount, observedClamp);
+        const remainingSec = Math.max(1, Math.ceil(leftMs / 1000));
+        const chunkSec = Math.min(WAIT_CHUNK_SEC, observedClamp, remainingSec);
+        pollCount += 1;
+        const linked = abortAny([parent, internal.signal]);
+        const segmentStart = waitMonotonicNow();
+        try {
+          const message = await this.request<Message>(
+            "POST",
+            "/v1/messages/wait",
+            {
+              address,
+              fromContains: opts.fromContains,
+              subjectContains: opts.subjectContains,
+              timeoutSec: chunkSec,
+            },
+            { signal: linked.signal },
+          );
+          if (remainingMs() <= 0 || internal.signal.aborted || parent?.aborted) {
+            throwParentOrInternal(pollCount, observedClamp);
+          }
+          return message;
+        } catch (err) {
+          if (parent?.aborted || internal.signal.aborted) {
+            throwParentOrInternal(pollCount, observedClamp);
+          }
+          if (isAbortError(err)) throwParentOrInternal(pollCount, observedClamp);
+          if (!(err instanceof ApiError) || err.status !== 408) throw err;
+          if (err.kind === "upstream_408_malformed" || err.kind === "total_deadline") throw err;
+          const elapsed = waitMonotonicNow() - segmentStart;
+          const n = err.timeoutSec;
+          const retryable =
+            err.kind === "upstream_timeout" &&
+            err.bodyError === "timeout" &&
+            typeof n === "number" &&
+            Number.isInteger(n) &&
+            n >= 1 &&
+            err.waitHeaderSec === n &&
+            elapsed >= n * 1000 - WAIT_TIMEOUT_EARLY_TOLERANCE_MS;
+          if (!retryable) {
+            throw new ApiError(
+              408,
+              `Upstream timeout early (kind=upstream_timeout_early).`,
+              n,
+              "upstream_timeout_early",
+              err.waitHeaderSec,
+              err.bodyError,
+            );
+          }
+          if (typeof n === "number" && n > 0 && n < chunkSec) {
+            observedClamp = Math.min(observedClamp, n);
+          }
+        } finally {
+          linked.dispose();
+        }
+      }
+    } finally {
+      clearTimeout(deadlineTimer);
+      parent?.removeEventListener("abort", onParentAbort);
+    }
+  }
+
+  send(
+    from: string,
+    to: string,
+    subject: string,
+    text: string,
+    html?: string,
+  ): Promise<{ queued: boolean; messageId: string; id?: string }> {
+    return this.request("POST", "/v1/send", { from, to, subject, text, html }, { sendSource: "mcp" });
+  }
+
+  notifyUser(
+    title: string,
+    message: string,
+    level: "urgent" | "normal" | "low" = "normal",
+    tags?: string[],
+  ): Promise<{ target: "user"; title: string; level: "urgent" | "normal" | "low" }> {
+    return this.request("POST", "/v1/notify", { target: "user", title, message, level, tags });
+  }
+
+  notifyAgent(
+    name: string,
+    title: string,
+    message: string,
+    level: "urgent" | "normal" | "low" = "normal",
+    tags?: string[],
+  ): Promise<{ target: string; title: string; level: "urgent" | "normal" | "low" }> {
+    return this.request("POST", "/v1/notify", { target: `agent:${name}`, title, message, level, tags });
+  }
+
+  async notificationCheck(since?: string): Promise<NotificationMessage[]> {
+    const params = new URLSearchParams({ topic: "self" });
+    if (since) params.set("since", since);
+    const data = await this.request<{ messages: NotificationMessage[] }>(
+      "GET",
+      `/v1/notify/messages?${params.toString()}`,
+    );
+    return data.messages;
+  }
+
+  verifyNotifications(): Promise<{ ok: true }> {
+    return this.request("POST", "/v1/notify/verify");
+  }
+
+  createTask(
+    to: string,
+    subject: string,
+    body: string,
+    wait = false,
+    parentTaskId?: string,
+  ): Promise<Task> {
+    return this.request("POST", "/v1/tasks", { to, subject, body, wait, ...(parentTaskId === undefined ? {} : { parentTaskId }) });
+  }
+
+  /** Additive approval creation. Ordinary createTask bytes remain unchanged. */
+  createApprovalTask(
+    to: string,
+    subject: string,
+    action: ApprovalAction,
+    expiresAt: string,
+    body?: string,
+    wait = false,
+    parentTaskId?: string,
+  ): Promise<Task> {
+    return this.request("POST", "/v1/tasks", {
+      to,
+      subject,
+      ...(body === undefined ? {} : { body }),
+      kind: 'approval',
+      approval: { action, expiresAt },
+      wait,
+      ...(parentTaskId === undefined ? {} : { parentTaskId }),
+    });
+  }
+
+  async listTasks(state?: TaskState): Promise<Task[]> {
+    const params = new URLSearchParams();
+    if (state) params.set("state", state);
+    const suffix = params.size ? `?${params.toString()}` : "";
+    const data = await this.request<{ tasks: Task[] }>("GET", `/v1/tasks${suffix}`);
+    return data.tasks;
+  }
+
+  getTask(id: string, wait = false): Promise<Task> {
+    return this.request("GET", `/v1/tasks/${encodeURIComponent(id)}${wait ? "?wait=true" : ""}`);
+  }
+
+  async listTaskChildren(parentTaskId: string, limit?: 20 | 50 | 100, cursor?: string): Promise<{ children: Task[]; nextCursor: string | null }> {
+    const params = new URLSearchParams();
+    if (limit !== undefined) params.set('limit', String(limit));
+    if (cursor !== undefined) params.set('cursor', cursor);
+    const suffix = params.size ? `?${params.toString()}` : '';
+    return this.request('GET', `/v1/tasks/${encodeURIComponent(parentTaskId)}/children${suffix}`);
+  }
+
+  updateTask(
+    id: string,
+    state: TaskState,
+    body?: string,
+    result?: unknown,
+    leaseToken?: string,
+  ): Promise<Task> {
+    return this.request("POST", `/v1/tasks/${encodeURIComponent(id)}/state`, {
+      state,
+      ...(body === undefined ? {} : { body }),
+      ...(result === undefined ? {} : { result }),
+      ...(leaseToken === undefined ? {} : { leaseToken }),
+    });
+  }
+
+  decideTask(id: string, decision: 'approved' | 'rejected'): Promise<Task> {
+    return this.request("POST", `/v1/tasks/${encodeURIComponent(id)}/decision`, { decision });
+  }
+
+  claimTask(id: string, leaseSec?: number): Promise<TaskLeaseGrant> {
+    return this.request("POST", `/v1/tasks/${encodeURIComponent(id)}/claim`, {
+      ...(leaseSec === undefined ? {} : { leaseSec }),
+    });
+  }
+
+  renewTask(id: string, leaseToken: string, leaseSec?: number): Promise<Task> {
+    return this.request("POST", `/v1/tasks/${encodeURIComponent(id)}/lease`, {
+      leaseToken,
+      ...(leaseSec === undefined ? {} : { leaseSec }),
+    });
+  }
+
+  releaseTask(id: string, leaseToken: string, reason?: string): Promise<Task> {
+    return this.request("POST", `/v1/tasks/${encodeURIComponent(id)}/release`, {
+      leaseToken,
+      ...(reason === undefined ? {} : { reason }),
+    });
+  }
+
+  async listWebhooks(address?: string): Promise<WebhookSubscriptionDetail[]> {
+    const params = new URLSearchParams();
+    if (address) params.set('address', address);
+    const suffix = params.size ? `?${params.toString()}` : '';
+    const res = await this.request<{ webhooks: WebhookSubscriptionDetail[] }>('GET', `/v1/webhooks${suffix}`);
+    return res.webhooks;
+  }
+
+  createWebhook(params: {
+    url: string;
+    address: string;
+    events: string[];
+    contentScope?: 'metadata' | 'preview';
+    description?: string;
+  }): Promise<WebhookCreateResult> {
+    return this.request<WebhookCreateResult>('POST', '/v1/webhooks', params);
+  }
+
+  deleteWebhook(id: string): Promise<{ ok: boolean }> {
+    return this.request<{ ok: boolean }>('DELETE', `/v1/webhooks/${encodeURIComponent(id)}`);
+  }
+
+  testWebhook(id: string): Promise<WebhookTestResult> {
+    return this.request<WebhookTestResult>('POST', `/v1/webhooks/${encodeURIComponent(id)}/test`);
+  }
+
+  disableWebhook(id: string): Promise<{ ok: boolean; state: string; disabledReason: string }> {
+    return this.request<{ ok: boolean; state: string; disabledReason: string }>('POST', `/v1/webhooks/${encodeURIComponent(id)}/disable`);
+  }
+}
+
+export interface WebhookSubscriptionDetail {
+  id: string;
+  url: string;
+  address: string;
+  events: string[];
+  contentScope: 'metadata' | 'preview';
+  description: string;
+  state: 'unverified' | 'enabled' | 'disabled';
+  disabledReason: string | null;
+  secretPrefix: string;
+  signatureScheme: string;
+  timestampToleranceSec: number;
+  createdAt: string;
+  updatedAt: string;
+  rotatedAt: string | null;
+  consecutiveFailures: number;
+  privateTargetGranted: boolean;
+  lastDelivery: {
+    deliveryId: string;
+    ts: string;
+    attempt: number;
+    outcome: string;
+    status: number | null;
+    durationMs: number | null;
+    reason: string | null;
+  } | null;
+}
+
+export interface WebhookCreateResult extends WebhookSubscriptionDetail {
+  secret: string | null;
+}
+
+export interface WebhookTestResult {
+  ok: boolean;
+  status: number | null;
+  durationMs: number;
+  reason: string | null;
+}
+

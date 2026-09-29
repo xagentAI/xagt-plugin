@@ -1,0 +1,70 @@
+{
+  "schema_version": "0.1",
+  "mode": "full",
+  "task": {
+    "task_id": "t310-governance-update-20260701",
+    "buyer_goal": "Add a local-only website release governance update without publishing, deploying, or touching generated public files.",
+    "surface": "website",
+    "allowed_actions": [
+      "local owned-media update entry",
+      "route validation",
+      "typescript validation",
+      "writeback"
+    ],
+    "forbidden_actions": [
+      "commit",
+      "push",
+      "PR",
+      "deploy",
+      "public publish",
+      "cleanup",
+      "sitemap generation"
+    ],
+    "acceptance_criteria": [
+      "Only approved pathspec is touched",
+      "Route works locally",
+      "Public release gates remain closed",
+      "Protocol tension is disclosed"
+    ]
+  },
+  "delivery": {
+    "writeback_text": "Re-applied Website Release Governance /updates entry on feat/t310-governance-updates from main. Changed src/owned-media/updates.ts only. Route, TypeScript, diff, import smoke, and Vite HTTP checks passed. Build and screenshot deferred. Product note says updateProtocol has tension because /updates should not cover release gates unless accepted as meta exception.",
+    "artifact_paths": [
+      "/Users/zhangxu/Projects/_inventory/2026-07-01/t310-leolabs-owned-media-website-implementation/cursor-writeback-20260701-session2.md"
+    ],
+    "changed_files": [
+      "src/owned-media/updates.ts"
+    ],
+    "validation": [
+      "repo-writer-lock check allowed",
+      "npm run check:owned-media-routes PASS",
+      "npx tsc -b PASS",
+      "git diff --check PASS",
+      "module import smoke PASS",
+      "Vite route HTTP 200"
+    ],
+    "validation_output": "Build and Playwright screenshot deferred. Later re-audit should verify internal route normalization for /research links before release.",
+    "rollback_plan": "git checkout -- src/owned-media/updates.ts before commit.",
+    "hard_gates_declared": [
+      "commit",
+      "push",
+      "PR",
+      "deploy",
+      "public publish",
+      "cleanup",
+      "account",
+      "credential",
+      "payment",
+      "runtime mutation"
+    ],
+    "next_gate": "Owner reviews governance copy, protocol tension, and release validation before any commit or deploy."
+  },
+  "context": {
+    "repo_state": "dirty",
+    "public_publish_requested": false,
+    "payments_or_wallets_in_scope": false,
+    "credentials_in_scope": false,
+    "notes": "Local-only governance content may be valuable, but it is not a publish-ready packet."
+  }
+}
+

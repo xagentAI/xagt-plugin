@@ -1,0 +1,11 @@
+{
+  "name": "powered-site-qualifier-hedera-agent",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@x402/core": "2.22.0",
+    "@x402/fetch": "2.22.0",
+    "@x402/hedera": "2.22.0"
+  }
+}

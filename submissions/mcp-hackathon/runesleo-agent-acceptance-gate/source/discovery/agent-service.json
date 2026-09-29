@@ -1,0 +1,125 @@
+{
+  "schema_version": "0.1",
+  "service_id": "agent-acceptance-gate",
+  "service_name": "Agent Acceptance Gate",
+  "display_name_zh": "Agent 验收门禁",
+  "status": "local_only_not_published",
+  "audience": ["agent", "asp", "buyer_agent", "evaluator_agent"],
+  "primary_user": "agent",
+  "human_role": "review_result_and_authorize_next_gate",
+  "one_liner": "Check whether an AI agent transaction can continue before task acceptance, paid service calls, delivery acceptance, payment release, or dispute review.",
+  "call_when": [
+    "before_hire_agent",
+    "before_accept_task",
+    "before_assign_budget",
+    "before_paid_tool_call",
+    "before_buy_service",
+    "before_agent_spends_budget",
+    "before_accept_delivery",
+    "before_release_payment",
+    "before_submit_delivery_to_buyer",
+    "before_dispute_vote",
+    "after_buyer_rejects_delivery",
+    "after_seller_claims_completion",
+    "before_public_release_or_deploy"
+  ],
+  "do_not_call_for": [
+    "legal_advice",
+    "investment_advice",
+    "wallet_signing",
+    "smart_contract_security_audit",
+    "full_code_review",
+    "public_deploy"
+  ],
+  "capabilities": [
+    "agent_transaction_gate",
+    "pre_hire_risk_check",
+    "budget_spend_guard",
+    "delivery_acceptance_audit",
+    "hard_gate_detection",
+    "missing_evidence_detection",
+    "release_readiness_triage",
+    "dispute_fact_packet"
+  ],
+  "tools": [
+    {
+      "name": "world_cup_smart_money_radar",
+      "description": "Return World Cup prediction-market smart-money movements: profitable wallet labels, position changes, side, notional size, confidence, and caveats. Data and analytics only; no trading, custody, or investment advice.",
+      "endpoint": "POST /world-cup-smart-money-radar",
+      "billable_event": "valid_world_cup_smart_money_report_generated",
+      "launch_priority": "first_okx_ai_listing_candidate"
+    },
+    {
+      "name": "polymarket_smart_money_radar",
+      "description": "Return all-market Polymarket smart-money movements for profitable wallet cohorts. Data and analytics only; no trading, custody, or investment advice.",
+      "endpoint": "POST /polymarket-smart-money-radar",
+      "billable_event": "valid_polymarket_smart_money_report_generated",
+      "launch_priority": "batch_listing_candidate"
+    },
+    {
+      "name": "event_probability_crypto_divergence",
+      "description": "Compare prediction-market event probability changes with crypto spot and funding moves to surface divergence signals for research agents.",
+      "endpoint": "POST /event-probability-crypto-divergence",
+      "billable_event": "valid_event_crypto_divergence_report_generated",
+      "launch_priority": "batch_listing_candidate"
+    },
+    {
+      "name": "crypto_market_pulse_report",
+      "description": "Return a compact crypto market pulse with flows, anomalies, and watch items for agent research workflows.",
+      "endpoint": "POST /crypto-market-pulse-report",
+      "billable_event": "valid_crypto_market_pulse_report_generated",
+      "launch_priority": "batch_listing_candidate"
+    },
+    {
+      "name": "audit_agent_delivery",
+      "description": "Given a task, agent writeback, artifact paths, changed files, validation output, hard gates, and next gate, return pass/needs_review/fail with missing evidence, risks, buyer summary, evaluator notes, and machine flags.",
+      "endpoint": "POST /audit-agent-deliverable",
+      "billable_event": "valid_audit_generated"
+    },
+    {
+      "name": "assess_agent_transaction",
+      "description": "Future tool shape: assess whether an agent transaction should continue before accepting a task, spending budget, buying a service, releasing payment, or entering dispute.",
+      "endpoint": "planned",
+      "billable_event": "valid_transaction_assessment_generated"
+    }
+  ],
+  "pricing_intent": {
+    "mode": "future_paid_call_not_active",
+    "billable_event": "valid_audit_generated",
+    "free_events": ["invalid_json", "missing_required_fields", "server_error", "duplicate_retry", "health_check", "sample_demo_call"]
+  },
+  "discovery_tags": [
+    "agent marketplace",
+    "agent transaction gate",
+    "World Cup smart money",
+    "prediction market analytics",
+    "Polymarket analytics",
+    "budget guard",
+    "pre-hire gate",
+    "delivery acceptance",
+    "agent QA",
+    "escrow safety",
+    "A2MCP",
+    "MCP tool",
+    "OKX.AI ASP candidate",
+    "evaluator support",
+    "release gate",
+    "hard gate"
+  ],
+  "local_endpoints": {
+    "health": "GET /health",
+    "sample_audits": "GET /api/sample-audits",
+    "audit": "POST /audit-agent-deliverable",
+    "openapi": "GET /openapi.yaml",
+    "mcp_manifest": "GET /mcp-tool-manifest.json"
+  },
+  "hard_gates_before_public_launch": [
+    "public_endpoint_deploy",
+    "wallet_or_receiving_address",
+    "payment_middleware",
+    "OKX_Agentic_Wallet_or_account",
+    "ASP_listing_submission",
+    "privacy_terms",
+    "rate_limit_and_abuse_policy"
+  ]
+}

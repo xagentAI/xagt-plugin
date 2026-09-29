@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Settle",
+  "slug": "modolu-settle",
+  "sourceRepository": "https://github.com/modolu/settle",
+  "reviewCommit": "25e958fcecaeb4ad20760c5a94c93a4670fd2b77",
+  "apiBaseUrl": "https://settle-beige-seven.vercel.app/v1",
+  "healthCheckUrl": "https://settle-beige-seven.vercel.app/health",
+  "deploymentProofUrl": "https://settle-beige-seven.vercel.app/.well-known/xagent-verification.json"
+}

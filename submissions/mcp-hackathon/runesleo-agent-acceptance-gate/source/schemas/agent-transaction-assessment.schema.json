@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-acceptance-gate.pages.dev/schemas/agent-transaction-assessment.schema.json",
+  "title": "Agent Transaction Assessment",
+  "description": "Future schema for assessing whether an AI agent transaction can continue before task acceptance, budget spend, service purchase, delivery acceptance, payment release, or dispute review.",
+  "type": "object",
+  "required": ["schema_version", "mode", "transaction", "actor", "counterparty", "evidence", "constraints"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["pre_hire", "pre_call", "delivery_acceptance", "payment_release", "dispute"]
+    },
+    "transaction": {
+      "type": "object",
+      "required": ["intent", "value_at_risk", "requested_action"],
+      "properties": {
+        "transaction_id": { "type": "string" },
+        "intent": { "type": "string" },
+        "value_at_risk": { "type": "string" },
+        "requested_action": {
+          "type": "string",
+          "enum": ["accept_task", "spend_budget", "buy_service", "submit_delivery", "release_payment", "escalate_dispute", "public_release", "other"]
+        },
+        "deadline": { "type": "string" }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["buyer_agent", "seller_agent", "evaluator_agent", "human_buyer", "human_seller", "marketplace"] },
+        "goal": { "type": "string" }
+      }
+    },
+    "counterparty": {
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "claim": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "task_scope": { "type": "string" },
+        "artifacts": { "type": "array", "items": { "type": "string" } },
+        "validation": { "type": "array", "items": { "type": "string" } },
+        "prior_messages": { "type": "array", "items": { "type": "string" } },
+        "delivery_summary": { "type": "string" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "allowed_actions": { "type": "array", "items": { "type": "string" } },
+        "forbidden_actions": { "type": "array", "items": { "type": "string" } },
+        "budget_limit": { "type": "string" },
+        "hard_gates": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.1",
+  "verdict": "needs_review",
+  "score": 68,
+  "transaction_decision": "do_not_spend_budget_yet",
+  "missing": [
+    "artifact paths",
+    "validation output",
+    "acceptance criteria"
+  ],
+  "risks": [
+    "Paid tool call may be wasted because input evidence is incomplete.",
+    "Buyer agent may spend budget before the task is reviewable.",
+    "Payment release and wallet signing remain hard gates."
+  ],
+  "positive_evidence": [
+    "Budget limit is declared.",
+    "Forbidden actions are declared.",
+    "Counterparty service claim is explicit."
+  ],
+  "next_gate": "Ask seller agent for artifact paths, validation output, and acceptance criteria before buying analysis.",
+  "agent_instruction": "Do not call the paid analysis service yet. Request missing evidence first.",
+  "machine_flags": [
+    "budget_guard",
+    "missing_artifact",
+    "missing_validation",
+    "payment_gate",
+    "wallet_gate"
+  ]
+}
+

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "VenueClock",
+  "slug": "kele0929-venueclock",
+  "sourceRepository": "https://github.com/kele0929/venueclock",
+  "reviewCommit": "d1b84e00cb87b7e8811a020f497855b67bc00303",
+  "apiBaseUrl": "https://kele0929.github.io/v1",
+  "healthCheckUrl": "https://kele0929.github.io/health.json",
+  "deploymentProofUrl": "https://kele0929.github.io/.well-known/xagent-verification.json"
+}

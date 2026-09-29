@@ -1,0 +1,367 @@
+import { describe, expect, mock, test } from 'bun:test';
+import { Hono } from 'hono';
+import type { UiApiDependencies } from '../src/routes/ui.ts';
+
+process.env.DOMAIN = 'test.example';
+process.env.API_KEYS = 'admin-key';
+process.env.IMAP_USER = 'agent@test.example';
+process.env.IMAP_PASS = 'imap-secret';
+process.env.SMTP_USER = 'agent@test.example';
+process.env.SMTP_PASS = 'smtp-secret';
+
+const { UiSessionStore } = await import('../src/lib/ui-session.ts');
+const { createUiApiRoutes } = await import('../src/routes/ui.ts');
+const { InvalidMailCursorError } = await import('../src/lib/mail-cursor.ts');
+
+function makeApp(overrides: Partial<UiApiDependencies> = {}) {
+  const deps: UiApiDependencies = {
+    listIdentities: () => [],
+    listMessages: mock(async () => [
+      {
+        id: '2',
+        from: 'new@example.net',
+        to: 'fox@test.example',
+        subject: 'New',
+        date: '2026-07-27T02:00:00.000Z',
+        seen: false,
+        snippet: 'newest',
+        hasOtp: true,
+        source: 'external' as const,
+      },
+      {
+        id: '1',
+        from: 'old@example.net',
+        to: 'fox@test.example',
+        subject: 'Old',
+        date: '2026-07-27T01:00:00.000Z',
+        seen: true,
+        snippet: 'older',
+        hasOtp: false,
+        source: 'external' as const,
+      },
+    ]),
+    setMessageSeen: mock(async () => true),
+    // Overview 的门面依赖：本文件不测它，给一个 0 身份语义的常量结果即可。
+    getMailboxScan: mock(async () => ({
+      kind: 'ready' as const,
+      now: Date.now(),
+      snapshot: null,
+      cached: false,
+      revalidating: false,
+      refreshError: false,
+    })),
+    getMessage: mock(async () => ({
+      id: '2',
+      from: 'new@example.net',
+      to: 'fox@test.example',
+      subject: 'New',
+      date: '2026-07-27T02:00:00.000Z',
+      text: 'Code 123456. Visit https://example.net/news',
+      html: '<img src=x onerror=alert(1)><p>Code 123456</p>',
+      otp: { codes: ['123456'], links: ['https://example.net/verify'] },
+      links: ['https://example.net/news', 'https://example.net/verify'],
+      source: 'external' as const,
+    })),
+    setPushContentTier: mock(() => null),
+    ...overrides,
+  };
+  const store = new UiSessionStore({
+    resolveToken: (token) => (token === 'ok' ? { kind: 'admin' } : null),
+  });
+  const created = store.create('ok', '127.0.0.1');
+  if (!created.ok) throw new Error('test session was not created');
+  const app = new Hono();
+  app.route('/ui/api', createUiApiRoutes(store, deps));
+  return { app, deps, cookie: `oae_ui=${created.sid}` };
+}
+
+describe('UI message JSON contract', () => {
+  test('summaries preserve newest-first order and hasOtp', async () => {
+    const { app, cookie } = makeApp();
+    const response = await app.request(
+      '/ui/api/messages?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      messages: Array<{ id: string; hasOtp: boolean }>;
+      nextCursor: string | null;
+    };
+    expect(body.messages.map((message: { id: string }) => message.id)).toEqual(['2', '1']);
+    expect(body.messages.map((message: { hasOtp: boolean }) => message.hasOtp)).toEqual([
+      true,
+      false,
+    ]);
+    expect(body.nextCursor).toBeNull();
+  });
+
+  test('detail omits raw html but preserves OTP and validated body links', async () => {
+    const { app, cookie } = makeApp();
+    const response = await app.request(
+      '/ui/api/messages/2?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      html?: string;
+      hasHtml?: boolean;
+      htmlTooLarge?: boolean;
+      otp: { codes: string[]; links: string[] };
+      links: string[];
+    };
+    expect(body.html).toBeUndefined();
+    expect(body.hasHtml).toBe(true);
+    expect(body.htmlTooLarge).toBe(false);
+    expect(body.otp).toEqual({
+      codes: ['123456'],
+      links: ['https://example.net/verify'],
+    });
+    expect(body.links).toEqual([
+      'https://example.net/news',
+      'https://example.net/verify',
+    ]);
+  });
+
+  test('oversized HTML is disclosed without returning the HTML itself', async () => {
+    const { app, cookie } = makeApp({
+      getMessage: mock(async () => ({
+        id: '3',
+        from: 'large@example.net',
+        to: 'fox@test.example',
+        subject: 'Large',
+        date: '2026-07-27T03:00:00.000Z',
+        text: 'Use the plain-text version.',
+        html: 'x'.repeat(512 * 1024 + 1),
+        otp: { codes: [], links: [] },
+        links: [],
+        source: 'external' as const,
+      })),
+    });
+    const response = await app.request(
+      '/ui/api/messages/3?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as Record<string, unknown>;
+    expect(body.html).toBeUndefined();
+    expect(body.hasHtml).toBe(true);
+    expect(body.htmlTooLarge).toBe(true);
+  });
+
+  test('limit is 1-200, defaults to 50 and is passed as an integer', async () => {
+    const { app, deps, cookie } = makeApp();
+    expect(
+      (
+        await app.request('/ui/api/messages?address=fox%40test.example&limit=200', {
+          headers: { cookie },
+        })
+      ).status,
+    ).toBe(200);
+    expect(deps.listMessages).toHaveBeenLastCalledWith('fox@test.example', 200, {
+      folder: 'inbox',
+      cursor: undefined,
+    });
+
+    for (const limit of ['0', '201', '1.5', 'nope']) {
+      const response = await app.request(
+        `/ui/api/messages?address=fox%40test.example&limit=${limit}`,
+        { headers: { cookie } },
+      );
+      expect(response.status).toBe(400);
+    }
+  });
+
+  // R1/#196：stale cursor → invalid_cursor；schema 失败仍 invalid_request（两码不混）
+  test('R1/#196: stale cursor maps to 400 invalid_cursor', async () => {
+    const listMessages = mock(async () => {
+      throw new InvalidMailCursorError();
+    });
+    const { app, cookie } = makeApp({ listMessages });
+    const response = await app.request(
+      '/ui/api/messages?address=fox%40test.example&cursor=mail-cursor-v1.stale.token',
+      { headers: { cookie } },
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'invalid_cursor' });
+    expect(listMessages).toHaveBeenCalled();
+  });
+
+  test('R1/#196: schema failure stays 400 invalid_request (not invalid_cursor)', async () => {
+    const listMessages = mock(async () => {
+      throw new Error('listMessages must not run on schema failure');
+    });
+    const { app, cookie } = makeApp({ listMessages });
+    // 缺 address → listQuerySchema 失败，尚未触达 listMessages
+    const response = await app.request('/ui/api/messages?limit=20', {
+      headers: { cookie },
+    });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'invalid_request' });
+    expect(listMessages).not.toHaveBeenCalled();
+  });
+
+  test('malformed UIDs are rejected before touching IMAP', async () => {
+    const getMessage = mock(async () => null);
+    const { app, cookie } = makeApp({ getMessage });
+    for (const id of ['1e3', '0', '-1', '999999999999999999999999999999999']) {
+      const response = await app.request(
+        `/ui/api/messages/${encodeURIComponent(id)}?address=fox%40test.example`,
+        { headers: { cookie } },
+      );
+      expect(response.status).toBe(400);
+    }
+    const traversal = await app.request(
+      '/ui/api/messages/%2E%2E%2F7?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect([400, 404]).toContain(traversal.status);
+    expect(getMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe('UI mark-seen endpoint', () => {
+  function postSeen(app: Hono, cookie: string, id: string, body: unknown) {
+    return app.request(`/ui/api/messages/${encodeURIComponent(id)}/seen`, {
+      method: 'POST',
+      headers: { cookie, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
+
+  test('a valid toggle reaches the store with the lowercased address', async () => {
+    const { app, deps, cookie } = makeApp();
+    const response = await postSeen(app, cookie, '2', {
+      address: 'FOX@test.example',
+      seen: true,
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ id: '2', seen: true });
+    expect(deps.setMessageSeen).toHaveBeenLastCalledWith('fox@test.example', '2', true);
+  });
+
+  test('unknown or foreign messages surface as 404', async () => {
+    const { app, cookie } = makeApp({ setMessageSeen: mock(async () => false) });
+    const response = await postSeen(app, cookie, '2', {
+      address: 'fox@test.example',
+      seen: false,
+    });
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: 'not_found' });
+  });
+
+  test('malformed ids and bodies are rejected before touching the store', async () => {
+    const { app, deps, cookie } = makeApp();
+    for (const id of ['1e3', '0', '-1', '%2E%2E%2F7']) {
+      expect(
+        (await postSeen(app, cookie, id, { address: 'fox@test.example', seen: true })).status,
+      ).toBe(400);
+    }
+    for (const body of [
+      { address: 'fox@test.example' }, // missing seen
+      { address: 'fox@test.example', seen: 'yes' }, // non-boolean
+      { address: 'fox@test.example', seen: true, extra: 1 }, // strict shape
+      { seen: true }, // missing address
+    ]) {
+      expect((await postSeen(app, cookie, '2', body)).status).toBe(400);
+    }
+    expect(deps.setMessageSeen).not.toHaveBeenCalled();
+  });
+});
+
+describe('UI message folders and source', () => {
+  test('unknown folder is 400 and does not touch IMAP', async () => {
+    const { app, deps, cookie } = makeApp();
+    for (const folder of ['trash', 'scheduled', 'INBOX', 'foo']) {
+      const response = await app.request(
+        `/ui/api/messages?address=fox%40test.example&folder=${folder}`,
+        { headers: { cookie } },
+      );
+      expect(response.status).toBe(400);
+    }
+    expect(deps.listMessages).not.toHaveBeenCalled();
+  });
+
+  test('folder=sent|all is forwarded and nextCursor is echoed', async () => {
+    const listMessages = mock(async () => ({
+      messages: [
+        {
+          id: '9',
+          from: 'fox@test.example',
+          to: 'ext@example.net',
+          subject: 'Sent',
+          date: '2026-08-01T00:00:00.000Z',
+          seen: true,
+          snippet: 'out',
+          hasOtp: false,
+          source: 'internal' as const,
+        },
+      ],
+      nextCursor: 'mail-cursor-v1.abc.def',
+    }));
+    const { app, cookie } = makeApp({ listMessages });
+    const response = await app.request(
+      '/ui/api/messages?address=fox%40test.example&folder=sent&limit=20',
+      { headers: { cookie } },
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      messages: [
+        {
+          id: '9',
+          from: 'fox@test.example',
+          to: 'ext@example.net',
+          subject: 'Sent',
+          date: '2026-08-01T00:00:00.000Z',
+          seen: true,
+          snippet: 'out',
+          hasOtp: false,
+          source: 'internal',
+        },
+      ],
+      nextCursor: 'mail-cursor-v1.abc.def',
+    });
+    expect(listMessages).toHaveBeenLastCalledWith('fox@test.example', 20, {
+      folder: 'sent',
+      cursor: undefined,
+    });
+  });
+
+  test('source is ACL-gated, truncated, and Cache-Control no-store', async () => {
+    const getMessageSource = mock(async () => ({
+      id: '2',
+      source: 'From: a\r\n\r\nhello',
+      truncated: true,
+      byteLength: 300000,
+    }));
+    const { app, cookie } = makeApp({ getMessageSource });
+    const response = await app.request(
+      '/ui/api/messages/2/source?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(await response.json()).toEqual({
+      id: '2',
+      source: 'From: a\r\n\r\nhello',
+      truncated: true,
+      byteLength: 300000,
+    });
+    expect(getMessageSource).toHaveBeenLastCalledWith('fox@test.example', '2');
+  });
+
+  test('source 404 when IMAP says not found; malformed id never touches IMAP', async () => {
+    const getMessageSource = mock(async () => null);
+    const { app, cookie } = makeApp({ getMessageSource });
+    const missing = await app.request(
+      '/ui/api/messages/2/source?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect(missing.status).toBe(404);
+    const bad = await app.request(
+      '/ui/api/messages/1e3/source?address=fox%40test.example',
+      { headers: { cookie } },
+    );
+    expect(bad.status).toBe(400);
+    expect(getMessageSource).toHaveBeenCalledTimes(1);
+  });
+});

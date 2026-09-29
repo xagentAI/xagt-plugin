@@ -1,0 +1,18 @@
+$ python docs/judge_check.py --url http://127.0.0.1:8017
+target instance: http://127.0.0.1:8017
+------------------------------------------------------------------------
+[PASS] health check GET /api/health — HTTP 200 status=ok version=2.1.0
+[PASS] four-stage walkthrough page GET / — HTTP 200 20106 bytes
+[PASS] pricing tiers readable (MONETIZE has a real pricing basis) GET /api/config — tiers=['free', 'basic', 'pro', 'enterprise'] currency=USD
+[PASS] MCP endpoint lists tools — 14 tools
+[PASS] all 7 spec-named tools are present — complete
+[PASS] tool call: health_check — status=ok
+[PASS] tool call: parse_openapi_spec on a local Petstore-style spec — 5 operations, auth schemes=['fixture_key', 'fixture_oauth']
+[PASS] tool call: list_operations returns a readable inventory — 368 chars, contains getPetById=True
+[PASS] tool call: call_rest_api, real outbound (GitHub public REST API) — HTTP 200, 358.2 ms
+[PASS] tool call: generate_mcp_tool_code produced deployable FastMCP source (section 6 #2) — 59 lines, contains FastMCP and get_pet_by_id
+[PASS] tool call: register + call_registered_api(getZen) real outbound (section 6 #3) — register ops=5 | call HTTP 200
+------------------------------------------------------------------------
+result: 11 passed / 0 failed
+
+exit code: 0

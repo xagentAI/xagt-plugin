@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "agada-arcway-pay",
+  "name": "Arcway",
+  "sourceRepository": "https://github.com/Tonylex18/arcway-pay",
+  "reviewCommit": "d9f1108bf28255ce436aa74212ccae6313d71ee4",
+  "apiBaseUrl": "https://arcwaypay.xyz",
+  "healthCheckUrl": "https://arcwaypay.xyz/api/health",
+  "deploymentProofUrl": "https://arcwaypay.xyz/.well-known/xagent-verification.json",
+  "track": "general-challenge",
+  "projectName": "Arcway",
+  "capabilityName": "pay_by_email",
+  "team": {
+    "name": "Agada Anthony Alex",
+    "solo": true,
+    "contact": "anthonyagada2000@gmail.com",
+    "github": "https://github.com/Tonylex18"
+  },
+  "description": "Pay a person or business a specified amount of USDC using only their email address. Provisions a Privy embedded wallet for the recipient automatically if they don't have one, then executes the transfer via Circle's Developer-Controlled Wallets on Arc. Requires an API key, sent as 'Authorization: Bearer ark_…'. A scoped reviewer key (0.5 USDC per payout, 6 req/min, own company, revocable) is available on request through the program's private review channel — contact anthonyagada2000@gmail.com. Without a key, the capability runs end to end in local mock mode; see verification/README.md, step 4. Production runs in live mode and moves real testnet USDC on Arc; verify settlement on https://testnet.arcscan.app using the walletAddress returned in the response, not the transferId.",
+  "capability": {
+    "endpoint": "/api/capability/pay-by-email",
+    "methods": ["GET", "POST"],
+    "inputSchemaRef": "source/app/api/capability/pay-by-email/route.ts",
+    "auth": {
+      "required": true,
+      "type": "bearer",
+      "header": "Authorization: Bearer ark_<64 hex chars>",
+      "reviewerKeyAccess": "A scoped reviewer key (0.5 USDC per payout, 6 req/min, own company, revocable) is available on request through the program's private review channel — contact anthonyagada2000@gmail.com.",
+      "limits": {
+        "maxAmountUsdcPerPayout": 0.5,
+        "requestsPerMinute": 6
+      }
+    },
+    "exampleRequest": {
+      "payeeName": "Ada Lovelace",
+      "payeeEmail": "ada.demo@example.com",
+      "amountUsdc": 0.25
+    },
+    "exampleResponse": {
+      "status": "pending",
+      "payeeId": "cmtykisas0001p14tc7rx503x",
+      "walletAddress": "0x7f2713BD4141A4EfF8334b570d4785C1Ccc16Ce0",
+      "transferId": "5102a069-978a-551c-a603-e3c510ba3093"
+    }
+  },
+  "healthCheck": {
+    "path": "/api/health",
+    "note": "Root (/) serves the product's human-facing landing page, so the health check is exposed at /api/health instead. It reports the deployed commit. See verification/README.md."
+  },
+  "verificationEndpoint": "/.well-known/xagent-verification.json",
+  "deployedUrl": "https://arcwaypay.xyz",
+  "commit": "d9f1108bf28255ce436aa74212ccae6313d71ee4",
+  "mockModeAvailable": false,
+  "mockModeNote": "The deployed instance runs in live mode and requires an API key. Local mock mode is the primary credential-free way to exercise the capability: no Circle, Privy or Resend credentials and no API key; transfers are simulated. See verification/README.md, step 4.",
+  "license": "MIT"
+}

@@ -1,0 +1,104 @@
+name: Uptime
+
+# The service has to stay up and stay the reviewed build while it is being
+# reviewed. This runs on GitHub's machines rather than anyone's laptop, so it
+# keeps running whether or not a particular computer is switched on.
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+    inputs:
+      expected_commit:
+        description: "Fail unless the service reports this commit"
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ask the service whether it is up, current, and working
+        id: check
+        env:
+          BASE: https://sumplus-model-desk-production.up.railway.app
+          EXPECTED_COMMIT: ${{ github.event.inputs.expected_commit }}
+        run: |
+          set -euo pipefail
+          bash scripts/uptime-check.sh 2>&1 | tee /tmp/uptime.log
+
+      - name: Open an issue if it is not
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let log = 'The check produced no output.';
+            try { log = fs.readFileSync('/tmp/uptime.log', 'utf8'); } catch {}
+
+            const title = 'Model Desk is not answering as expected';
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'uptime',
+            });
+
+            const body = [
+              'The scheduled check failed.',
+              '',
+              '```',
+              log.trim().slice(-4000),
+              '```',
+              '',
+              `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            ].join('\n');
+
+            // One issue per outage, not one per day: a fresh issue every
+            // morning would bury the first report under its own repetitions.
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: open.data[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['uptime'],
+              });
+            }
+
+      - name: Close the issue once it is answering again
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'uptime',
+            });
+            for (const issue of open.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `The service is answering again as of ${new Date().toISOString()}.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }

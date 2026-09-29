@@ -1,0 +1,106 @@
+{
+  "recorded_at": "2026-09-14T09:04:06.912326+00:00",
+  "policy_status": "live_passed",
+  "policy_event": {
+    "event_id": "ecb-deposit-rate-2026-08-15-2026-09-14",
+    "event_type": "interest_rate_change",
+    "title": "Euro-area deposit facility rate moved +0.0 basis points",
+    "source": "European Central Bank",
+    "observed_at": "2026-09-14T00:00:00Z",
+    "old_value": 2.25,
+    "new_value": 2.25,
+    "unit": "percent",
+    "change_pct": null,
+    "base_currency": null,
+    "quote_currency": null,
+    "affected_currencies": [
+      "EUR"
+    ],
+    "jurisdiction": "EA",
+    "evidence_url": "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV",
+    "window_start": "2026-08-15T00:00:00Z",
+    "window_end": "2026-09-14T00:00:00Z",
+    "confidence": "observed",
+    "provenance": {
+      "provider": "European Central Bank",
+      "source_type": "official_structured",
+      "retrieved_at": "2026-09-14T09:04:06.911326Z",
+      "series_id": "FM.D.U2.EUR.4F.KR.DFR.LEV",
+      "source_url": "https://data-api.ecb.europa.eu/service/data/FM/D.U2.EUR.4F.KR.DFR.LEV",
+      "notes": [
+        "ECB daily deposit facility levels, percent per annum; signed basis-point change is 100 \u00d7 (new \u2212 old).",
+        "Daily levels measure the requested window; this does not identify a specific monetary-policy announcement."
+      ]
+    },
+    "metadata": {
+      "requested_lookback_days": 30,
+      "requested_as_of": "2026-09-14",
+      "target_start_date": "2026-08-15",
+      "old_date": "2026-08-15",
+      "new_date": "2026-09-14",
+      "actual_window_days": 30,
+      "observation_lag_days": 0,
+      "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+      "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+      "provider": "ECB",
+      "synthetic": false,
+      "mode": "live",
+      "fallback_used": false,
+      "change_basis_points": 0.0,
+      "change_percentage_points": 0.0,
+      "scope": "Euro area; EUR exposures only",
+      "rate_name": "deposit facility"
+    }
+  },
+  "energy_status": "fixture_fallback",
+  "energy_event": {
+    "event_id": "synthetic-brent-2025-12-24-2025-12-31",
+    "event_type": "oil_move",
+    "title": "Synthetic scenario: Brent crude moved +15.00% over the observation window",
+    "source": "synthetic judging fixture",
+    "observed_at": "2025-12-31T00:00:00Z",
+    "old_value": 80.0,
+    "new_value": 92.0,
+    "unit": "USD per barrel",
+    "change_pct": 14.999999999999991,
+    "base_currency": null,
+    "quote_currency": null,
+    "affected_currencies": [],
+    "jurisdiction": null,
+    "evidence_url": null,
+    "window_start": "2025-12-24T00:00:00Z",
+    "window_end": "2025-12-31T00:00:00Z",
+    "confidence": "scenario",
+    "provenance": {
+      "provider": "synthetic-fixture",
+      "source_type": "synthetic_fixture",
+      "retrieved_at": "2026-09-14T09:04:06.912326Z",
+      "series_id": "synthetic-brent-step-v1",
+      "source_url": null,
+      "notes": [
+        "Synthetic fixed step scenario; values and dates are not EIA observations."
+      ]
+    },
+    "metadata": {
+      "requested_lookback_days": 7,
+      "requested_as_of": "2025-12-31",
+      "target_start_date": "2025-12-24",
+      "old_date": "2025-12-24",
+      "new_date": "2025-12-31",
+      "actual_window_days": 7,
+      "observation_lag_days": 0,
+      "window_method": "Latest published observation and last observation on/before its date minus lookback_days; baseline tolerance 7 days.",
+      "date_precision": "day; UTC midnight encodes the source date, not an intraday publication timestamp",
+      "provider": "synthetic-fixture",
+      "synthetic": true,
+      "mode": "live_or_fixture",
+      "fallback_used": true,
+      "commodity": "Brent crude oil",
+      "price_currency": "USD",
+      "scope": "Brent Europe spot benchmark",
+      "fixture_anchor_date": "2025-12-31",
+      "live_request_as_of": "2026-09-14",
+      "fallback_reason": "EIA_API_KEY is not configured"
+    }
+  }
+}

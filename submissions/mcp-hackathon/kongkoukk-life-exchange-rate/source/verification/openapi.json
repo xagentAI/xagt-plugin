@@ -1,0 +1,1412 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Life Exchange Rate API",
+    "description": "Translate macroeconomic shocks into concrete, user-specific life impacts.",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/xagent-verification.json": {
+      "get": {
+        "summary": "Xagent Verification",
+        "operationId": "xagent_verification__well_known_xagent_verification_json_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Xagent Verification  Well Known Xagent Verification Json Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/demo": {
+      "get": {
+        "summary": "Events Demo",
+        "operationId": "events_demo_v1_events_demo_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MacroEvent"
+                  },
+                  "type": "array",
+                  "title": "Response Events Demo V1 Events Demo Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/radar/demo": {
+      "get": {
+        "summary": "Radar Demo",
+        "operationId": "radar_demo_v1_radar_demo_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventScore"
+                  },
+                  "type": "array",
+                  "title": "Response Radar Demo V1 Radar Demo Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/fx": {
+      "get": {
+        "summary": "Events Fx",
+        "operationId": "events_fx_v1_events_fx_get",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "title": "Base"
+            }
+          },
+          {
+            "name": "quote",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "title": "Quote"
+            }
+          },
+          {
+            "name": "lookback_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 90,
+              "minimum": 2,
+              "default": 7,
+              "title": "Lookback Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MacroEvent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/policy-rate": {
+      "get": {
+        "summary": "Events Policy Rate",
+        "operationId": "events_policy_rate_v1_events_policy_rate_get",
+        "parameters": [
+          {
+            "name": "lookback_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 2,
+              "default": 30,
+              "title": "Lookback Days"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "live",
+                "fixture",
+                "live_or_fixture"
+              ],
+              "type": "string",
+              "default": "live_or_fixture",
+              "title": "Mode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MacroEvent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/energy": {
+      "get": {
+        "summary": "Events Energy",
+        "operationId": "events_energy_v1_events_energy_get",
+        "parameters": [
+          {
+            "name": "lookback_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 2,
+              "default": 7,
+              "title": "Lookback Days"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "live",
+                "fixture",
+                "live_or_fixture"
+              ],
+              "type": "string",
+              "default": "live_or_fixture",
+              "title": "Mode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MacroEvent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/headlines/official": {
+      "get": {
+        "summary": "Headlines Official",
+        "operationId": "headlines_official_v1_headlines_official_get",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "fed",
+                "ecb"
+              ],
+              "type": "string",
+              "title": "Source"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MacroHeadline"
+                  },
+                  "title": "Response Headlines Official V1 Headlines Official Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/radar/rank": {
+      "post": {
+        "summary": "Radar Rank",
+        "operationId": "radar_rank_v1_radar_rank_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RadarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventScore"
+                  },
+                  "type": "array",
+                  "title": "Response Radar Rank V1 Radar Rank Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/translate": {
+      "post": {
+        "summary": "Translate",
+        "operationId": "translate_v1_translate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpactResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/convert": {
+      "post": {
+        "summary": "Convert",
+        "operationId": "convert_v1_convert_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Convert V1 Convert Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scenarios": {
+      "post": {
+        "summary": "Scenarios",
+        "operationId": "scenarios_v1_scenarios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Scenarios V1 Scenarios Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CalculationStep": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "formula": {
+            "type": "string",
+            "title": "Formula"
+          },
+          "inputs": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Inputs"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "formula"
+        ],
+        "title": "CalculationStep"
+      },
+      "CommuteProfile": {
+        "properties": {
+          "monthly_fuel_liters": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Monthly Fuel Liters"
+          },
+          "fuel_price_per_liter": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Fuel Price Per Liter"
+          }
+        },
+        "type": "object",
+        "required": [
+          "monthly_fuel_liters",
+          "fuel_price_per_liter"
+        ],
+        "title": "CommuteProfile"
+      },
+      "Confidence": {
+        "type": "string",
+        "enum": [
+          "observed",
+          "scenario",
+          "mixed"
+        ],
+        "title": "Confidence"
+      },
+      "ConvertRequest": {
+        "properties": {
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/LifeProfile"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "currency",
+          "profile"
+        ],
+        "title": "ConvertRequest"
+      },
+      "EventScore": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/MacroEvent"
+          },
+          "market_significance": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Market Significance"
+          },
+          "user_relevance": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "User Relevance"
+          },
+          "priority_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Priority Score"
+          },
+          "significance_method": {
+            "type": "string",
+            "title": "Significance Method"
+          },
+          "relevance_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Relevance Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "market_significance",
+          "user_relevance",
+          "priority_score",
+          "significance_method"
+        ],
+        "title": "EventScore"
+      },
+      "EventType": {
+        "type": "string",
+        "enum": [
+          "fx_move",
+          "interest_rate_change",
+          "oil_move"
+        ],
+        "title": "EventType"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImpactAssumptions": {
+        "properties": {
+          "interest_rate_pass_through": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Interest Rate Pass Through",
+            "default": 0.5
+          },
+          "oil_to_fuel_pass_through": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Oil To Fuel Pass Through",
+            "default": 0.25
+          }
+        },
+        "type": "object",
+        "title": "ImpactAssumptions"
+      },
+      "ImpactDirection": {
+        "type": "string",
+        "enum": [
+          "cost_increase",
+          "cost_decrease",
+          "neutral",
+          "unquantified"
+        ],
+        "title": "ImpactDirection"
+      },
+      "ImpactResult": {
+        "properties": {
+          "event_provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Provenance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_observed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Observed At"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "headline": {
+            "type": "string",
+            "title": "Headline"
+          },
+          "direct_effect_home": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direct Effect Home"
+          },
+          "home_currency": {
+            "type": "string",
+            "title": "Home Currency"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/ImpactDirection",
+            "default": "unquantified"
+          },
+          "impact_horizon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Impact Horizon"
+          },
+          "work_hours_equivalent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Hours Equivalent"
+          },
+          "life_units": {
+            "items": {
+              "$ref": "#/components/schemas/LifeUnitConversion"
+            },
+            "type": "array",
+            "title": "Life Units"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "calculation_trace": {
+            "items": {
+              "$ref": "#/components/schemas/CalculationStep"
+            },
+            "type": "array",
+            "title": "Calculation Trace"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "headline",
+          "home_currency",
+          "explanation",
+          "confidence"
+        ],
+        "title": "ImpactResult"
+      },
+      "LifeProfile": {
+        "properties": {
+          "home_currency": {
+            "type": "string",
+            "title": "Home Currency"
+          },
+          "home_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Country"
+          },
+          "net_monthly_income": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Net Monthly Income"
+          },
+          "monthly_work_hours": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Monthly Work Hours"
+          },
+          "travel_budget_home": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Travel Budget Home"
+          },
+          "travel_target_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Travel Target Currency"
+          },
+          "mortgage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MortgageProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "savings_balance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Savings Balance"
+          },
+          "commute": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CommuteProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "life_units": {
+            "items": {
+              "$ref": "#/components/schemas/LifeUnit"
+            },
+            "type": "array",
+            "title": "Life Units"
+          }
+        },
+        "type": "object",
+        "required": [
+          "home_currency",
+          "net_monthly_income",
+          "monthly_work_hours"
+        ],
+        "title": "LifeProfile"
+      },
+      "LifeUnit": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "price": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Price"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "price",
+          "currency"
+        ],
+        "title": "LifeUnit"
+      },
+      "LifeUnitConversion": {
+        "properties": {
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "quantity": {
+            "type": "number",
+            "title": "Quantity"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "unit_price": {
+            "type": "number",
+            "title": "Unit Price"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unit",
+          "quantity",
+          "currency",
+          "unit_price"
+        ],
+        "title": "LifeUnitConversion"
+      },
+      "MacroEvent": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Observed At"
+          },
+          "old_value": {
+            "type": "number",
+            "title": "Old Value"
+          },
+          "new_value": {
+            "type": "number",
+            "title": "New Value"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Pct"
+          },
+          "base_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Currency"
+          },
+          "quote_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote Currency"
+          },
+          "affected_currencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Affected Currencies"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          },
+          "evidence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Url"
+          },
+          "window_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window Start"
+          },
+          "window_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window End"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence",
+            "default": "observed"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Provenance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "event_type",
+          "title",
+          "source",
+          "old_value",
+          "new_value",
+          "unit"
+        ],
+        "title": "MacroEvent"
+      },
+      "MacroHeadline": {
+        "properties": {
+          "headline_id": {
+            "type": "string",
+            "title": "Headline Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "publisher": {
+            "type": "string",
+            "title": "Publisher"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          },
+          "event_type_hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "requires_quantification": {
+            "type": "boolean",
+            "title": "Requires Quantification",
+            "default": true
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type",
+            "default": "official_rss"
+          }
+        },
+        "type": "object",
+        "required": [
+          "headline_id",
+          "title",
+          "publisher",
+          "url"
+        ],
+        "title": "MacroHeadline"
+      },
+      "MortgageProfile": {
+        "properties": {
+          "principal": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Principal"
+          },
+          "remaining_years": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Remaining Years"
+          },
+          "current_annual_rate_pct": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Current Annual Rate Pct"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "principal",
+          "remaining_years",
+          "current_annual_rate_pct"
+        ],
+        "title": "MortgageProfile"
+      },
+      "Provenance": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type",
+            "default": "official_or_structured"
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Retrieved At"
+          },
+          "series_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider"
+        ],
+        "title": "Provenance"
+      },
+      "RadarRequest": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/MacroEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/LifeProfile"
+          }
+        },
+        "type": "object",
+        "required": [
+          "events",
+          "profile"
+        ],
+        "title": "RadarRequest"
+      },
+      "ScenarioInput": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "multiplier": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Multiplier"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "multiplier"
+        ],
+        "title": "ScenarioInput"
+      },
+      "ScenarioRequest": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/MacroEvent"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/LifeProfile"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioInput"
+            },
+            "type": "array",
+            "title": "Scenarios"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/ImpactAssumptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "profile",
+          "scenarios"
+        ],
+        "title": "ScenarioRequest"
+      },
+      "TranslateRequest": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/MacroEvent"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/LifeProfile"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/ImpactAssumptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "profile"
+        ],
+        "title": "TranslateRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+/Users/rich/Documents/Codex/2026-09-10/contest-agent/outputs/night-2026-09-12/product/batch2/grid-witness-test-env/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_budget_boundary (test_api.ApiTests.test_budget_boundary) ... ok
+test_exhaustive_api_parity (test_api.ApiTests.test_exhaustive_api_parity) ... ok
+test_health_binding (test_api.ApiTests.test_health_binding) ... ok
+test_malformed_and_extra (test_api.ApiTests.test_malformed_and_extra) ... ok
+test_no_global_result_mutation (test_api.ApiTests.test_no_global_result_mutation) ... ok
+test_optimistic_false_positive (test_api.ApiTests.test_optimistic_false_positive) ... ok
+test_strict_input (test_api.ApiTests.test_strict_input) ... ok
+test_unknown_route (test_api.ApiTests.test_unknown_route) ... ok
+test_all_solved_cases_conserve_complex_power (test_benchmark.ProtocolChecks.test_all_solved_cases_conserve_complex_power) ... ok
+test_corrupted_solution_and_wrong_slack_rejected (test_benchmark.ProtocolChecks.test_corrupted_solution_and_wrong_slack_rejected) ... ok
+test_each_investment_vector_has_correct_penalty_projection (test_benchmark.ProtocolChecks.test_each_investment_vector_has_correct_penalty_projection) ... ok
+test_invalid_voltages_cannot_pass (test_benchmark.ProtocolChecks.test_invalid_voltages_cannot_pass) ... ok
+test_no_load_has_no_drop_or_losses (test_benchmark.ProtocolChecks.test_no_load_has_no_drop_or_losses) ... ok
+test_nonconvergence_is_unresolved (test_benchmark.ProtocolChecks.test_nonconvergence_is_unresolved) ... ok
+test_one_branch_matches_closed_form_high_voltage_root (test_benchmark.ProtocolChecks.test_one_branch_matches_closed_form_high_voltage_root) ... ok
+test_reference_catalogue_and_surrogate_ac_disagreement (test_benchmark.ProtocolChecks.test_reference_catalogue_and_surrogate_ac_disagreement) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.078s
+
+OK

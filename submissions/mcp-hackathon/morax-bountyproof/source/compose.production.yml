@@ -1,0 +1,28 @@
+services:
+  bountyproof:
+    container_name: bountyproof-api
+    build:
+      context: .
+      args:
+        VCS_REF: ${REVIEW_COMMIT}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18789:8787"
+    environment:
+      REVIEW_COMMIT: ${REVIEW_COMMIT}
+      SOURCE_REPOSITORY: https://github.com/fzlzjerry/bountyproof
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

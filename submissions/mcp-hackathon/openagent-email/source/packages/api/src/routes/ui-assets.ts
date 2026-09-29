@@ -1,0 +1,125 @@
+import { readFileSync } from 'node:fs';
+import type { Context } from 'hono';
+import type { Hono } from 'hono';
+import { getCookie } from 'hono/cookie';
+import { OUTER_CSP, UI_CSS, UI_HTML, UI_JS, UI_LOGO_SVG } from '../ui/assets.ts';
+import { resolveUiAssetUrl } from '../ui/load-ui-asset.ts';
+import { uiShellRegisterPaths } from '../ui/shell-routes.ts';
+import { COOKIE_NAME, type UiSessionStore } from '../lib/ui-session.ts';
+import { clientIp } from '../lib/net.ts';
+
+// Satoshi 字体与官网（website/public/fonts/）同源同文件；缺失时启动即报错，不半死不活。
+// 双布局与 JS/CSS loader 共用 resolveUiAssetUrl：源码树相邻（../ui/fonts/）；
+// dist 打平后回落 dist/ui/<name>（与 UI 真文件同目录）。
+function readUiFont(name: string): Buffer {
+  return readFileSync(resolveUiAssetUrl(import.meta.url, `../ui/fonts/${name}`, name));
+}
+
+const UI_FONTS: Record<string, Uint8Array> = {
+  'Satoshi-Regular.woff2': readUiFont('Satoshi-Regular.woff2'),
+  'Satoshi-Medium.woff2': readUiFont('Satoshi-Medium.woff2'),
+  'Satoshi-Bold.woff2': readUiFont('Satoshi-Bold.woff2'),
+  'Satoshi-Black.woff2': readUiFont('Satoshi-Black.woff2'),
+};
+
+/** ADR #26：app shell 覆盖的真实 /ui/* 子路径（须在 API/assets/frame/OAuth 之后注册）。 */
+const UI_SHELL_PATHS = uiShellRegisterPaths();
+
+function commonHeaders(c: Context): void {
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('Referrer-Policy', 'no-referrer');
+  c.header('Cache-Control', 'no-cache');
+}
+
+function shell(c: Context) {
+  commonHeaders(c);
+  c.header('Content-Type', 'text/html; charset=utf-8');
+  c.header('Content-Security-Policy', OUTER_CSP);
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Cross-Origin-Opener-Policy', 'same-origin');
+  c.header('Cross-Origin-Resource-Policy', 'same-origin');
+  c.header(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  );
+  return c.body(UI_HTML);
+}
+
+function legacyOverviewRedirect(c: Context) {
+  // 保留卡片要求的 301，同时禁止浏览器把兼容跳转长期存储为不可撤销的本地路由规则。
+  c.header('Cache-Control', 'no-store');
+  return c.redirect('/ui', 301);
+}
+
+/** 静态资产：js/css/fonts/favicon。不含 shell 深链（防注册顺序吞路由）。 */
+export function registerUiAssets(app: Hono): void {
+  app.get('/ui/app.js', (c) => {
+    commonHeaders(c);
+    c.header('Content-Type', 'text/javascript; charset=utf-8');
+    return c.body(UI_JS);
+  });
+  app.get('/ui/styles.css', (c) => {
+    commonHeaders(c);
+    c.header('Content-Type', 'text/css; charset=utf-8');
+    return c.body(UI_CSS);
+  });
+  app.get('/ui/favicon.svg', (c) => {
+    commonHeaders(c);
+    c.header('Content-Type', 'image/svg+xml; charset=utf-8');
+    // 被直接导航打开时也不可能跑脚本、不可能取任何子资源
+    c.header('Content-Security-Policy', "default-src 'none'");
+    return c.body(UI_LOGO_SVG);
+  });
+  app.get('/ui/fonts/:name', (c) => {
+    const data = UI_FONTS[c.req.param('name')];
+    if (!data) return c.body(null, 404);
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('Referrer-Policy', 'no-referrer');
+    // 文件名随官网字体变更而同步换内容（sha256 钉在测试里），可安全长缓存。
+    c.header('Cache-Control', 'public, max-age=31536000, immutable');
+    c.header('Content-Type', 'font/woff2');
+    return c.body(data);
+  });
+  // 旧外壳可能仍在缓存里，保留 204 以免它拿到 404。
+  app.get('/ui/favicon.ico', (c) => {
+    commonHeaders(c);
+    return c.body(null, 204);
+  });
+}
+
+/**
+ * Dashboard shell 深链：必须在 /ui/api、/ui/frame、/ui/oauth 之后注册（ADR #26）。
+ * 路径与 API 前缀无交集，但后挂才能保证后续加宽匹配时不吞专用路由。
+ * #132 加固：GET /ui?token= 经服务端验令牌后 302 净化到 /ui?code=（长期令牌不进客户端 JS）。
+ */
+export function registerUiShell(app: Hono, store?: UiSessionStore): void {
+  // B6 0 期：旧 Overview 书签只做永久兼容跳转，不再返回旧 shell。
+  app.get('/ui/overview', legacyOverviewRedirect);
+  app.get('/ui/overview/', legacyOverviewRedirect);
+  for (const path of UI_SHELL_PATHS) {
+    app.get(path, (c) => {
+      const rawToken = c.req.query('token');
+      if (rawToken !== undefined && store) {
+        const url = new URL(c.req.url);
+        url.searchParams.delete('token');
+        url.searchParams.delete('code');
+
+        const sid = getCookie(c, COOKIE_NAME);
+        const existingSession = sid ? store.authenticate(sid) : null;
+        if (!existingSession) {
+          const ip = clientIp(c);
+          const result = store.mintExchangeCode(rawToken, ip);
+          if (result.ok) {
+            url.searchParams.set('code', result.code);
+          }
+        }
+        const cleanSearch = url.searchParams.toString();
+        const location = `${url.pathname}${cleanSearch ? `?${cleanSearch}` : ''}`;
+        c.header('Cache-Control', 'no-store');
+        c.header('Referrer-Policy', 'no-referrer');
+        return c.redirect(location, 302);
+      }
+      return shell(c);
+    });
+  }
+}

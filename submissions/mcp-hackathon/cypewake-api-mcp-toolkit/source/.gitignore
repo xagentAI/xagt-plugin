@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 运行时状态（每次运行重新生成，不应入库）
+registry.json
+usage.json
+generated/
+*.corrupt.json
+
+# 验收证据每次运行都会重写；如要随提交冻结一份作为证据，用
+#   git add -f verification-evidence.md verification-artifacts/
+verification-artifacts/
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

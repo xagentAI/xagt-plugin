@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.1",
+  "mode": "full",
+  "task": {
+    "task_id": "pm-quant-article-rename-20260702",
+    "buyer_goal": "Rename PM Quant product/article copy while preserving pricing and avoiding public release actions.",
+    "surface": "website",
+    "allowed_actions": [
+      "local copy edits",
+      "syntax validation",
+      "writeback"
+    ],
+    "forbidden_actions": [
+      "push",
+      "deploy",
+      "payment configuration change",
+      "price change"
+    ],
+    "acceptance_criteria": [
+      "Changed files are declared",
+      "Pricing remains unchanged",
+      "Validation is reported",
+      "Next public release gate is explicit"
+    ]
+  },
+  "delivery": {
+    "writeback_text": "Local-ready worktree commit 2860be7 on work/pm-quant-article-rename. Changed PMQuantPage.tsx and SubscriptionPage.tsx. Syntax checks and git diff whitespace check passed. Build deferred to release gate. Pricing and payment configuration not touched. Next gate is Leo approval before push and deploy. Special review needed for old buyer promise wording.",
+    "artifact_paths": [
+      "/Users/zhangxu/Documents/Codex/worker-writebacks/2026-07-02/pm-quant-article-rename-writeback.md"
+    ],
+    "changed_files": [
+      "src/pages/PMQuantPage.tsx",
+      "src/pages/SubscriptionPage.tsx"
+    ],
+    "validation": [
+      "esbuild tsx syntax PASS x2",
+      "git diff --check PASS"
+    ],
+    "validation_output": "Full npm run build deferred to release gate.",
+    "rollback_plan": "Remove local worktree and delete branch before push.",
+    "hard_gates_declared": [
+      "push",
+      "deploy",
+      "payment configuration",
+      "Memberful",
+      "Stripe",
+      "account",
+      "price change"
+    ],
+    "next_gate": "Leo reviews copy risk, then explicitly approves or rejects push/deploy."
+  },
+  "context": {
+    "repo_state": "dirty",
+    "public_publish_requested": false,
+    "payments_or_wallets_in_scope": false,
+    "credentials_in_scope": false,
+    "notes": "Local-ready delivery has an unresolved buyer-promise wording risk."
+  }
+}
+
