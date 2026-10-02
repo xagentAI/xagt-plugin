@@ -15,6 +15,7 @@ export default defineConfig({
           LLM_API_BASE: "https://llm.test/v1",
           LLM_MODEL: "test-model",
           LLM_API_KEY: "test-only-key",
+          DEMO_SOURCE_URL: "https://acme.test/",
           SUPPORT_EMAIL: "support@finfold.app",
         },
       },

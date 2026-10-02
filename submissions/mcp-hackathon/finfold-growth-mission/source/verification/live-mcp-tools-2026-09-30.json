@@ -1,0 +1,42 @@
+{
+  "capture": {
+    "capturedAt": "2026-09-30T01:32:25.804Z",
+    "deployedCommit": "02be14a556692b1c445da03bce4ec9a2ca59d41e",
+    "selection": "Names, titles, descriptions, and annotations from the authenticated live tools/list response."
+  },
+  "tools": [
+    {
+      "name": "finfold_create_growth_mission",
+      "title": "Create a Finfold growth mission",
+      "description": "Reads one public business URL and creates one evidence-bound growth mission, one platform-native content asset, and one tracked CTA. Mutation: persists the mission. It never publishes content or modifies an external account. Requires mission:create. Retry only with the same idempotencyKey.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "finfold_get_growth_mission",
+      "title": "Get a Finfold growth mission",
+      "description": "Reads a persisted mission, its anonymous attribution totals, verdict, and next action. Read-only with no side effects. Requires mission:read.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "finfold_record_growth_outcome",
+      "title": "Record a Finfold growth outcome",
+      "description": "Records one attributable lead, signup, purchase, or revenue event inside the mission measurement window and recomputes the verdict. Revenue must use the mission target currency. Mutation: writes one idempotent outcome. No external side effects. Requires outcome:write. Retry with the same eventId and idempotencyKey.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

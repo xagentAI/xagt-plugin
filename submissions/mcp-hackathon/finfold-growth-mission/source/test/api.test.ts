@@ -1,7 +1,8 @@
 import { createExecutionContext, env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
-import { GENERATED, REVIEW_KEY, mockOutbound, resetDatabase } from "./fixtures";
+import { DEMO_KEY_ID, demoMissionView, warmDemoMission } from "../src/demo";
+import { GENERATED, REVIEW_KEY, SOURCE_HTML, mockOutbound, resetDatabase } from "./fixtures";
 
 const createPayload = {
   sourceUrl: "https://acme.test/",
@@ -290,5 +291,126 @@ describe("auth scopes, expiry, quota, and redaction", () => {
       headers: { authorization: `Bearer ${secret}` },
     });
     expect(log.mock.calls.flat().join(" ")).not.toContain(secret);
+  });
+});
+
+describe("public demo", () => {
+  it("serves a fresh demo mission without authentication", async () => {
+    const response = await call("/v1/demo/mission");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("public, max-age=60");
+    const body = (await response.json()) as Record<string, any>;
+    expect(body.demo.mode).toBe("public-readonly-demo");
+    expect(body.demo.fresh).toBe(true);
+    expect(body.demo.refreshCadence).toBe("hourly");
+    expect(body.demo.platformRotation).toEqual(["linkedin", "x", "reddit", "xiaohongshu", "wechat"]);
+    expect(body.mission.id).toMatch(/^gm_[a-z0-9]{24}$/);
+    expect(body.sideEffects.published).toBe(false);
+    expect(body.tracking.trackedUrl).toMatch(/^https:\/\/api\.finfold\.app\/r\/[a-z0-9]{36}$/);
+    expect(body.asset.body).toContain(body.tracking.trackedUrl);
+    const deliverable = [body.mission.title, body.mission.hypothesis, body.asset.title, body.asset.body, body.asset.cta].join("\n");
+    for (const mapping of body.claimMap) {
+      expect(deliverable).toContain(mapping.claim);
+      const cited = mapping.evidenceIds.map((id: string) => body.evidence.find((item: any) => item.id === id)?.quote ?? "").join("\n");
+      expect(cited).toContain(mapping.claim);
+    }
+  });
+
+  it("keeps exactly one demo mission per hour across repeat calls", async () => {
+    const first = await call("/v1/demo/mission");
+    const second = await call("/v1/demo/mission");
+    expect(second.status).toBe(200);
+    expect(((await second.json()) as Record<string, any>).mission.id).toBe(
+      ((await first.json()) as Record<string, any>).mission.id,
+    );
+    const rows = await env.DB.prepare("SELECT COUNT(*) AS total FROM missions WHERE api_key_id = ?")
+      .bind(DEMO_KEY_ID)
+      .first<{ total: number }>();
+    expect(Number(rows?.total)).toBe(1);
+  });
+
+  it("isolates demo missions from review-key missions", async () => {
+    const { body: reviewMission } = await createMission("demo-isolation-001");
+    const demo = (await (await call("/v1/demo/mission")).json()) as Record<string, any>;
+    expect(demo.mission.id).not.toBe(reviewMission.mission.id);
+    const demoRows = await env.DB.prepare("SELECT COUNT(*) AS total FROM missions WHERE api_key_id = ?")
+      .bind(DEMO_KEY_ID)
+      .first<{ total: number }>();
+    expect(Number(demoRows?.total)).toBe(1);
+  });
+
+  it("counts public clicks on the demo tracking link", async () => {
+    const demo = (await (await call("/v1/demo/mission")).json()) as Record<string, any>;
+    const path = demo.tracking.trackedUrl.replace("https://api.finfold.app", "");
+    const click = await call(path);
+    expect(click.status).toBe(302);
+    expect(click.headers.get("location")).toContain(`utm_campaign=${demo.mission.id}`);
+    const after = (await (await call("/v1/demo/mission")).json()) as Record<string, any>;
+    expect(after.attribution.clicks).toBe(1);
+  });
+
+  it("rejects non-GET methods on the demo route", async () => {
+    const response = await call("/v1/demo/mission", { method: "POST" });
+    expect(response.status).toBe(405);
+    expect((await response.json()) as object).toMatchObject({ error: { code: "METHOD_NOT_ALLOWED" } });
+  });
+
+  it("falls back to the last good demo mission when a later refresh fails", async () => {
+    const first = await demoMissionView(env as unknown as Env, "demo-fallback-0001");
+    expect((first.body as Record<string, any>).demo.fresh).toBe(true);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("upstream offline", { status: 503 })));
+    const later = await demoMissionView(env as unknown as Env, "demo-fallback-0002", new Date(Date.now() + 2 * 3_600_000));
+    expect(later.status).toBe(200);
+    expect(later.cacheControl).toBe("no-store");
+    const laterBody = later.body as Record<string, any>;
+    expect(laterBody.demo.fresh).toBe(false);
+    expect(laterBody.demo.fallback).toBe("last-good");
+    expect(laterBody.mission.id).toBe((first.body as Record<string, any>).mission.id);
+  });
+
+  it("throws a typed error when a cold demo refresh fails with no fallback", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        if (url === "https://acme.test/") {
+          return new Response(SOURCE_HTML, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+        }
+        return new Response("model offline", { status: 503 });
+      }),
+    );
+    const error = await demoMissionView(env as unknown as Env, "demo-cold-0000001").catch((cause: unknown) => cause);
+    expect(error).toMatchObject({ code: "GENERATION_FAILED" });
+  });
+
+  it("returns DEMO_UNAVAILABLE while a cold warm-up is in flight", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        if (url === "https://acme.test/") {
+          return new Response(SOURCE_HTML, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+        }
+        await gate;
+        return Response.json({ choices: [{ message: { content: JSON.stringify(GENERATED) } }] });
+      }),
+    );
+    const warming = demoMissionView(env as unknown as Env, "demo-warming-0001");
+    const concurrent = await demoMissionView(env as unknown as Env, "demo-warming-0002").catch((cause: unknown) => cause);
+    expect(concurrent).toMatchObject({ code: "DEMO_UNAVAILABLE", status: 503 });
+    release();
+    const warmed = await warming;
+    expect((warmed.body as Record<string, any>).demo.fresh).toBe(true);
+  });
+
+  it("warms the demo mission from the hourly scheduled handler", async () => {
+    await expect(warmDemoMission(env as unknown as Env)).resolves.toBeUndefined();
+    const response = await call("/v1/demo/mission");
+    expect(response.status).toBe(200);
+    expect(((await response.json()) as Record<string, any>).demo.fresh).toBe(true);
   });
 });

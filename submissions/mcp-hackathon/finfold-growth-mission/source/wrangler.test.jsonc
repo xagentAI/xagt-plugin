@@ -10,6 +10,7 @@
     "MODEL_PROVIDER": "http",
     "LLM_API_BASE": "https://llm.test/v1",
     "LLM_MODEL": "test-model",
+    "DEMO_SOURCE_URL": "https://acme.test/",
     "SUPPORT_EMAIL": "support@finfold.app"
   },
   "d1_databases": [

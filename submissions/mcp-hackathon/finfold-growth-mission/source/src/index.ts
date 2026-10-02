@@ -1,4 +1,5 @@
 import { authenticate, idempotencyKey } from "./auth";
+import { DEMO_WARMUP_CRON, demoMissionView, warmDemoMission } from "./demo";
 import { AppError } from "./errors";
 import { errorResponse, jsonResponse, readJsonBody, requestIdFrom } from "./http";
 import { handleMcp } from "./mcp";
@@ -52,13 +53,19 @@ async function routeRequest(request: Request, env: Env, requestId: string): Prom
   if (request.method === "GET" && path === "/openapi.json") {
     return jsonResponse(openApiDocument(env.APP_BASE_URL), 200, { "cache-control": "public, max-age=300" });
   }
+  if (path === "/v1/demo/mission") {
+    if (request.method !== "GET") throw new AppError("METHOD_NOT_ALLOWED", "This endpoint accepts GET only.", 405);
+    const view = await demoMissionView(env, requestId);
+    return jsonResponse(view.body, view.status, { "cache-control": view.cacheControl });
+  }
   if (request.method === "GET" && path === "/v1/capability") {
     return jsonResponse({
       slug: "finfold-growth-mission",
-      version: "1.1.0",
+      version: "1.2.0",
       unit: "one validated mission",
       input: "one public business URL plus one growth objective",
       output: "one evidence-bound mission, one content asset, one tracked CTA",
+      publicDemo: `${env.APP_BASE_URL}/v1/demo/mission`,
       supportedPlatforms: ["auto", "linkedin", "x", "reddit", "xiaohongshu", "wechat"],
       pricingBoundary: {
         model: "fixed_per_validated_mission",
@@ -75,6 +82,7 @@ async function routeRequest(request: Request, env: Env, requestId: string): Prom
     return jsonResponse({
       name: "Finfold Growth Mission API",
       proposition: "One URL. One evidence-bound growth move. One measurable outcome loop.",
+      demo: `${env.APP_BASE_URL}/v1/demo/mission`,
       mcp: `${env.APP_BASE_URL}/mcp`,
       openapi: `${env.APP_BASE_URL}/openapi.json`,
       support: env.SUPPORT_EMAIL,
@@ -192,7 +200,11 @@ export default {
     return secured;
   },
 
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    if (controller.cron === DEMO_WARMUP_CRON) {
+      ctx.waitUntil(warmDemoMission(env));
+      return;
+    }
     const now = new Date().toISOString();
     ctx.waitUntil(
       env.DB.batch([
