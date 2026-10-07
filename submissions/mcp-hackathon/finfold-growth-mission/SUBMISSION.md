@@ -2,7 +2,7 @@
 
 **Submitted via:** `xagt-plugin@0.5.0`
 **Submitted at:** 2026-09-02T08:12:39.464Z
-**Updated at:** 2026-09-03T11:53:00.000Z
+**Updated at:** 2026-09-30T01:40:00.000Z
 
 ## Capability
 
@@ -12,24 +12,25 @@
 ## Live API
 
 - **API base URL:** https://api.finfold.app
+- **Public credential-free demo:** https://api.finfold.app/v1/demo/mission — one real mission from the exact production pipeline, refreshed hourly across all five platforms, no key required
 - **Health-check URL:** https://api.finfold.app/health
 - **Deployment proof URL:** https://api.finfold.app/.well-known/xagent-verification.json
 - **Authentication:** Bearer review key delivered only through the program's approved private review channel. The raw key is shown once and only its SHA-256 hash is stored.
-- **Rate limits / known limits:** The isolated review key allows 100 authenticated calls per UTC day and expires after 2026-10-05. Source fetches accept public HTML/XHTML only, stream at most 1.5 MB, allow at most three redirects, and time out after 10 seconds. Mission creation is synchronous; the current five-platform production run completed 20/20 calls on the first provider attempt with 16,897 ms p50, 22,548 ms p95, and 24,206 ms p99. JavaScript-only or evidence-thin pages fail with typed errors. Anonymous clicks are raw counts and do not count as credible conversion outcomes by themselves.
+- **Rate limits / known limits:** The isolated review key allows 100 authenticated calls per UTC day and expires after 2026-10-05. Source fetches accept public HTML/XHTML only, stream at most 1.5 MB, allow at most three redirects, and time out after 10 seconds. Mission creation is synchronous; the five-platform production run re-executed inside the official review window on 2026-09-30 completed 20/20 calls (one call used the single allowed repair) with 10,354 ms p50, 18,280 ms p95, and 20,098 ms p99. JavaScript-only or evidence-thin pages fail with typed errors. Anonymous clicks are raw counts and do not count as credible conversion outcomes by themselves.
 
 ## Source and reproducibility
 
 - **Source repository:** https://github.com/joeymilano/finfold-growth-mission-api
-- **Review commit:** `65a4a545ca74b0e357973de433fd108c375531bc`
+- **Review commit:** `cfc413d1e6ae81e96a6f42f9648dd84b3a370df9`
 - **Source submitted in this PR:** `source/`
 - **Run tests:** `npm ci && npm run check`
 - **Run locally:** `npx wrangler d1 migrations apply finfold-growth-mission --local && npm run dev` (mission generation uses the configured Workers AI binding; the test suite is fully intercepted and does not require paid inference).
 - **Deploy:** Create the D1 database, replace the documented `database_id`, run `npx wrangler d1 migrations apply finfold-growth-mission --remote`, issue a review key with `node scripts/issue-review-key.mjs`, then run `npx wrangler deploy --var "COMMIT_SHA:$(git rev-parse HEAD)"`.
-- **Version binding:** The exact commit is injected at deployment. Public `/health` and same-origin `/.well-known/xagent-verification.json` both return `65a4a545ca74b0e357973de433fd108c375531bc`, which is also the public GitHub review commit.
+- **Version binding:** The exact commit is injected at deployment. Public `/health` and same-origin `/.well-known/xagent-verification.json` both return `65a4a545ca74b0e357973de433fd108c375531bc`, which is also the public GitHub review commit. The 2026-09-30 live artifacts were first captured under the code-identical parent `02be14a556692b1c445da03bce4ec9a2ca59d41e` (documentation-only commits followed); `source/verification/` records the exact capture commits.
 
 ## Verification
 
-See `verification/README.md` for public version proof, an authenticated mission call, MCP discovery, expected output, safe failure behavior, tracking verification, the credential-free five-platform 20-call report, a redacted real mission, and authenticated live MCP discovery evidence under `source/verification/`.
+See `verification/README.md` for public version proof, the credential-free hourly demo route, an authenticated mission call, MCP discovery, expected output, safe failure behavior, tracking verification, the five-platform 20-call reports (2026-09-03 and the in-window 2026-09-30 re-run), redacted real missions, and live MCP discovery evidence under `source/verification/`.
 
 ## Security and data handling
 

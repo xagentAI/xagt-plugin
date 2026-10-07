@@ -1,0 +1,93 @@
+{
+  "capture": {
+    "capturedAt": "2026-09-30T01:32:25.804Z",
+    "deployedCommit": "02be14a556692b1c445da03bce4ec9a2ca59d41e",
+    "call": "POST /v1/missions with review key, sourceUrl https://www.finfold.app/en",
+    "httpStatus": 201,
+    "redactions": [
+      "mission ID",
+      "tracking code",
+      "request ID"
+    ]
+  },
+  "mission": {
+    "id": "gm_REDACTED",
+    "title": "Test: Finfold Growth Mission",
+    "hypothesis": "Test whether most small teams do not have a content problem, they have a translation problem, and Finfold can help solve this by turning one update into content that can be used on different platforms",
+    "audience": "small teams",
+    "primaryMetric": "leads",
+    "platform": "linkedin",
+    "objective": "leads",
+    "locale": "en",
+    "targetValue": 1,
+    "measurementWindowDays": 14,
+    "measurementStartedAt": "2026-09-30T01:32:01.234Z",
+    "measurementDueAt": "2026-10-14T01:32:01.234Z"
+  },
+  "asset": {
+    "format": "LinkedIn post",
+    "title": "Test: Solve Your Translation Problem with Finfold",
+    "body": "Test whether most small teams do not have a content problem, they have a translation problem, and Finfold can help solve this by turning one update into content that can be used on different platforms\n\nPage evidence:\n• Most small teams do not have a content problem. They have a translation problem.\n• It finds content opportunities, readies platform-native drafts, answers comments in your browser, and records what each step brought Start the first task free — nothing ships before you review it\n\nFor small teams, test the response to this angle: https://api.finfold.app/r/REDACTED",
+    "cta": "Review the evidence and test the angle"
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "sectionId": "s39",
+      "quote": "Most small teams do not have a content problem. They have a translation problem.",
+      "confidence": 0.9,
+      "sourceUrl": "https://www.finfold.app/en"
+    },
+    {
+      "id": "e2",
+      "sectionId": "s15",
+      "quote": "It finds content opportunities, readies platform-native drafts, answers comments in your browser, and records what each step brought Start the first task free — nothing ships before you review it",
+      "confidence": 0.9,
+      "sourceUrl": "https://www.finfold.app/en"
+    }
+  ],
+  "claimMap": [
+    {
+      "claim": "Most small teams do not have a content problem. They have a translation problem.",
+      "evidenceIds": [
+        "e1"
+      ]
+    },
+    {
+      "claim": "It finds content opportunities, readies platform-native drafts, answers comments in your browser, and records what each step brought Start the first task free — nothing ships before you review it",
+      "evidenceIds": [
+        "e2"
+      ]
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "evidenceExactMatch": true,
+    "unsupportedNumbers": [],
+    "platformChecks": {
+      "platform": "linkedin",
+      "characterCount": 611,
+      "characterLimit": 3000,
+      "hasTrackingCta": true
+    },
+    "warnings": []
+  },
+  "tracking": {
+    "code": "1v4u5e104i2y141x1e704f6f0e2k041m4l4g",
+    "destinationUrl": "https://www.finfold.app/en?utm_source=finfold_growth_mission&utm_medium=linkedin&utm_campaign=gm_REDACTED",
+    "trackedUrl": "https://api.finfold.app/r/REDACTED"
+  },
+  "provenance": {
+    "requestId": "REDACTED",
+    "generatedAt": "2026-09-30T01:32:01.234Z",
+    "sourceDigest": "d3ca561f8f2b2716b6bc82804960f060d88d0e5a901491bc2f68f4ce5135a139",
+    "providerAttempts": 1,
+    "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "commit": "02be14a556692b1c445da03bce4ec9a2ca59d41e"
+  },
+  "sideEffects": {
+    "persisted": true,
+    "published": false,
+    "externalAccountsModified": false
+  }
+}

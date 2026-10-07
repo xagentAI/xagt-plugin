@@ -1,4 +1,5 @@
 import { sha256Hex } from "../src/crypto";
+import { DEMO_KEY_ID } from "../src/demo";
 import { vi } from "vitest";
 
 export const REVIEW_KEY = "ff_gm_test_review_key_123456789";
@@ -70,18 +71,45 @@ export async function resetDatabase(scopes = "mission:create mission:read outcom
       "2026-09-02T00:00:00.000Z",
     )
     .run();
+  await env.DB.prepare(
+    "INSERT INTO api_keys (id, token_hash, label, scopes, daily_limit, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+  )
+    .bind(
+      DEMO_KEY_ID,
+      await sha256Hex("ff_gm_demo_key_hash_only_token_never_issued"),
+      "public-demo",
+      "mission:create mission:read",
+      1,
+      "2027-01-01T00:00:00.000Z",
+      "2026-09-02T00:00:00.000Z",
+    )
+    .run();
+}
+
+function generatedForPlatform(platform: string) {
+  if (platform === "linkedin") return GENERATED;
+  return { ...GENERATED, mission: { ...GENERATED.mission, platform } };
 }
 
 export function mockOutbound(): void {
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (input: RequestInfo | URL) => {
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : input.toString();
       if (url === "https://acme.test/") {
         return new Response(SOURCE_HTML, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
       }
       if (url === "https://llm.test/v1/chat/completions") {
-        return Response.json({ choices: [{ message: { content: JSON.stringify(GENERATED) } }] });
+        const rawBody =
+          typeof init?.body === "string"
+            ? init.body
+            : input instanceof Request
+              ? await input.clone().text()
+              : "";
+        const requested =
+          rawBody.match(/"requestedPlatform":"(auto|linkedin|x|reddit|xiaohongshu|wechat)"/)?.[1] ?? "linkedin";
+        const content = JSON.stringify(generatedForPlatform(requested === "auto" ? "linkedin" : requested));
+        return Response.json({ choices: [{ message: { content } }] });
       }
       throw new Error(`Unexpected outbound request: ${url}`);
     }),

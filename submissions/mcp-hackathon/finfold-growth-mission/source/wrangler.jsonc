@@ -17,6 +17,7 @@
     "MODEL_PROVIDER": "workers-ai",
     "LLM_API_BASE": "https://api.openai.com/v1",
     "LLM_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "DEMO_SOURCE_URL": "https://www.finfold.app/",
     "SUPPORT_EMAIL": "support@finfold.app"
   },
   "ai": {
@@ -31,7 +32,7 @@
     }
   ],
   "triggers": {
-    "crons": ["17 3 * * *"]
+    "crons": ["0 * * * *", "17 3 * * *"]
   },
   "observability": {
     "enabled": true,

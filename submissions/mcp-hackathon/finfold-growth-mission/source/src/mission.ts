@@ -267,10 +267,8 @@ function verdictFor(row: MissionRow, attribution: Attribution): { verdict: strin
   };
 }
 
-export async function getMissionOperation(env: Env, auth: AuthContext, missionId: string): Promise<Record<string, unknown>> {
-  const row = await loadMission(env.DB, missionId, auth.apiKeyId);
-  if (!row) throw new AppError("MISSION_NOT_FOUND", "Mission not found.", 404);
-  const attribution = await attributionFor(env.DB, missionId);
+export async function missionView(db: D1Database, row: MissionRow): Promise<Record<string, unknown>> {
+  const attribution = await attributionFor(db, row.id);
   const verdict = verdictFor(row, attribution);
   return {
     ...parsedMission(row),
@@ -283,6 +281,12 @@ export async function getMissionOperation(env: Env, auth: AuthContext, missionId
       nextAction: verdict.nextAction,
     },
   };
+}
+
+export async function getMissionOperation(env: Env, auth: AuthContext, missionId: string): Promise<Record<string, unknown>> {
+  const row = await loadMission(env.DB, missionId, auth.apiKeyId);
+  if (!row) throw new AppError("MISSION_NOT_FOUND", "Mission not found.", 404);
+  return missionView(env.DB, row);
 }
 
 export async function recordOutcomeOperation(

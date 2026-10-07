@@ -1,0 +1,197 @@
+{
+  "generatedAt": "2026-09-30T01:35:22.188Z",
+  "apiBase": "https://api.finfold.app",
+  "sourceUrl": "https://www.finfold.app/",
+  "runs": 20,
+  "successes": 20,
+  "successRate": 1,
+  "firstAttemptSuccessRate": 0.95,
+  "uniqueValidatedAssets": 14,
+  "p50Ms": 10354,
+  "p95Ms": 18280,
+  "p99Ms": 20098,
+  "syncGatePassed": true,
+  "winningTargetPassed": true,
+  "results": [
+    {
+      "run": 1,
+      "platform": "linkedin",
+      "status": 201,
+      "durationMs": 9290,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 260
+    },
+    {
+      "run": 2,
+      "platform": "x",
+      "status": 201,
+      "durationMs": 11623,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 236
+    },
+    {
+      "run": 3,
+      "platform": "reddit",
+      "status": 201,
+      "durationMs": 20098,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 420
+    },
+    {
+      "run": 4,
+      "platform": "xiaohongshu",
+      "status": 201,
+      "durationMs": 10001,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 302
+    },
+    {
+      "run": 5,
+      "platform": "wechat",
+      "status": 201,
+      "durationMs": 18280,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 451
+    },
+    {
+      "run": 6,
+      "platform": "linkedin",
+      "status": 201,
+      "durationMs": 8107,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 260
+    },
+    {
+      "run": 7,
+      "platform": "x",
+      "status": 201,
+      "durationMs": 10354,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 236
+    },
+    {
+      "run": 8,
+      "platform": "reddit",
+      "status": 201,
+      "durationMs": 12130,
+      "providerAttempts": 1,
+      "evidenceCount": 2,
+      "assetLength": 358
+    },
+    {
+      "run": 9,
+      "platform": "xiaohongshu",
+      "status": 201,
+      "durationMs": 9635,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 378
+    },
+    {
+      "run": 10,
+      "platform": "wechat",
+      "status": 201,
+      "durationMs": 13371,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 443
+    },
+    {
+      "run": 11,
+      "platform": "linkedin",
+      "status": 201,
+      "durationMs": 7446,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 260
+    },
+    {
+      "run": 12,
+      "platform": "x",
+      "status": 201,
+      "durationMs": 8724,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 236
+    },
+    {
+      "run": 13,
+      "platform": "reddit",
+      "status": 201,
+      "durationMs": 16617,
+      "providerAttempts": 2,
+      "evidenceCount": 1,
+      "assetLength": 330
+    },
+    {
+      "run": 14,
+      "platform": "xiaohongshu",
+      "status": 201,
+      "durationMs": 9417,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 302
+    },
+    {
+      "run": 15,
+      "platform": "wechat",
+      "status": 201,
+      "durationMs": 11097,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 388
+    },
+    {
+      "run": 16,
+      "platform": "linkedin",
+      "status": 201,
+      "durationMs": 8520,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 260
+    },
+    {
+      "run": 17,
+      "platform": "x",
+      "status": 201,
+      "durationMs": 9218,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 211
+    },
+    {
+      "run": 18,
+      "platform": "reddit",
+      "status": 201,
+      "durationMs": 11915,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 399
+    },
+    {
+      "run": 19,
+      "platform": "xiaohongshu",
+      "status": 201,
+      "durationMs": 10490,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 302
+    },
+    {
+      "run": 20,
+      "platform": "wechat",
+      "status": 201,
+      "durationMs": 10923,
+      "providerAttempts": 1,
+      "evidenceCount": 1,
+      "assetLength": 336
+    }
+  ]
+}
