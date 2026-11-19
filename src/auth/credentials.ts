@@ -37,7 +37,15 @@ export async function loadCredentials(): Promise<SavedCredentials | null> {
 export async function saveCredentials(credentials: SavedCredentials): Promise<void> {
   const path = getCredentialPath();
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, `${JSON.stringify(credentials, null, 2)}\n`, "utf8");
+  if (process.platform !== "win32") {
+    try {
+      await chmod(path, 0o600);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+  // Restrict a newly created credential file before writing tokens into it.
+  await writeFile(path, `${JSON.stringify(credentials, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
   if (process.platform !== "win32") {
     await chmod(path, 0o600);
   }
